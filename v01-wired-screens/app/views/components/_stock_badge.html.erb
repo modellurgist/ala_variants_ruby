@@ -1,0 +1,6 @@
+<%# A stock level as a coloured badge. Takes the computed status, the level and the words per status; a
+    status with no label shows nothing. Its class marks it for live replacement. %>
+<% styles = { in_stock: "text-green-700", low_stock: "bg-amber-100 text-amber-800", out_of_stock: "bg-red-100 text-red-700" } %>
+<span class="<%= stock_marker(product_id) %> inline-block rounded-full px-2 py-0.5 text-xs font-medium <%= styles[status] %>">
+  <%= labels[status] && labels[status] % { n: stock } %>
+</span>

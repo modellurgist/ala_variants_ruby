@@ -1,0 +1,16 @@
+<%# A choice of shipping method, submitted as soon as one is picked. Takes the summary's options and
+    the URL the choice goes to. %>
+<%= form_with url: url, method: :patch, data: { controller: "auto-submit" }, class: "mt-6" do |f| %>
+  <fieldset>
+    <legend class="pb-2 text-sm font-semibold text-stone-900"><%= heading %></legend>
+    <div class="space-y-2">
+      <% summary[:shipping_options].each do |opt| %>
+        <label class="flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm <%= summary[:shipping_method] == opt[:method] ? "border-brand-600 bg-brand-50" : "border-stone-200 hover:border-stone-300" %>">
+          <%= f.radio_button :shipping_method, opt[:method], checked: summary[:shipping_method] == opt[:method], data: { action: "change->auto-submit#submit" }, class: "text-brand-700 focus:ring-brand-600" %>
+          <span class="flex-1 text-stone-800"><%= opt[:label] %></span>
+          <span class="text-right text-stone-500"><%= opt[:cost] %><% if opt[:free_above] %><span class="block text-xs"><%= free_over %> <%= opt[:free_above] %></span><% end %></span>
+        </label>
+      <% end %>
+    </div>
+  </fieldset>
+<% end %>

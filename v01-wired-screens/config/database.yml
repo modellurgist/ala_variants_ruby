@@ -1,0 +1,34 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: postgres
+  password: postgres
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: good_deal_rails_v01_development
+
+test:
+  <<: *default
+  database: good_deal_rails_v01_test
+
+production:
+  primary: &primary_production
+    <<: *default
+    database: good_deal_production
+    username: good_deal
+    password: <%= ENV["GOOD_DEAL_DATABASE_PASSWORD"] %>
+  cache:
+    <<: *primary_production
+    database: good_deal_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: good_deal_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: good_deal_production_cable
+    migrations_paths: db/cable_migrate

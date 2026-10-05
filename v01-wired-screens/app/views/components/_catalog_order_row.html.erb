@@ -1,0 +1,10 @@
+<%# A catalogue row a buyer orders from: a product line with its stock and a quantity to add; adding is
+    unavailable when the product is out of stock. %>
+<%= render "components/product_line", row: row, id: product_row_id(row[:id]) do %>
+  <%= form_with url: add_url, class: "flex items-center gap-2" do |f| %>
+    <%= f.hidden_field :product_id, value: row[:id] %>
+    <%= f.number_field :quantity, value: t[:default_quantity], min: 1, class: "w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-right text-sm" %>
+    <%= f.submit t[:add], disabled: row[:stock_status] == :out_of_stock, class: "rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-800 disabled:bg-stone-300" %>
+  <% end %>
+<% end %>
+<div class="-mt-4 mb-4 pl-20 text-xs"><%= render "components/stock_badge", product_id: row[:id], status: row[:stock_status], stock: row[:stock], labels: labels %></div>

@@ -1,0 +1,28 @@
+<%= render "components/notice_with_action", shown: @s.undo_pending, text: @t[:undo_text], action: @t[:undo],
+      url: portal_undo_path, expire_url: expire_portal_undo_path, after_ms: Screens::Store::UNDO_WINDOW.in_milliseconds %>
+<div class="grid items-start gap-8 lg:grid-cols-[1fr_22rem]">
+  <div class="space-y-8">
+    <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="pb-2 text-base font-semibold text-stone-900"><%= @t[:order] %></h2>
+      <div id="order_lines">
+        <% @s.rows.each do |row| %>
+          <%= render "components/order_line", row: row, t: @t, labels: Screens::Store::STOCK_LABELS, quantity_url: portal_line_path(row[:id]), remove_url: portal_line_path(row[:id]) %>
+        <% end %>
+      </div>
+      <%= render "components/none", count: @s.summary[:item_count], text: @t[:empty] %>
+    </section>
+    <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="pb-2 text-base font-semibold text-stone-900"><%= @t[:catalog] %></h2>
+      <div id="portal_products">
+        <% @s.catalog_rows.each do |row| %>
+          <%= render "components/catalog_order_row", row: row, t: @t, labels: Screens::Store::STOCK_LABELS, add_url: portal_lines_path %>
+        <% end %>
+      </div>
+    </section>
+  </div>
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm lg:sticky lg:top-6">
+    <%= render "components/cart_summary", summary: @s.summary, t: @t[:summary] %>
+    <%= button_to "#{@t[:review]} · #{@s.summary[:total]}", review_portal_path, disabled: @s.summary[:empty],
+          class: "mt-6 w-full rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-stone-300" %>
+  </section>
+</div>

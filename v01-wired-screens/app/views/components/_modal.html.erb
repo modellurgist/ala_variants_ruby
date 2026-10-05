@@ -1,0 +1,16 @@
+<%# A modal over the page, inside the "modal" Turbo frame. Takes a title, a subtitle, the URL that closes
+    it, and its content as a block. %>
+<%= turbo_frame_tag "modal" do %>
+  <div class="fixed inset-0 z-50 flex items-start justify-center bg-stone-900/40 p-6 pt-20">
+    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+      <div class="mb-6 flex items-start justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-stone-900"><%= title %></h2>
+          <% if local_assigns[:subtitle] %><p class="mt-1 text-sm text-stone-500"><%= subtitle %></p><% end %>
+        </div>
+        <%= link_to "✕", close_path, class: "text-stone-400 hover:text-stone-700", aria: { label: "Close" } %>
+      </div>
+      <%= yield %>
+    </div>
+  </div>
+<% end %>

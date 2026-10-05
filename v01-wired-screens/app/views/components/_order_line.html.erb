@@ -1,0 +1,12 @@
+<%# An order line: a product line with its stock, an absolute quantity (applied as it changes) and a
+    remove action. Takes a projected row, the words, the stock labels and the URLs. %>
+<%= render "components/product_line", row: row, id: cart_line_id(row[:id]), price_suffix: t[:each] do %>
+  <%= form_with url: quantity_url, method: :patch, data: { controller: "auto-submit" }, class: "flex items-center gap-2" do |f| %>
+    <%= f.number_field :quantity, value: row[:quantity], min: 1, data: { action: "change->auto-submit#submit" }, class: "w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-right text-sm" %>
+  <% end %>
+  <div class="w-24 text-right">
+    <div class="font-semibold tabular-nums"><%= row[:line_total] %></div>
+    <%= button_to t[:remove], remove_url, method: :delete, class: "text-xs font-medium text-stone-400 hover:text-red-600" %>
+  </div>
+<% end %>
+<div class="-mt-4 mb-4 pl-20 text-xs"><%= render "components/stock_badge", product_id: row[:product_id], status: row[:stock_status], stock: row[:stock], labels: labels %></div>

@@ -1,0 +1,1095 @@
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (301.2ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v01_development" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (137.4ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v01_test" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35m (2.8ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT pg_try_advisory_lock(5937613997968773750) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (1.1ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-05 08:20:27.222802', '2026-10-05 08:20:27.222804') RETURNING "key" /*application='GoodDeal'*/[0m
+Migrating to CreateStoreTables (20261005120000)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (2.6ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (2.2ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrapped" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "saved_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_de0b6559fa"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_a3de60733c"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_cart_id" ON "saved_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_product_id" ON "saved_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_saved_items_on_cart_id_and_product_id" ON "saved_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE TABLE "cart_pricing_choices" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "promo_code" character varying, "shipping_method" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_1b068352fb"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_pricing_choices_on_cart_id" ON "cart_pricing_choices" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'address' NOT NULL, "name" character varying, "line1" character varying, "city" character varying, "postal_code" character varying, "payment_reference" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "order_submissions" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'lines' NOT NULL, "po_number" character varying, "notes" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_886a7b33bc"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_order_submissions_on_cart_id" ON "order_submissions" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261005120000') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT pg_advisory_unlock(5937613997968773750) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.6ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Widget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.6ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Widget', 'A dependable widget for everyday widgeting.', 1000, 10, 'https://picsum.photos/seed/widget/200', '2026-10-05 08:41:38.243531', '2026-10-05 08:41:38.243531') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Gadget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (4.9ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Gadget', 'A gadget with all the gadgetry you expect.', 2500, 5, 'https://picsum.photos/seed/gadget/200', '2026-10-05 08:41:38.249561', '2026-10-05 08:41:38.249561') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Gizmo' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Gizmo', 'Limited run; when it''s gone it''s gone.', 5000, 3, 'https://picsum.photos/seed/gizmo/200', '2026-10-05 08:41:38.256701', '2026-10-05 08:41:38.256701') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Bulk Widget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (1.2ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Bulk Widget', 'Widgets by the case, for the trade.', 10000, 50, 'https://picsum.photos/seed/bulk/200', '2026-10-05 08:41:38.261604', '2026-10-05 08:41:38.261604') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Started GET "/products" for ::1 at 2026-10-05 09:41:45 +0100
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+Processing by ProductsController#index as */*
+  [1m[36mCart Load (1.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (1.4ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:41:45.716434', '2026-10-05 08:41:45.716434') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 2.6ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.5ms | GC: 0.0ms)
+Completed 200 OK in 53ms (Views: 8.4ms | ActiveRecord: 9.0ms (3 queries, 0 cached) | GC: 1.6ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:42:05 +0100
+Processing by ProductsController#index as HTML
+  [1m[36mCart Load (1.0ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (2.0ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:42:05.690978', '2026-10-05 08:42:05.690978') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.5ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.9ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 3.3ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.0ms | GC: 0.0ms)
+Completed 200 OK in 22ms (Views: 4.7ms | ActiveRecord: 4.0ms (3 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/cable" for ::1 at 2026-10-05 09:42:05 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:42:06 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started GET "/favicon.ico" for ::1 at 2026-10-05 09:42:06 +0100
+  
+ActionController::RoutingError (No route matches [GET] "/favicon.ico"):
+  
+Started GET "/products/new" for ::1 at 2026-10-05 09:42:16 +0100
+Processing by ProductsController#new as HTML
+  [1m[36mCart Load (1.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='new',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  Rendering layout /Users/fluxgate/.asdf/installs/ruby/4.0.7/lib/ruby/gems/4.0.0/gems/turbo-rails-2.0.23/app/views/layouts/turbo_rails/frame.html.erb
+  Rendering products/new.html.erb within layouts/turbo_rails/frame
+  Rendered components/_record_form.html.erb (Duration: 11.0ms | GC: 0.6ms)
+  Rendered products/_form.html.erb (Duration: 11.7ms | GC: 0.6ms)
+  Rendered components/_modal.html.erb (Duration: 13.4ms | GC: 1.3ms)
+  Rendered products/new.html.erb within layouts/turbo_rails/frame (Duration: 14.7ms | GC: 1.3ms)
+  Rendered layout /Users/fluxgate/.asdf/installs/ruby/4.0.7/lib/ruby/gems/4.0.0/gems/turbo-rails-2.0.23/app/views/layouts/turbo_rails/frame.html.erb (Duration: 15.2ms | GC: 1.3ms)
+Completed 200 OK in 35ms (Views: 16.8ms | ActiveRecord: 1.3ms (1 query, 0 cached) | GC: 1.3ms)
+
+
+Started POST "/products/validate" for ::1 at 2026-10-05 09:42:36 +0100
+Processing by ProductsController#validate as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "product" => {"name" => "", "description" => "", "amount" => "5", "stock" => "0", "thumbnail" => ""}}
+Can't verify CSRF token authenticity.
+Completed 422 Unprocessable Content in 1ms (ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+  
+ActionController::InvalidAuthenticityToken (Can't verify CSRF token authenticity.):
+  
+actionpack (8.1.4) lib/action_controller/metal/request_forgery_protection.rb:321:in 'ActionController::RequestForgeryProtection::ProtectionMethods::Exception#handle_unverified_request'
+actionpack (8.1.4) lib/action_controller/metal/request_forgery_protection.rb:415:in 'ActionController::RequestForgeryProtection#handle_unverified_request'
+actionpack (8.1.4) lib/action_controller/metal/request_forgery_protection.rb:404:in 'ActionController::RequestForgeryProtection#verify_authenticity_token'
+activesupport (8.1.4) lib/active_support/callbacks.rb:362:in 'block in ActiveSupport::Callbacks::CallTemplate::MethodCall#make_lambda'
+activesupport (8.1.4) lib/active_support/callbacks.rb:179:in 'block in ActiveSupport::Callbacks::Filters::Before#call'
+actionpack (8.1.4) lib/abstract_controller/callbacks.rb:36:in 'block (2 levels) in <module:Callbacks>'
+activesupport (8.1.4) lib/active_support/callbacks.rb:180:in 'ActiveSupport::Callbacks::Filters::Before#call'
+activesupport (8.1.4) lib/active_support/callbacks.rb:560:in 'block in ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.1.4) lib/active_support/callbacks.rb:560:in 'Array#each'
+activesupport (8.1.4) lib/active_support/callbacks.rb:560:in 'ActiveSupport::Callbacks::CallbackSequence#invoke_before'
+activesupport (8.1.4) lib/active_support/callbacks.rb:119:in 'block in ActiveSupport::Callbacks#run_callbacks'
+activesupport (8.1.4) lib/active_support/callbacks.rb:141:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.1.4) lib/abstract_controller/callbacks.rb:266:in 'AbstractController::Callbacks#process_action'
+actionpack (8.1.4) lib/action_controller/metal/rescue.rb:36:in 'ActionController::Rescue#process_action'
+actionpack (8.1.4) lib/action_controller/metal/instrumentation.rb:76:in 'block in ActionController::Instrumentation#process_action'
+activesupport (8.1.4) lib/active_support/notifications.rb:210:in 'block in ActiveSupport::Notifications.instrument'
+activesupport (8.1.4) lib/active_support/notifications/instrumenter.rb:58:in 'ActiveSupport::Notifications::Instrumenter#instrument'
+activesupport (8.1.4) lib/active_support/notifications.rb:210:in 'ActiveSupport::Notifications.instrument'
+actionpack (8.1.4) lib/action_controller/metal/instrumentation.rb:75:in 'ActionController::Instrumentation#process_action'
+actionpack (8.1.4) lib/action_controller/metal/params_wrapper.rb:259:in 'ActionController::ParamsWrapper#process_action'
+activerecord (8.1.4) lib/active_record/railties/controller_runtime.rb:39:in 'ActiveRecord::Railties::ControllerRuntime#process_action'
+actionpack (8.1.4) lib/abstract_controller/base.rb:154:in 'AbstractController::Base#process'
+actionview (8.1.4) lib/action_view/rendering.rb:40:in 'ActionView::Rendering#process'
+actionpack (8.1.4) lib/action_controller/metal.rb:252:in 'ActionController::Metal#dispatch'
+actionpack (8.1.4) lib/action_controller/metal.rb:335:in 'ActionController::Metal.dispatch'
+actionpack (8.1.4) lib/action_dispatch/routing/route_set.rb:65:in 'ActionDispatch::Routing::RouteSet::Dispatcher#dispatch'
+actionpack (8.1.4) lib/action_dispatch/routing/route_set.rb:50:in 'ActionDispatch::Routing::RouteSet::Dispatcher#serve'
+actionpack (8.1.4) lib/action_dispatch/journey/router.rb:35:in 'block in ActionDispatch::Journey::Router#serve'
+actionpack (8.1.4) lib/action_dispatch/journey/router.rb:86:in 'block in ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.4) lib/action_dispatch/journey/router.rb:66:in 'Array#each'
+actionpack (8.1.4) lib/action_dispatch/journey/router.rb:66:in 'ActionDispatch::Journey::Router#recognize'
+actionpack (8.1.4) lib/action_dispatch/journey/router.rb:31:in 'ActionDispatch::Journey::Router#serve'
+actionpack (8.1.4) lib/action_dispatch/routing/route_set.rb:906:in 'ActionDispatch::Routing::RouteSet#call'
+railties (8.1.4) lib/rails/engine/lazy_route_set.rb:93:in 'Rails::Engine::LazyRouteSet#call'
+rack (3.2.7) lib/rack/tempfile_reaper.rb:20:in 'Rack::TempfileReaper#call'
+rack (3.2.7) lib/rack/etag.rb:29:in 'Rack::ETag#call'
+rack (3.2.7) lib/rack/conditional_get.rb:44:in 'Rack::ConditionalGet#call'
+rack (3.2.7) lib/rack/head.rb:15:in 'Rack::Head#call'
+actionpack (8.1.4) lib/action_dispatch/http/content_security_policy.rb:38:in 'ActionDispatch::ContentSecurityPolicy::Middleware#call'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:274:in 'Rack::Session::Abstract::Persisted#context'
+rack-session (2.1.2) lib/rack/session/abstract/id.rb:268:in 'Rack::Session::Abstract::Persisted#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/cookies.rb:708:in 'ActionDispatch::Cookies#call'
+activerecord (8.1.4) lib/active_record/migration.rb:671:in 'ActiveRecord::Migration::CheckPending#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/callbacks.rb:31:in 'block in ActionDispatch::Callbacks#call'
+activesupport (8.1.4) lib/active_support/callbacks.rb:101:in 'ActiveSupport::Callbacks#run_callbacks'
+actionpack (8.1.4) lib/action_dispatch/middleware/callbacks.rb:30:in 'ActionDispatch::Callbacks#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/executor.rb:20:in 'ActionDispatch::Executor#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/actionable_exceptions.rb:18:in 'ActionDispatch::ActionableExceptions#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/debug_exceptions.rb:31:in 'ActionDispatch::DebugExceptions#call'
+web-console (4.3.0) lib/web_console/middleware.rb:132:in 'WebConsole::Middleware#call_app'
+web-console (4.3.0) lib/web_console/middleware.rb:28:in 'block in WebConsole::Middleware#call'
+web-console (4.3.0) lib/web_console/middleware.rb:17:in 'Kernel#catch'
+web-console (4.3.0) lib/web_console/middleware.rb:17:in 'WebConsole::Middleware#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/show_exceptions.rb:32:in 'ActionDispatch::ShowExceptions#call'
+railties (8.1.4) lib/rails/rack/logger.rb:41:in 'Rails::Rack::Logger#call_app'
+railties (8.1.4) lib/rails/rack/logger.rb:29:in 'Rails::Rack::Logger#call'
+propshaft (1.3.2) lib/propshaft/quiet_assets.rb:11:in 'Propshaft::QuietAssets#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/remote_ip.rb:98:in 'ActionDispatch::RemoteIp#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/request_id.rb:34:in 'ActionDispatch::RequestId#call'
+rack (3.2.7) lib/rack/method_override.rb:28:in 'Rack::MethodOverride#call'
+rack (3.2.7) lib/rack/runtime.rb:24:in 'Rack::Runtime#call'
+activesupport (8.1.4) lib/active_support/cache/strategy/local_cache_middleware.rb:30:in 'ActiveSupport::Cache::Strategy::LocalCache::Middleware#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/server_timing.rb:61:in 'block in ActionDispatch::ServerTiming#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/server_timing.rb:26:in 'ActionDispatch::ServerTiming::Subscriber#collect_events'
+actionpack (8.1.4) lib/action_dispatch/middleware/server_timing.rb:60:in 'ActionDispatch::ServerTiming#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/executor.rb:20:in 'ActionDispatch::Executor#call'
+propshaft (1.3.2) lib/propshaft/server.rb:37:in 'Propshaft::Server#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/static.rb:27:in 'ActionDispatch::Static#call'
+rack (3.2.7) lib/rack/sendfile.rb:131:in 'Rack::Sendfile#call'
+actionpack (8.1.4) lib/action_dispatch/middleware/host_authorization.rb:144:in 'ActionDispatch::HostAuthorization#call'
+railties (8.1.4) lib/rails/engine.rb:534:in 'Rails::Engine#call'
+puma (8.0.2) lib/puma/configuration.rb:305:in 'Puma::Configuration::ConfigMiddleware#call'
+puma (8.0.2) lib/puma/response.rb:79:in 'block in Puma::Response#handle_request'
+puma (8.0.2) lib/puma/thread_pool.rb:434:in 'Puma::ThreadPool#with_force_shutdown'
+puma (8.0.2) lib/puma/response.rb:78:in 'Puma::Response#handle_request'
+puma (8.0.2) lib/puma/server.rb:508:in 'Puma::Server#process_client'
+puma (8.0.2) lib/puma/server.rb:263:in 'block in Puma::Server#run'
+puma (8.0.2) lib/puma/thread_pool.rb:246:in 'block in Puma::ThreadPool#spawn_thread'
+Started GET "/cable" for ::1 at 2026-10-05 09:42:45 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:42:45 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started GET "/products/new" for ::1 at 2026-10-05 09:42:53 +0100
+Processing by ProductsController#new as HTML
+  [1m[36mCart Load (0.2ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='new',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  Rendering layout layouts/application.html.erb
+  Rendering products/new.html.erb within layouts/application
+  Rendered components/_record_form.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered products/_form.html.erb (Duration: 1.2ms | GC: 0.0ms)
+  Rendered components/_modal.html.erb (Duration: 1.5ms | GC: 0.0ms)
+  Rendered products/new.html.erb within layouts/application (Duration: 2.0ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.4ms | GC: 0.0ms)
+Completed 200 OK in 35ms (Views: 8.2ms | ActiveRecord: 2.0ms (1 query, 0 cached) | GC: 0.2ms)
+
+
+Started POST "/products/validate" for ::1 at 2026-10-05 09:43:09 +0100
+Processing by ProductsController#validate as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "product" => {"name" => "", "description" => "", "amount" => "7", "stock" => "0", "thumbnail" => ""}}
+  [1m[36mCart Load (0.7ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='validate',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  Rendered components/_record_form.html.erb (Duration: 2.7ms | GC: 0.0ms)
+  Rendered products/_form.html.erb (Duration: 3.4ms | GC: 0.0ms)
+Completed 200 OK in 14ms (Views: 0.2ms | ActiveRecord: 0.7ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:43:17 +0100
+Processing by ProductsController#index as HTML
+  [1m[36mCart Load (0.5ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 2.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.8ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 6.2ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.1ms | GC: 0.0ms)
+Completed 200 OK in 14ms (Views: 7.5ms | ActiveRecord: 0.9ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/cable" for ::1 at 2026-10-05 09:43:17 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:43:17 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started GET "/cart" for ::1 at 2026-10-05 09:43:34 +0100
+Processing by CartsController#show as HTML
+  [1m[36mCart Load (0.7ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (2.0ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" <= '2026-10-05 08:43:29.258297' /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.4ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.7ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mCartPricingChoice Create (1.5ms)[0m  [1m[32mINSERT INTO "cart_pricing_choices" ("cart_id", "promo_code", "shipping_method", "created_at", "updated_at") VALUES (2, NULL, NULL, '2026-10-05 08:43:34.284383', '2026-10-05 08:43:34.284383') RETURNING "id" /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mSavedItem Load (1.5ms)[0m  [1m[34mSELECT "saved_items".* FROM "saved_items" WHERE "saved_items"."cart_id" = 2 ORDER BY "saved_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/saved_items.rb:12:in 'block in <class:SavedItems>'
+  [1m[36mWishlistItem Load (1.6ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 2 ORDER BY "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/wishlist.rb:15:in 'block in <class:Wishlist>'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  Rendered components/_notice_with_action.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_tabs.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_shipping_selector.html.erb (Duration: 1.3ms | GC: 0.0ms)
+  Rendered components/_promo_form.html.erb (Duration: 0.5ms | GC: 0.2ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 5.5ms | GC: 0.2ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.9ms | GC: 0.2ms)
+Completed 200 OK in 64ms (Views: 6.4ms | ActiveRecord: 13.7ms (9 queries, 0 cached) | GC: 7.5ms)
+
+
+Started GET "/cable" for ::1 at 2026-10-05 09:43:34 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:43:34 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:43:52 +0100
+Turbo::StreamsChannel stopped streaming from catalog
+Started GET "/products" for ::1 at 2026-10-05 09:43:56 +0100
+Processing by ProductsController#index as HTML
+  [1m[36mCart Load (0.6ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 1.0ms | GC: 0.3ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 3.5ms | GC: 0.3ms)
+  Rendered components/_flash.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 5.0ms | GC: 0.3ms)
+Completed 200 OK in 12ms (Views: 5.4ms | ActiveRecord: 0.9ms (2 queries, 0 cached) | GC: 0.3ms)
+
+
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:43:56 +0100
+Turbo::StreamsChannel stopped streaming from catalog
+Started GET "/cable" for ::1 at 2026-10-05 09:43:56 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:43:56 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started GET "/products" for ::1 at 2026-10-05 09:44:08 +0100
+Processing by ProductsController#index as */*
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (0.6ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:44:08.710734', '2026-10-05 08:44:08.710734') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.5ms | GC: 0.3ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 1.5ms | GC: 0.3ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.9ms | GC: 0.3ms)
+Completed 200 OK in 6ms (Views: 2.1ms | ActiveRecord: 1.4ms (3 queries, 0 cached) | GC: 0.3ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:44:08 +0100
+Processing by ProductsController#index as */*
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (0.6ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:44:08.728360', '2026-10-05 08:44:08.728360') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 1.0ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.3ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 1.5ms | ActiveRecord: 1.4ms (3 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:44:08 +0100
+Processing by ProductsController#index as */*
+  [1m[36mCart Load (0.2ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (0.6ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:44:08.745210', '2026-10-05 08:44:08.745210') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 1.0ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.4ms | GC: 0.0ms)
+Completed 200 OK in 5ms (Views: 1.5ms | ActiveRecord: 1.3ms (3 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:44:08 +0100
+Processing by ProductsController#index as */*
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (0.6ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:44:08.771813', '2026-10-05 08:44:08.771813') RETURNING "id" /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 1.1ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 1.6ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 1.8ms | ActiveRecord: 1.3ms (3 queries, 0 cached) | GC: 0.4ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:44:20 +0100
+Processing by ProductsController#index as HTML
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 1.6ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 2.1ms | GC: 0.0ms)
+Completed 200 OK in 6ms (Views: 2.3ms | ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:44:20 +0100
+Turbo::StreamsChannel stopped streaming from catalog
+Started GET "/cable" for ::1 at 2026-10-05 09:44:20 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:44:20 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started POST "/products/1/add_to_cart" for ::1 at 2026-10-05 09:44:46 +0100
+Processing by ProductsController#add_to_cart as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "id" => "1"}
+  [1m[36mCart Load (0.6ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.3ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 2 AND "cart_items"."product_id" = 1 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:12:in 'CartItem.add'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mCart Load (1.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 1 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mCartItem Create (2.7ms)[0m  [1m[32mINSERT INTO "cart_items" ("cart_id", "product_id", "quantity", "gift_wrapped", "removed_at", "created_at", "updated_at") VALUES (2, 1, 1, FALSE, NULL, '2026-10-05 08:44:46.355765', '2026-10-05 08:44:46.355765') RETURNING "id" /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+Redirected to http://localhost:3017/products
+↳ app/controllers/products_controller.rb:45:in 'ProductsController#add_to_cart'
+Completed 302 Found in 18ms (ActiveRecord: 6.3ms (5 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:44:46 +0100
+Processing by ProductsController#index as TURBO_STREAM
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 2.3ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 9.2ms | GC: 5.7ms)
+Completed 200 OK in 13ms (Views: 9.5ms | ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 5.7ms)
+
+
+Started POST "/products/2/add_to_cart" for ::1 at 2026-10-05 09:45:00 +0100
+Processing by ProductsController#add_to_cart as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "id" => "2"}
+  [1m[36mCart Load (0.5ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.4ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 2 AND "cart_items"."product_id" = 2 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:12:in 'CartItem.add'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mCart Load (1.9ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mProduct Load (0.4ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 LIMIT 1 /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mCartItem Create (0.5ms)[0m  [1m[32mINSERT INTO "cart_items" ("cart_id", "product_id", "quantity", "gift_wrapped", "removed_at", "created_at", "updated_at") VALUES (2, 2, 1, FALSE, NULL, '2026-10-05 08:45:01.008249', '2026-10-05 08:45:01.008249') RETURNING "id" /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mCOMMIT /*action='add_to_cart',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart_item.rb:15:in 'CartItem.add'
+Redirected to http://localhost:3017/products
+↳ app/controllers/products_controller.rb:45:in 'ProductsController#add_to_cart'
+Completed 302 Found in 16ms (ActiveRecord: 4.3ms (5 queries, 0 cached) | GC: 0.6ms)
+
+
+Started GET "/products" for ::1 at 2026-10-05 09:45:01 +0100
+Processing by ProductsController#index as TURBO_STREAM
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 2.3ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 3.2ms | GC: 0.0ms)
+Completed 200 OK in 8ms (Views: 3.6ms | ActiveRecord: 0.6ms (2 queries, 0 cached) | GC: 0.5ms)
+
+
+Started GET "/cart" for ::1 at 2026-10-05 09:45:02 +0100
+Processing by CartsController#show as HTML
+  [1m[36mCart Load (0.6ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.4ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" <= '2026-10-05 08:44:57.796760' /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.3ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.3ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.8ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" IN (1, 2) /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.4ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mSavedItem Load (0.3ms)[0m  [1m[34mSELECT "saved_items".* FROM "saved_items" WHERE "saved_items"."cart_id" = 2 ORDER BY "saved_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/saved_items.rb:12:in 'block in <class:SavedItems>'
+  [1m[36mWishlistItem Load (0.5ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 2 ORDER BY "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/wishlist.rb:15:in 'block in <class:Wishlist>'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  Rendered components/_notice_with_action.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_tabs.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.9ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 2.8ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 0.8ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_shipping_selector.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered components/_promo_form.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 6.6ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.7ms | GC: 0.3ms)
+Completed 200 OK in 45ms (Views: 8.2ms | ActiveRecord: 3.8ms (8 queries, 0 cached) | GC: 1.8ms)
+
+
+Started GET "/cable" for ::1 at 2026-10-05 09:45:02 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:45:02 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Started PATCH "/cart/shipping" for ::1 at 2026-10-05 09:45:13 +0100
+Processing by CartPricingController#shipping as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "shipping_method" => "express"}
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='shipping',application='GoodDeal',controller='cart_pricing'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartPricingChoice Load (0.2ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='shipping',application='GoodDeal',controller='cart_pricing'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='shipping',application='GoodDeal',controller='cart_pricing'*/[0m
+  ↳ app/ala/domain_abstractions/pricing_choices.rb:31:in 'block in <class:PricingChoices>'
+  [1m[36mCartPricingChoice Update (1.4ms)[0m  [1m[33mUPDATE "cart_pricing_choices" SET "shipping_method" = 'express', "updated_at" = '2026-10-05 08:45:13.086653' WHERE "cart_pricing_choices"."id" = 1 /*action='shipping',application='GoodDeal',controller='cart_pricing'*/[0m
+  ↳ app/ala/domain_abstractions/pricing_choices.rb:31:in 'block in <class:PricingChoices>'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*action='shipping',application='GoodDeal',controller='cart_pricing'*/[0m
+  ↳ app/ala/domain_abstractions/pricing_choices.rb:31:in 'block in <class:PricingChoices>'
+Redirected to http://localhost:3017/cart
+↳ app/controllers/concerns/cart_screen.rb:8:in 'CartScreen#back_to_cart'
+Completed 302 Found in 8ms (ActiveRecord: 2.4ms (3 queries, 0 cached) | GC: 0.2ms)
+
+
+Started GET "/cart" for ::1 at 2026-10-05 09:45:13 +0100
+Processing by CartsController#show as TURBO_STREAM
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" <= '2026-10-05 08:45:08.098375' /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" IN (1, 2) /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.2ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mSavedItem Load (0.2ms)[0m  [1m[34mSELECT "saved_items".* FROM "saved_items" WHERE "saved_items"."cart_id" = 2 ORDER BY "saved_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/saved_items.rb:12:in 'block in <class:SavedItems>'
+  [1m[36mWishlistItem Load (0.2ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 2 ORDER BY "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/wishlist.rb:15:in 'block in <class:Wishlist>'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  Rendered components/_notice_with_action.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_tabs.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 0.8ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_shipping_selector.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered components/_promo_form.html.erb (Duration: 0.5ms | GC: 0.2ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 3.8ms | GC: 0.2ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.4ms | GC: 0.2ms)
+Completed 200 OK in 14ms (Views: 4.7ms | ActiveRecord: 1.9ms (8 queries, 0 cached) | GC: 0.8ms)
+
+
+Started DELETE "/cart/items/1" for ::1 at 2026-10-05 09:45:15 +0100
+Processing by CartItemsController#destroy as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "id" => "1"}
+  [1m[36mCart Load (1.2ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.7ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."id" = 1 ORDER BY "cart_items"."id" ASC LIMIT 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:33:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.6ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:33:in 'block in <class:CartLines>'
+  [1m[36mCartItem Load (0.7ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."id" != 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Load (0.4ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."id" = 1 LIMIT 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:21:in 'block in <class:Undo>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:21:in 'block in <class:Undo>'
+  [1m[36mCartItem Update (1.4ms)[0m  [1m[33mUPDATE "cart_items" SET "removed_at" = '2026-10-05 08:45:15.799381', "updated_at" = '2026-10-05 08:45:15.800232' WHERE "cart_items"."id" = 1 /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:21:in 'block in <class:Undo>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='destroy',application='GoodDeal',controller='cart_items'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:21:in 'block in <class:Undo>'
+Redirected to http://localhost:3017/cart
+↳ app/controllers/concerns/cart_screen.rb:8:in 'CartScreen#back_to_cart'
+Completed 302 Found in 23ms (ActiveRecord: 5.4ms (6 queries, 0 cached) | GC: 1.4ms)
+
+
+Started GET "/cart" for ::1 at 2026-10-05 09:45:15 +0100
+Processing by CartsController#show as TURBO_STREAM
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.3ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" <= '2026-10-05 08:45:10.813516' /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.3ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.2ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mSavedItem Load (0.2ms)[0m  [1m[34mSELECT "saved_items".* FROM "saved_items" WHERE "saved_items"."cart_id" = 2 ORDER BY "saved_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/saved_items.rb:12:in 'block in <class:SavedItems>'
+  [1m[36mWishlistItem Load (0.2ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 2 ORDER BY "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/wishlist.rb:15:in 'block in <class:Wishlist>'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  Rendered components/_notice_with_action.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_tabs.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_shipping_selector.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered components/_promo_form.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 3.2ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 3.8ms | GC: 0.0ms)
+Completed 200 OK in 13ms (Views: 4.1ms | ActiveRecord: 2.0ms (8 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/cart/undo/expire" for ::1 at 2026-10-05 09:45:21 +0100
+Processing by CartUndosController#expire as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mCart Load (0.9ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='expire',application='GoodDeal',controller='cart_undos'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.6ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 /*action='expire',application='GoodDeal',controller='cart_undos'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='expire',application='GoodDeal',controller='cart_undos'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'block in DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Destroy (2.0ms)[0m  [1m[31mDELETE FROM "cart_items" WHERE "cart_items"."id" = 1 /*action='expire',application='GoodDeal',controller='cart_undos'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'block in DomainAbstractions::Undo#finalize'
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*action='expire',application='GoodDeal',controller='cart_undos'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'block in DomainAbstractions::Undo#finalize'
+Redirected to http://localhost:3017/cart
+↳ app/controllers/concerns/cart_screen.rb:8:in 'CartScreen#back_to_cart'
+Completed 302 Found in 15ms (ActiveRecord: 4.2ms (3 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/cart" for ::1 at 2026-10-05 09:45:21 +0100
+Processing by CartsController#show as TURBO_STREAM
+  [1m[36mCart Load (0.5ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.3ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" <= '2026-10-05 08:45:16.806175' /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.2ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mSavedItem Load (0.2ms)[0m  [1m[34mSELECT "saved_items".* FROM "saved_items" WHERE "saved_items"."cart_id" = 2 ORDER BY "saved_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/saved_items.rb:12:in 'block in <class:SavedItems>'
+  [1m[36mWishlistItem Load (0.2ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 2 ORDER BY "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/ala/domain_abstractions/wishlist.rb:15:in 'block in <class:Wishlist>'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  Rendered components/_notice_with_action.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_tabs.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_line.html.erb (Duration: 0.9ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_shipping_selector.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered components/_promo_form.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 2.8ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.7ms | GC: 4.0ms)
+Completed 200 OK in 18ms (Views: 8.1ms | ActiveRecord: 2.0ms (8 queries, 0 cached) | GC: 4.0ms)
+
+
+Started POST "/cart/checkout" for ::1 at 2026-10-05 09:45:37 +0100
+Processing by CheckoutsController#create as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mCart Load (0.5ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 AND "carts"."status" = 'open' LIMIT 1 /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.5ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:22:in 'Enumerable#map'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:22:in 'Enumerable#map'
+  [1m[36mCheckout Load (1.1ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mCheckout Create (0.9ms)[0m  [1m[32mINSERT INTO "checkouts" ("cart_id", "step", "name", "line1", "city", "postal_code", "payment_reference", "created_at", "updated_at") VALUES (2, 'address', NULL, NULL, NULL, NULL, NULL, '2026-10-05 08:45:37.860926', '2026-10-05 08:45:37.860926') RETURNING "id" /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='create',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+Redirected to http://localhost:3017/cart/checkout
+↳ app/controllers/checkouts_controller.rb:6:in 'CheckoutsController#create'
+Completed 302 Found in 38ms (ActiveRecord: 5.5ms (6 queries, 0 cached) | GC: 1.5ms)
+
+
+Started GET "/cart/checkout" for ::1 at 2026-10-05 09:45:37 +0100
+Processing by CheckoutsController#show as TURBO_STREAM
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.1ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mCheckout Load (0.1ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  Rendering layout layouts/application.html.erb
+  Rendering checkouts/show.html.erb within layouts/application
+  Rendered components/_milestones.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_record_form.html.erb (Duration: 0.5ms | GC: 0.0ms)
+  Rendered checkouts/_address_form.html.erb (Duration: 0.7ms | GC: 0.0ms)
+  Rendered checkouts/_address.html.erb (Duration: 1.0ms | GC: 0.0ms)
+  Rendered checkouts/show.html.erb within layouts/application (Duration: 2.6ms | GC: 0.1ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 3.0ms | GC: 0.1ms)
+Completed 200 OK in 8ms (Views: 3.4ms | ActiveRecord: 0.6ms (4 queries, 0 cached) | GC: 0.1ms)
+
+
+Unsubscribing from channel: {"channel":"Turbo::StreamsChannel","signed_stream_name":"ImNhdGFsb2ci--dfeee5ccf93beaafb0e3e899481ebb34dc43cc804436f1772e5a6f389f1fc03d"}
+Turbo::StreamsChannel stopped streaming from catalog
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from checkout_2
+Started PATCH "/cart/checkout/address" for ::1 at 2026-10-05 09:45:41 +0100
+Processing by CheckoutsController#address as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]", "checkout" => {"name" => "Ada", "line1" => "1 Ave", "city" => "London", "postal_code" => "12345"}}
+  [1m[36mCheckout Load (0.6ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:38:in 'block in <class:CheckoutFlow>'
+  [1m[36mCheckout Update (2.4ms)[0m  [1m[33mUPDATE "checkouts" SET "name" = 'Ada', "line1" = '1 Ave', "city" = 'London', "postal_code" = '12345', "updated_at" = '2026-10-05 08:45:41.210685' WHERE "checkouts"."id" = 1 /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:38:in 'block in <class:CheckoutFlow>'
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:38:in 'block in <class:CheckoutFlow>'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+  [1m[36mCheckout Update (2.4ms)[0m  [1m[33mUPDATE "checkouts" SET "step" = 'payment', "updated_at" = '2026-10-05 08:45:41.218939' WHERE "checkouts"."id" = 1 /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*action='address',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+Redirected to http://localhost:3017/cart/checkout/payment
+↳ app/controllers/checkouts_controller.rb:24:in 'CheckoutsController#address'
+Completed 302 Found in 20ms (ActiveRecord: 6.9ms (3 queries, 0 cached) | GC: 0.3ms)
+
+
+Started GET "/cart/checkout/payment" for ::1 at 2026-10-05 09:45:41 +0100
+Processing by CheckoutsController#show as TURBO_STREAM
+  Parameters: {"step" => "payment"}
+  [1m[36mCartItem Load (0.5ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.4ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.3ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mCheckout Load (0.3ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  Rendering layout layouts/application.html.erb
+  Rendering checkouts/show.html.erb within layouts/application
+  Rendered components/_milestones.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered checkouts/_payment.html.erb (Duration: 0.8ms | GC: 0.0ms)
+  Rendered checkouts/show.html.erb within layouts/application (Duration: 1.9ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 2.8ms | GC: 0.0ms)
+Completed 200 OK in 12ms (Views: 3.3ms | ActiveRecord: 1.5ms (4 queries, 0 cached) | GC: 0.3ms)
+
+
+Unsubscribing from channel: {"channel":"Turbo::StreamsChannel","signed_stream_name":"ImNoZWNrb3V0XzIi--1b187f7ca9921978208958dc4614c23864da27608ed5c9d725445b3789365ee3"}
+Turbo::StreamsChannel stopped streaming from checkout_2
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from checkout_2
+Started POST "/cart/checkout/pay" for ::1 at 2026-10-05 09:45:44 +0100
+Processing by CheckoutsController#pay as TURBO_STREAM
+  Parameters: {"authenticity_token" => "[FILTERED]"}
+  [1m[36mCartItem Load (0.6ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:22:in 'Enumerable#map'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:22:in 'Enumerable#map'
+  [1m[36mProduct Pluck (0.3ms)[0m  [1m[34mSELECT "products"."id", "products"."stock" FROM "products" WHERE "products"."id" = 2 /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/product.rb:5:in 'Product.stock_levels'
+  [1m[36mCheckout Load (0.3ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+  [1m[36mCheckout Update (1.8ms)[0m  [1m[33mUPDATE "checkouts" SET "step" = 'processing', "updated_at" = '2026-10-05 08:45:44.369876' WHERE "checkouts"."id" = 1 /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*action='pay',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+[ActiveJob] Enqueued Foundation::PushLater (Job ID: 9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3) to Async(default) with arguments: "Screens::Checkout", {cart_id: 2}, "charge", {line_items: [{name: "Gadget", description: "A gadget with all the gadgetry you expect.", image_url: "https://picsum.photos/seed/gadget/200", unit_amount: 2500, currency: "usd", quantity: 1}], cart_id: 2}
+[ActiveJob] ↳ app/ala/foundation/push_later.rb:7:in 'block in Foundation::PushLater.port_for'
+Redirected to http://localhost:3017/cart/checkout/payment
+↳ app/controllers/checkouts_controller.rb:39:in 'CheckoutsController#pay'
+Completed 302 Found in 19ms (ActiveRecord: 3.9ms (5 queries, 0 cached) | GC: 0.4ms)
+
+
+Started GET "/cart/checkout/payment" for ::1 at 2026-10-05 09:45:44 +0100
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3] Performing Foundation::PushLater (Job ID: 9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3) from Async(default) enqueued at 2026-10-05T08:45:44.376596000Z with arguments: "Screens::Checkout", {cart_id: 2}, "charge", {line_items: [{name: "Gadget", description: "A gadget with all the gadgetry you expect.", image_url: "https://picsum.photos/seed/gadget/200", unit_amount: 2500, currency: "usd", quantity: 1}], cart_id: 2}
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/order.rb:7:in 'block in Order.place'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCart Load (0.7ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/order.rb:7:in 'block in Order.place'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCart Update (0.2ms)[0m  [1m[33mUPDATE "carts" SET "status" = 'completed', "updated_at" = '2026-10-05 08:45:44.382706' WHERE "carts"."id" = 2 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/cart.rb:11:in 'Cart#complete!'
+Processing by CheckoutsController#show as TURBO_STREAM
+  Parameters: {"step" => "payment"}
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCart Load (0.2ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 2 LIMIT 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/order.rb:8:in 'block in Order.place'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mOrder Create (1.8ms)[0m  [1m[32mINSERT INTO "orders" ("cart_id", "po_number", "created_at", "updated_at") VALUES (2, NULL, '2026-10-05 08:45:44.386335', '2026-10-05 08:45:44.386335') RETURNING "id" /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/order.rb:8:in 'block in Order.place'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/order.rb:6:in 'Order.place'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/settle_order.rb:13:in 'block in <class:SettleOrder>'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/settle_order.rb:13:in 'block in <class:SettleOrder>'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mProduct Update All (0.2ms)[0m  [1m[33mUPDATE "products" SET stock = stock - 1 WHERE "products"."id" = 2 AND (stock >= 1) /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/product.rb:9:in 'Product.decrement_stock'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 LIMIT 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/product.rb:10:in 'Product.decrement_stock'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3] [ActionCable] Broadcasting to catalog: "<turbo-stream action=\"replace\" targets=\".stock_2\"><template><!-- BEGIN app/views/components/_stock_badge.html.erb\n--><span class=\"stock_2 inline-block rounded-full px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800\">\n  Only 4 left!\n</span>\n<!-- END app/views/components/_stock_...
+Turbo::StreamsChannel transmitting "<turbo-stream action=\"replace\" targets=\".stock_2\"><template><!-- BEGIN app/views/components/_stock_badge.html.erb\n--><span class=\"stock_2 inline-block rounded-full px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800\">\n  Only 4 left!\n</span>\n<!-- END app/views/components/_stock_... (via streamed from catalog)
+Turbo::StreamsChannel transmitting "<turbo-stream action=\"replace\" targets=\".stock_2\"><template><!-- BEGIN app/views/components/_stock_badge.html.erb\n--><span class=\"stock_2 inline-block rounded-full px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800\">\n  Only 4 left!\n</span>\n<!-- END app/views/components/_stock_... (via streamed from catalog)
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCheckout Load (0.3ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:56:in 'block in <class:CheckoutFlow>'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCheckout Update (0.6ms)[0m  [1m[33mUPDATE "checkouts" SET "payment_reference" = 'chg_66d2b3ec1073', "updated_at" = '2026-10-05 08:45:44.393175' WHERE "checkouts"."id" = 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:56:in 'block in <class:CheckoutFlow>'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:56:in 'block in <class:CheckoutFlow>'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mCheckout Update (0.8ms)[0m  [1m[33mUPDATE "checkouts" SET "step" = 'complete', "updated_at" = '2026-10-05 08:45:44.394921' WHERE "checkouts"."id" = 1 /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal',job='Foundation%3A%3APushLater'*/[0m
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   ↳ app/ala/domain_abstractions/checkout_flow.rb:74:in 'DomainAbstractions::CheckoutFlow#advance'
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3]   Rendered components/_checkout_status.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3] [ActionCable] Broadcasting to checkout_2: "<turbo-stream action=\"replace\" target=\"checkout_status\"><template><!-- BEGIN app/views/components/_checkout_status.html.erb\n--><div id=\"checkout_status\">\n    <p class=\"py-6 text-stone-500\" data-controller=\"visit\" data-visit-url-value=\"/cart/success\">Redirecting…</p>\n</div>\n<!-- E...
+[ActiveJob] [Foundation::PushLater] [9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3] Performed Foundation::PushLater (Job ID: 9381f6d5-e5d0-42a0-86a1-9a4a6a98afb3) from Async(default) in 17.05ms
+Turbo::StreamsChannel transmitting "<turbo-stream action=\"replace\" target=\"checkout_status\"><template><!-- BEGIN app/views/components/_checkout_status.html.erb\n--><div id=\"checkout_status\">\n    <p class=\"py-6 text-stone-500\" data-controller=\"visit\" data-visit-url-value=\"/cart/success\">Redirecting…</p>\n</div>\n<!-- E... (via streamed from checkout_2)
+  [1m[36mCartItem Load (10.8ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 2 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."id" = 2 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mCartPricingChoice Load (0.3ms)[0m  [1m[34mSELECT "cart_pricing_choices".* FROM "cart_pricing_choices" WHERE "cart_pricing_choices"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/cart_pricing_choice.rb:4:in 'CartPricingChoice.for_cart'
+  [1m[36mCheckout Load (0.2ms)[0m  [1m[34mSELECT "checkouts".* FROM "checkouts" WHERE "checkouts"."cart_id" = 2 LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/models/checkout.rb:9:in 'Checkout.for_cart'
+Redirected to http://localhost:3017/cart/success
+↳ app/controllers/checkouts_controller.rb:11:in 'CheckoutsController#show'
+Completed 302 Found in 17ms (ActiveRecord: 14.7ms (4 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/cart/success" for ::1 at 2026-10-05 09:45:44 +0100
+Processing by CartSuccessesController#show as TURBO_STREAM
+  Rendering layout layouts/application.html.erb
+  Rendering cart_successes/show.html.erb within layouts/application
+  Rendered cart_successes/show.html.erb within layouts/application (Duration: 0.1ms | GC: 0.0ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 0.7ms | GC: 0.0ms)
+Completed 200 OK in 2ms (Views: 1.1ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Unsubscribing from channel: {"channel":"Turbo::StreamsChannel","signed_stream_name":"ImNoZWNrb3V0XzIi--1b187f7ca9921978208958dc4614c23864da27608ed5c9d725445b3789365ee3"}
+Turbo::StreamsChannel stopped streaming from checkout_2
+Started GET "/portal" for ::1 at 2026-10-05 09:45:51 +0100
+Processing by PortalsController#show as HTML
+  [1m[36mCart Load (1.7ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" IS NULL AND "carts"."status" = 'open' LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCart Create (2.2ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 08:45:51.431575', '2026-10-05 08:45:51.431575') RETURNING "id" /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/cart.rb:7:in 'Cart.ensure_open'
+  [1m[36mCartItem Load (0.6ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 7 AND "cart_items"."removed_at" <= '2026-10-05 08:45:46.441815' /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:38:in 'DomainAbstractions::Undo#finalize'
+  [1m[36mCartItem Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."removed_at" IS NOT NULL AND "cart_items"."cart_id" = 7 LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/ala/domain_abstractions/undo.rb:15:in 'block in <class:Undo>'
+  [1m[36mCartItem Load (0.4ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."removed_at" IS NULL AND "cart_items"."cart_id" = 7 ORDER BY "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/ala/domain_abstractions/cart_lines.rb:17:in 'block in <class:CartLines>'
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."id" ASC /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/ala/domain_abstractions/records.rb:14:in 'Enumerable#map'
+  [1m[36mOrderSubmission Load (1.9ms)[0m  [1m[34mSELECT "order_submissions".* FROM "order_submissions" WHERE "order_submissions"."cart_id" = 7 LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/order_submission.rb:9:in 'OrderSubmission.for_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/order_submission.rb:9:in 'OrderSubmission.for_cart'
+  [1m[36mCart Load (0.4ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."id" = 7 LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/order_submission.rb:9:in 'OrderSubmission.for_cart'
+  [1m[36mOrderSubmission Create (1.4ms)[0m  [1m[32mINSERT INTO "order_submissions" ("cart_id", "step", "po_number", "notes", "created_at", "updated_at") VALUES (7, 'lines', NULL, NULL, '2026-10-05 08:45:51.472493', '2026-10-05 08:45:51.472493') RETURNING "id" /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/order_submission.rb:9:in 'OrderSubmission.for_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/order_submission.rb:9:in 'OrderSubmission.for_cart'
+  Rendering layout layouts/application.html.erb
+  Rendering portals/show.html.erb within layouts/application
+  Rendered components/_milestones.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_notice_with_action.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_none.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 1.2ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_catalog_order_row.html.erb (Duration: 1.9ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.6ms | GC: 0.3ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_catalog_order_row.html.erb (Duration: 0.8ms | GC: 0.3ms)
+  Rendered components/_product_line.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_catalog_order_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_product_line.html.erb (Duration: 0.3ms | GC: 0.0ms)
+  Rendered components/_stock_badge.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered components/_catalog_order_row.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered components/_cart_summary.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered portals/_lines.html.erb (Duration: 4.8ms | GC: 0.3ms)
+  Rendered portals/show.html.erb within layouts/application (Duration: 5.7ms | GC: 0.3ms)
+  Rendered components/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 6.3ms | GC: 0.3ms)
+Completed 200 OK in 60ms (Views: 7.3ms | ActiveRecord: 15.6ms (9 queries, 0 cached) | GC: 8.3ms)
+
+
+Started GET "/cable" for ::1 at 2026-10-05 09:45:51 +0100
+Started GET "/cable" [WebSocket] for ::1 at 2026-10-05 09:45:51 +0100
+Successfully upgraded to WebSocket (REQUEST_METHOD: GET, HTTP_CONNECTION: Upgrade, HTTP_UPGRADE: websocket)
+Turbo::StreamsChannel is transmitting the subscription confirmation
+Turbo::StreamsChannel is streaming from catalog
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:46:01 +0100
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:46:01 +0100
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:46:01 +0100
+Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:46:01 +0100
+Turbo::StreamsChannel stopped streaming from catalog
+Turbo::StreamsChannel stopped streaming from catalog
+Turbo::StreamsChannel stopped streaming from catalog

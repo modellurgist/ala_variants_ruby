@@ -1,0 +1,9 @@
+<%# The page's transient notices, one per flash entry. %>
+<div id="flash" class="fixed right-4 top-4 z-40 space-y-2">
+  <% flash.each do |kind, message| %>
+    <% next if message.blank? %>
+    <div data-controller="dismiss" data-dismiss-after-value="2500" class="rounded-xl px-4 py-3 text-sm shadow-lg <%= kind.to_s == "alert" ? "bg-red-50 text-red-800 ring-1 ring-red-200" : "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200" %>">
+      <%= message %>
+    </div>
+  <% end %>
+</div>

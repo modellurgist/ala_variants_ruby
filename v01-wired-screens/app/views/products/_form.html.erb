@@ -1,0 +1,2 @@
+<%= render "components/record_form", record: form, fields: Screens::Store::PRODUCT_FORM[:fields], submit: Screens::Store::PRODUCT_FORM[:submit],
+      url: form.persisted? ? product_path(form) : products_path, validate_url: validate_products_path(id: form.id) %>

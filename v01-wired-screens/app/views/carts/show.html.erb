@@ -1,0 +1,44 @@
+<% content_for :title, "Your Cart · GoodDeal" %>
+<%= turbo_stream_from Screens::Catalog::STREAM %>
+<h1 class="pb-6 text-3xl font-semibold tracking-tight">Your Cart</h1>
+<%= render "components/notice_with_action", shown: @s.undo_pending, text: @texts[:undo][:text], action: @texts[:undo][:undo],
+      url: cart_undo_path, expire_url: expire_cart_undo_path, after_ms: Screens::Store::UNDO_WINDOW.in_milliseconds %>
+<div class="grid items-start gap-8 lg:grid-cols-[1fr_22rem]">
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm" data-controller="tabs">
+    <%= render "components/tabs", tabs: [ [ :items, "#{@texts[:tabs][:items]} (#{@s.summary[:item_count]})" ],
+                                          [ :saved, "#{@texts[:tabs][:saved]} (#{@s.saved_count})" ],
+                                          [ :wishlist, "#{@texts[:tabs][:wishlist]} (#{@s.wishlist_count})" ] ] %>
+    <div data-tabs-target="pane" data-name="items">
+      <% @s.rows.each do |row| %>
+        <%= render "components/cart_line", row: row, wishlisted: @s.wishlist_ids.include?(row[:product_id]), t: @texts[:cart], labels: Screens::Store::STOCK_LABELS,
+              urls: { quantity: cart_item_path(row[:id]), remove: cart_item_path(row[:id]), gift_wrap: gift_wrap_cart_item_path(row[:id]),
+                      save: save_cart_item_path(row[:id]), wishlist: wishlist_cart_item_path(row[:id]) } %>
+      <% end %>
+      <%= render "components/none", count: @s.summary[:item_count], text: @texts[:cart][:empty] %>
+    </div>
+    <div data-tabs-target="pane" data-name="saved" hidden>
+      <% @s.saved_rows.each do |row| %>
+        <%= render "components/product_line", row: row do %>
+          <%= button_to @texts[:saved][:move], move_cart_saved_item_path(row[:id]), class: "text-sm font-medium text-brand-700 hover:text-brand-800" %>
+        <% end %>
+      <% end %>
+      <%= render "components/none", count: @s.saved_count, text: @texts[:saved][:empty] %>
+    </div>
+    <div data-tabs-target="pane" data-name="wishlist" hidden>
+      <% @s.wishlist_rows.each do |row| %>
+        <%= render "components/product_line", row: row do %>
+          <%= button_to @texts[:wishlist][:add], add_to_cart_cart_wishlist_item_path(row[:id]), class: "text-sm font-medium text-brand-700 hover:text-brand-800" %>
+          <%= button_to @texts[:wishlist][:remove], cart_wishlist_item_path(row[:id]), method: :delete, class: "text-sm font-medium text-stone-400 hover:text-red-600" %>
+        <% end %>
+      <% end %>
+      <%= render "components/none", count: @s.wishlist_count, text: @texts[:wishlist][:empty] %>
+    </div>
+  </section>
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm lg:sticky lg:top-6">
+    <%= render "components/cart_summary", summary: @s.summary, t: @texts[:cart] %>
+    <%= render "components/shipping_selector", summary: @s.summary, heading: @texts[:cart][:shipping], free_over: @texts[:cart][:free_over], url: shipping_cart_path %>
+    <%= render "components/promo_form", code: @s.summary[:promo_code], error: flash[:promo_error], url: promo_cart_path, t: @texts[:cart] %>
+    <%= button_to "#{@texts[:cart][:checkout]} · #{@s.summary[:total]}", cart_checkout_path, disabled: @s.summary[:empty],
+          class: "mt-6 w-full rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-stone-300" %>
+  </section>
+</div>

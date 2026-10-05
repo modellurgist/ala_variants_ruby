@@ -1,0 +1,6 @@
+<%# A save that failed validation: the form again, with its errors, as a full page. %>
+<% content_for :title, "#{@form.persisted? ? "Edit" : "New"} Product · GoodDeal" %>
+<div class="mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+  <h1 class="mb-6 text-2xl font-semibold"><%= @form.persisted? ? "Edit Product" : "New Product" %></h1>
+  <%= render "products/form", form: @form %>
+</div>

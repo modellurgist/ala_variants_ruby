@@ -1,0 +1,16 @@
+<%# A catalog row: a product's thumbnail, name, description, price and stock. Data arrives as a projected
+    row; the actions block, when given, renders the row's buttons. %>
+<div id="<%= product_row_id(row[:id]) %>" class="grid grid-cols-[4rem_1fr] items-center gap-4 border-b border-stone-200 py-5 last:border-b-0 sm:grid-cols-[4rem_1fr_auto]">
+  <img class="h-16 w-16 rounded-lg object-cover ring-1 ring-stone-200" src="<%= row[:thumbnail] %>" alt="<%= row[:name] %>">
+  <div class="min-w-0">
+    <div class="truncate font-medium text-stone-900"><%= link_to row[:name], product_path(row[:id]), class: "hover:underline" %></div>
+    <div class="truncate text-sm text-stone-500"><%= row[:description] %></div>
+    <div class="mt-1 flex items-center gap-3 text-sm text-stone-500">
+      <%= row[:amount] %>
+      <%= render "components/stock_badge", product_id: row[:id], status: row[:stock_status], stock: row[:stock], labels: labels %>
+    </div>
+  </div>
+  <div class="col-span-2 flex items-center justify-end gap-3 sm:col-span-1">
+    <%= yield if block_given? %>
+  </div>
+</div>

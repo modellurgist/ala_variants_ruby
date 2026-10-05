@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html class="[scrollbar-gutter:stable]">
+  <head>
+    <title><%= content_for(:title) || "GoodDeal" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="bg-stone-50 text-stone-900 antialiased">
+    <header class="border-b border-stone-200 bg-white">
+      <nav class="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4 text-sm font-medium">
+        <%= link_to "GoodDeal", root_path, class: "text-lg font-semibold text-brand-700" %>
+        <%= link_to "Products", products_path, class: "text-stone-600 hover:text-stone-900" %>
+        <%= link_to "Cart", cart_path, class: "text-stone-600 hover:text-stone-900" %>
+        <%= link_to "Bulk orders", portal_path, class: "text-stone-600 hover:text-stone-900" %>
+      </nav>
+    </header>
+    <%= render "components/flash" %>
+    <main class="mx-auto max-w-6xl px-6 py-10">
+      <%= yield %>
+    </main>
+  </body>
+</html>

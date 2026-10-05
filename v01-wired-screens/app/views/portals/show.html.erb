@@ -1,0 +1,5 @@
+<% content_for :title, "Bulk Order Portal · GoodDeal" %>
+<%= turbo_stream_from Screens::Catalog::STREAM %>
+<h1 class="pb-6 text-3xl font-semibold tracking-tight"><%= @t[:heading] %></h1>
+<%= render "components/milestones", step: @s.step, milestones: Screens::Portal::MILESTONES, order: Screens::Portal::MILESTONES.map(&:first) %>
+<%= render "portals/#{@s.step}" %>

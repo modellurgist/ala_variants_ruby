@@ -1,0 +1,9 @@
+<%# A tab bar whose buttons show one pane each; UI state only, kept by the tabs Stimulus controller. %>
+<nav class="mb-2 flex gap-6 border-b border-stone-200">
+  <% tabs.each_with_index do |(name, label), i| %>
+    <button type="button" data-tabs-target="tab" data-name="<%= name %>" data-action="tabs#show" aria-selected="<%= i.zero? %>"
+            class="-mb-px border-b-2 pb-3 text-sm font-medium aria-selected:border-brand-700 aria-selected:text-stone-900 border-transparent text-stone-500 hover:text-stone-800">
+      <%= label %>
+    </button>
+  <% end %>
+</nav>

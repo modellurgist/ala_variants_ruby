@@ -1,0 +1,16 @@
+<% content_for :title, "All Products · GoodDeal" %>
+<%= turbo_stream_from Screens::Catalog::STREAM %>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-3xl font-semibold tracking-tight">All Products</h1>
+  <%= link_to "New Product", new_product_path, data: { turbo_frame: "modal" }, class: "rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800" %>
+</div>
+<%= turbo_frame_tag "modal" %>
+<section id="products" class="rounded-2xl border border-stone-200 bg-white px-6 shadow-sm">
+  <% @rows.each do |row| %>
+    <%= render "components/product_row", row: row, labels: Screens::Store::STOCK_LABELS do %>
+      <%= link_to "Edit", edit_product_path(row[:id]), data: { turbo_frame: "modal" }, class: "text-sm font-medium text-stone-500 hover:text-stone-800" %>
+      <%= button_to "Delete", product_path(row[:id]), method: :delete, data: { turbo_confirm: "Delete this product?" }, class: "text-sm font-medium text-stone-400 hover:text-red-600" %>
+      <%= button_to "Add to cart", add_to_cart_product_path(row[:id]), class: "rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-800" %>
+    <% end %>
+  <% end %>
+</section>

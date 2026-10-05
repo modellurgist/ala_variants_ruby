@@ -1,0 +1,5 @@
+<div class="max-w-lg rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+  <h2 class="pb-2 text-2xl font-semibold"><%= @t[:submitted] %></h2>
+  <p class="text-stone-600"><%= @t[:reference] %> <span class="font-mono">#<%= @s.reference %></span> · <%= @s.form.po_number %></p>
+  <p class="pt-1 text-sm text-stone-500"><%= @t[:summary][:total] %> <%= @s.summary[:total] %> (<%= @s.summary[:item_count] %> <%= @t[:items] %>)</p>
+</div>
