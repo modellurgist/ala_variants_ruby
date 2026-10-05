@@ -1,0 +1,185 @@
+  [1m[35mSQL (0.3ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (180.5ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v02_development" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.8ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (5.8ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrapped" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_pricing_choices" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "cart_pricing_choices" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "promo_code" character varying, "shipping_method" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_pricing_choices_on_cart_id" ON "cart_pricing_choices" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (2.2ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "checkouts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'address' NOT NULL, "name" character varying, "line1" character varying, "city" character varying, "postal_code" character varying, "payment_reference" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_submissions" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "order_submissions" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'lines' NOT NULL, "po_number" character varying, "notes" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_order_submissions_on_cart_id" ON "order_submissions" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "saved_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "saved_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_saved_items_on_cart_id_and_product_id" ON "saved_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_cart_id" ON "saved_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_product_id" ON "saved_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "wishlist_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (2.1ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "cart_pricing_choices" ADD CONSTRAINT "fk_rails_1b068352fb"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "checkouts" ADD CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mALTER TABLE "order_submissions" ADD CONSTRAINT "fk_rails_886a7b33bc"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "saved_items" ADD CONSTRAINT "fk_rails_de0b6559fa"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "saved_items" ADD CONSTRAINT "fk_rails_a3de60733c"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20261005120000) /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.6ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-05 09:48:22.249192', '2026-10-05 09:48:22.249194') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'f37c183216fab10f62be7ad628c873d3ca2466fc', '2026-10-05 09:48:22.251378', '2026-10-05 09:48:22.251379') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (124.8ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v02_test" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (2.5ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrapped" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_pricing_choices" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "cart_pricing_choices" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "promo_code" character varying, "shipping_method" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_pricing_choices_on_cart_id" ON "cart_pricing_choices" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "checkouts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'address' NOT NULL, "name" character varying, "line1" character varying, "city" character varying, "postal_code" character varying, "payment_reference" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_submissions" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "order_submissions" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "step" character varying DEFAULT 'lines' NOT NULL, "po_number" character varying, "notes" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_order_submissions_on_cart_id" ON "order_submissions" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" text, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "saved_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "saved_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_saved_items_on_cart_id_and_product_id" ON "saved_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_cart_id" ON "saved_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_saved_items_on_product_id" ON "saved_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "wishlist_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (2.2ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "cart_pricing_choices" ADD CONSTRAINT "fk_rails_1b068352fb"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mALTER TABLE "checkouts" ADD CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "order_submissions" ADD CONSTRAINT "fk_rails_886a7b33bc"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mALTER TABLE "saved_items" ADD CONSTRAINT "fk_rails_de0b6559fa"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "saved_items" ADD CONSTRAINT "fk_rails_a3de60733c"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20261005120000) /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-05 09:48:22.453545', '2026-10-05 09:48:22.453547') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Update (0.3ms)[0m  [1m[33mUPDATE "ar_internal_metadata" SET "value" = 'test', "updated_at" = '2026-10-05 09:48:22.454787' WHERE "ar_internal_metadata"."key" = 'environment' /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.1ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'f37c183216fab10f62be7ad628c873d3ca2466fc', '2026-10-05 09:48:22.455871', '2026-10-05 09:48:22.455872') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Widget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.4ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Widget', 'A dependable widget for everyday widgeting.', 1000, 10, 'https://picsum.photos/seed/widget/200', '2026-10-05 09:48:22.540489', '2026-10-05 09:48:22.540489') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Gadget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.9ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Gadget', 'A gadget with all the gadgetry you expect.', 2500, 5, 'https://picsum.photos/seed/gadget/200', '2026-10-05 09:48:22.543420', '2026-10-05 09:48:22.543420') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Gizmo' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Gizmo', 'Limited run; when it''s gone it''s gone.', 5000, 3, 'https://picsum.photos/seed/gizmo/200', '2026-10-05 09:48:22.546412', '2026-10-05 09:48:22.546412') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Bulk Widget' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.8ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Bulk Widget', 'Widgets by the case, for the trade.', 10000, 50, 'https://picsum.photos/seed/bulk/200', '2026-10-05 09:48:22.548819', '2026-10-05 09:48:22.548819') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m

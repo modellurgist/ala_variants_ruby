@@ -1,0 +1,11 @@
+<%# A flow's milestones; a milestone is reached when it or any later step is current. %>
+<% reached = order.take_while { _1 != step } + [ step ] %>
+<ol class="mb-8 flex items-center gap-3 text-sm">
+  <% milestones.each_with_index do |(name, label), i| %>
+    <li class="flex items-center gap-3">
+      <% if i.positive? %><span class="h-px w-8 <%= reached.include?(name) ? "bg-brand-600" : "bg-stone-300" %>"></span><% end %>
+      <span class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold <%= reached.include?(name) ? "bg-brand-700 text-white" : "bg-stone-200 text-stone-500" %>"><%= i + 1 %></span>
+      <span class="font-medium <%= reached.include?(name) ? "text-stone-900" : "text-stone-400" %>"><%= label %></span>
+    </li>
+  <% end %>
+</ol>

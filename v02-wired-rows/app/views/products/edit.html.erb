@@ -1,0 +1,4 @@
+<% content_for :title, "Edit Product · GoodDeal" %>
+<%= render "elements/modal", frame: Screens::Catalog::MODAL_FRAME, title: "Edit Product", subtitle: Screens::Store::PRODUCT_FORM[:subtitle], close_path: products_path do %>
+  <%= render "products/form", form: @form %>
+<% end %>

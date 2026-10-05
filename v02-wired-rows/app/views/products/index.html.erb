@@ -1,0 +1,11 @@
+<% content_for :title, "All Products · GoodDeal" %>
+<%= turbo_stream_from Screens::Catalog::STREAM %>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-3xl font-semibold tracking-tight">All Products</h1>
+  <%= link_to "New Product", new_product_path, data: { turbo_frame: Screens::Catalog::MODAL_FRAME }, class: "rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800" %>
+</div>
+<%= turbo_frame_tag Screens::Catalog::MODAL_FRAME %>
+<section id="<%= Screens::Catalog::LIST %>" class="rounded-2xl border border-stone-200 bg-white px-6 shadow-sm">
+  <%= render partial: "components/product_row", collection: @rows, as: :row,
+        locals: { labels: Screens::Store::STOCK_LABELS, actions: Screens::Catalog::TEXTS, frame: Screens::Catalog::MODAL_FRAME } %>
+</section>

@@ -1,0 +1,23 @@
+<%# A cart line: a product line with its quantity stepper, gift wrap, save and wishlist actions. Takes a
+    projected row (with the URLs its actions post to), the wishlist's product ids, the words and the
+    stock labels. %>
+<%= render "elements/product_line", row: row, price_suffix: t[:each] do %>
+  <div class="flex flex-col items-end gap-2">
+    <div class="flex items-center rounded-lg border border-stone-300">
+      <%= button_to "−", row[:urls][:quantity], method: :patch, params: { delta: -1 }, disabled: row[:quantity] <= 1, class: "h-8 w-8 text-stone-600 hover:bg-stone-100 disabled:opacity-30" %>
+      <span class="w-8 text-center text-sm tabular-nums"><%= row[:quantity] %></span>
+      <%= button_to "+", row[:urls][:quantity], method: :patch, params: { delta: 1 }, class: "h-8 w-8 text-stone-600 hover:bg-stone-100" %>
+    </div>
+    <div class="font-semibold tabular-nums"><%= row[:line_total] %></div>
+    <%= button_to t[:remove], row[:urls][:remove], method: :delete, class: "text-xs font-medium text-stone-400 hover:text-red-600" %>
+  </div>
+<% end %>
+<% wishlisted = wishlist_ids.include?(row[:product_id]) %>
+<div class="-mt-4 mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 pl-20 text-xs">
+  <%= render "elements/stock_badge", product_id: row[:product_id], status: row[:stock_status], stock: row[:stock], labels: labels %>
+  <%= button_to row[:urls][:gift_wrap], method: :patch, class: "flex items-center gap-1.5 text-stone-500" do %>
+    <span class="inline-block h-3.5 w-3.5 rounded border <%= row[:gift_wrapped] ? "border-brand-700 bg-brand-700" : "border-stone-300" %>"></span><%= t[:gift_wrap_label] %>
+  <% end %>
+  <%= button_to t[:save], row[:urls][:save], class: "font-medium text-stone-500 hover:text-stone-800" %>
+  <%= button_to wishlisted ? t[:wishlisted] : t[:wishlist], row[:urls][:wishlist], class: "font-medium #{wishlisted ? "text-rose-600" : "text-stone-500 hover:text-stone-800"}" %>
+</div>

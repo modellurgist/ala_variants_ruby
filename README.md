@@ -14,6 +14,7 @@ names, so `cd` into one and run it.
 | Directory | What it shows |
 |---|---|
 | `v01-wired-screens/` | Rails 8.1 + Hotwire; one per-request screen composition per page, wiring domain abstractions port to port with a 90-line `Foundation::Ports`; feature tables keyed by cart id; Turbo Stream broadcasts and an Active Job wired as ports; 48 tests |
+| `v02-wired-rows/` | V01 iterated until `ala_lint_ruby` scores it 100/100 at `--super-strict`: a declared five-layer map (rules and UI elements under the domain), product data through a pull port instead of an association, rows carrying their own URLs so pages render collections, names flowing down; 48 tests |
 
 Lint a variant with `../ala_lint_ruby/bin/ala_lint --root v01-wired-screens` (settings in its
 `.ala_lint.rb`); each variant's `LINT_NOTES.md` reads the findings.

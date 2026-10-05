@@ -1,0 +1,2 @@
+<%= render "elements/record_form", record: form, fields: Screens::Portal::PO_FIELDS, submit: "#{Screens::Portal::TEXTS[:submit]} · #{@s.summary[:total]}",
+      url: submit_portal_path, validate_url: validate_portal_path %>
