@@ -70,6 +70,10 @@ and keeps nothing.
 - **Changes redirect; Turbo morphs.** Every change is a `button_to` or small form that redirects to
   the page, which the layout refreshes by morph. This is the most ordinary Rails shape and it keeps
   the controllers to one line each; the cost is a full render per change, which Turbo's morph hides.
+  This departs from R8.1 as written ("streams, no full re-render"): only changes made *elsewhere*
+  (stock, catalog rows, checkout status) arrive as Turbo Streams; the shopper's own changes are a
+  redirect and a morphed re-render. The page behaves as R8.1 wants; the mechanism is not the one it
+  names.
 - **One `cart_items` table serves both the storefront and the portal.** It is the "lines" abstraction
   both build on (v51's `Lines`); the portal never reads `gift_wrapped`. A stricter R10 reading would
   give the portal its own lines table.

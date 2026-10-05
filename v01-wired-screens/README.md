@@ -9,7 +9,9 @@ taken; where it didn't, the nearest choice that still reads as Rails was.
 suites, plus wiring-coverage and domain unit tests). The browser paths the integration tests can't
 reach (modal form with live validation, tabs, the undo countdown, the auto-submitting shipping
 choice, and the payment job's live redirect) were exercised by hand in Chrome against the dev server.
-No linter scores it yet (`ala_lint_ruby` doesn't exist); the checklist walk is in `DESIGN.md`.
+`../../ala_lint_ruby/bin/ala_lint --root .` scores it 65/100 at the default tier (24 scored findings over 200
+functions, 94% of functions clean); `LINT_NOTES.md` reads each finding and lists the changes to
+decide on. The hand walk of the checklist is in `DESIGN.md`.
 
 ## Run it
 

@@ -15,6 +15,9 @@ names, so `cd` into one and run it.
 |---|---|
 | `v01-wired-screens/` | Rails 8.1 + Hotwire; one per-request screen composition per page, wiring domain abstractions port to port with a 90-line `Foundation::Ports`; feature tables keyed by cart id; Turbo Stream broadcasts and an Active Job wired as ports; 48 tests |
 
+Lint a variant with `../ala_lint_ruby/bin/ala_lint --root v01-wired-screens` (settings in its
+`.ala_lint.rb`); each variant's `LINT_NOTES.md` reads the findings.
+
 Run a variant:
 
 ```bash
