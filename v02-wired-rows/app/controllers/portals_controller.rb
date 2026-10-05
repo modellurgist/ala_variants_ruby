@@ -21,6 +21,7 @@ class PortalsController < ApplicationController
 
   def validate
     screen.input_port(:validate).push(po_params)
+    @s = screen
     render turbo_stream: turbo_stream.replace(helpers.dom_id(screen.form, :form), partial: "portals/po_form", locals: { form: screen.form })
   end
 

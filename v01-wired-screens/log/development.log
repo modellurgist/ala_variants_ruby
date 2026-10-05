@@ -1093,3 +1093,27 @@ Finished "/cable" [WebSocket] for ::1 at 2026-10-05 09:46:01 +0100
 Turbo::StreamsChannel stopped streaming from catalog
 Turbo::StreamsChannel stopped streaming from catalog
 Turbo::StreamsChannel stopped streaming from catalog
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mCart Create (1.8ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 10:12:15.990611', '2026-10-05 10:12:15.990611') RETURNING "id" /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mCart Destroy (2.6ms)[0m  [1m[31mDELETE FROM "carts" WHERE "carts"."id" = 8 /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mCart Create (2.9ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at") VALUES ('open', '2026-10-05 10:20:55.600075', '2026-10-05 10:20:55.600075') RETURNING "id" /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mCart Destroy (3.0ms)[0m  [1m[31mDELETE FROM "carts" WHERE "carts"."id" = 9 /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'

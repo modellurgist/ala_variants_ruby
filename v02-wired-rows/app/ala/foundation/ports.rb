@@ -24,10 +24,10 @@ module Foundation
     # Wires one of my outputs to one of target's inputs, by port name or by the only paradigm match.
     # The target may also be a bare port object (one a paradigm or an execution model built).
     def wire_to(target, from: nil, to: nil)
-      return attach(from, self.class.outputs.fetch(from), target).then { self } unless target.respond_to?(:input_port)
+      return attach(from, self.class.outputs.fetch(from), target, target).then { self } unless target.respond_to?(:input_port)
       out, spec = find_output(from, target, to)
-      port = target.input_port(to || target.class.inputs.key(spec[:paradigm]))
-      attach(out, spec, port)
+      input = to || target.class.inputs.key(spec[:paradigm])
+      attach(out, spec, target.input_port(input), target, input)
       self
     end
 
@@ -37,7 +37,7 @@ module Foundation
     # composition writes inline.
     def on(from, &block)
       spec = self.class.outputs.fetch(from) { raise ArgumentError, "#{self.class} has no output #{from.inspect}" }
-      attach(from, spec, spec[:paradigm].port(&block))
+      attach(from, spec, spec[:paradigm].port(&block), block)
       self
     end
 
@@ -48,6 +48,10 @@ module Foundation
 
     # Outputs nothing is wired to yet; a composition test lists them.
     def unwired_outputs = self.class.outputs.keys.select { instance_variable_get(:"@#{_1}").nil? }
+
+    # Every wire made from my outputs, in wiring order: what a drawing of the built graph reads.
+    Wire = Data.define(:output, :target, :input)
+    def wires = @wires || []
 
     private
 
@@ -63,7 +67,8 @@ module Foundation
       port.call(query)
     end
 
-    def attach(out, spec, port)
+    def attach(out, spec, port, target = nil, input = nil)
+      (@wires ||= []) << Wire.new(output: out, target:, input:)
       if spec[:many]
         (instance_variable_get(:"@#{out}") || instance_variable_set(:"@#{out}", [])) << port
       else

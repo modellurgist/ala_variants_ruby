@@ -1,7 +1,7 @@
 <%# A form for one record: an input per configured field, the record's errors, and a submit button.
     Takes the record, the fields ([name, type, label]), the words and the URLs it posts to; validates
     live against validate_url while the shopper types. %>
-<%= form_with model: record, url: local_assigns[:url], id: local_assigns[:id] || dom_id(record, :form), data: { turbo_frame: "_top", controller: "live-validate", live_validate_url_value: validate_url, action: "input->live-validate#check" }, class: "space-y-4" do |f| %>
+<%= form_with model: record, url: local_assigns[:url], id: local_assigns[:id] || dom_id(record, :form), data: { turbo_frame: "_top", controller: "live-validate", live_validate_url_value: validate_url, action: "input->live-validate#check submit->live-validate#cancel" }, class: "space-y-4" do |f| %>
   <% if record.errors.any? %>
     <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
       <% record.errors.full_messages.each do |message| %><div><%= message %></div><% end %>

@@ -27,12 +27,12 @@ class PortalTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "label", "Purchase order number"
 
-    post submit_portal_path, params: { order_submission: { po_number: "nope" } }
+    patch submit_portal_path, params: { order_submission: { po_number: "nope" } }
     assert_response :unprocessable_content
     assert_select "body", /must look like PO-1234/
 
     cart_id = session[:portal_cart_id]
-    post submit_portal_path, params: po
+    patch submit_portal_path, params: po
     assert_redirected_to portal_step_path(:submitted)
     follow_redirect!
     assert_select "#flash", /Order submitted/

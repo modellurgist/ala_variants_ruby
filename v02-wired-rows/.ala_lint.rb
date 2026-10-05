@@ -2,7 +2,7 @@
 # says why each layer exists.
 {
   layers: [
-    { name: :application, paths: [%r{\Aapp/ala/screens/}, %r{\Aapp/controllers/}, %r{\Aapp/views/(?!components/|elements/)}, %r{\Aconfig/routes\.rb}] },
+    { name: :application, paths: [%r{\Aapp/ala/screens/}, %r{\Aapp/controllers/}, %r{\Aapp/views/(?!components/|elements/)}, %r{\Aconfig/routes\.rb}, %r{\Alib/tasks/}] },
     { name: :domain, paths: [%r{\Aapp/ala/domain_abstractions/}, %r{\Aapp/views/components/}] },
     { name: :rules, paths: [%r{\Aapp/ala/rules/}, %r{\Aapp/views/elements/}] },
     # execution models (LiveUpdate, PushLater) run the paradigm interfaces beside them, as in Spray's own layer

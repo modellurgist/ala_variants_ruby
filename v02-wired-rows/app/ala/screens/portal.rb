@@ -35,8 +35,11 @@ module Screens
     input(:expire_undo, ProgrammingParadigms::Event) { @undo.input_port(:expire).send_event }
     input(:review, ProgrammingParadigms::Event) { @flow.input_port(:review).send_event }
     input(:edit_lines, ProgrammingParadigms::Event) { @flow.input_port(:edit_lines).send_event }
-    input(:validate, ProgrammingParadigms::DataFlow) { |params| @flow.input_port(:validate).push(params) }
-    # A submit that fails shows the review step again, which prices the lines, so they load first.
+    # The review step prices the lines beside the form, so validating and submitting load them first.
+    input(:validate, ProgrammingParadigms::DataFlow) do |params|
+      @lines.input_port(:load).send_event
+      @flow.input_port(:validate).push(params)
+    end
     input(:submit, ProgrammingParadigms::DataFlow) do |params|
       @lines.input_port(:load).send_event
       @flow.input_port(:submit).push(params)

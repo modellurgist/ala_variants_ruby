@@ -42,7 +42,7 @@ Rails.application.routes.draw do
     post :review
     post :edit_lines
     post :validate
-    post :submit
+    patch :submit
     resources :lines, only: [ :create, :update, :destroy ], controller: "portal_lines"
     resource :undo, only: :create, controller: "portal_undos" do
       post :expire
