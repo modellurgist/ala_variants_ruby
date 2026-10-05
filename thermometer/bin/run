@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+require_relative "../lib/thermometer"
+
+# Runs the thermometer over a warming sensor and shows the window after every tenth reading;
+# `bin/run draw` prints the Mermaid diagram.
+if ARGV.first == "draw"
+  puts ProgrammingParadigms::Drawing.mermaid(Thermometer.new(adc: Foundation::Adc.new(samples: [])))
+  exit
+end
+
+samples = (0...60).map { |i| 400 + i * 2 + (i % 3) * 5 }
+thermometer = Thermometer.new(adc: Foundation::Adc.new(samples:))
+60.times do |i|
+  thermometer.input_port(:tick).send_event
+  next unless ((i + 1) % 10).zero?
+  thermometer.input_port(:show).send_event
+  puts thermometer.frame.join(" | ")
+end

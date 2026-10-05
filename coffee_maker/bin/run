@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require_relative "../lib/coffee_maker"
+
+# Brews a pot in the simulator and prints each cycle; `bin/run draw` prints the Mermaid diagram.
+if ARGV.first == "draw"
+  puts ProgrammingParadigms::Drawing.mermaid(CoffeeMaker.new)
+  exit
+end
+
+maker = CoffeeMaker.new
+world = Foundation::SimulatedHardware.new(water: 3)
+script = { 1 => :press_button, 4 => :lift_pot, 5 => :replace_pot, 8 => :lift_pot, 9 => :replace_pot }
+10.times do |cycle|
+  action = script[cycle]
+  action == :replace_pot ? world.replace_pot(emptied: cycle == 9) : world.public_send(action) if action
+  command = maker.input_port(:cycle).push(world.reading)
+  world.apply(command)
+  puts format("%2d %-13s %-8s boiler %-3s valve %-6s warmer %-3s lamp %-3s water %d pot %d",
+              cycle, action || "", maker.parts[:state].current, command.boiler_heater, command.relief_valve,
+              command.warmer_heater, command.indicator, world.water, world.pot_contents)
+end
