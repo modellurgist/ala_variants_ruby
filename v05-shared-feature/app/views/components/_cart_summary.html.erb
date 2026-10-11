@@ -1,0 +1,16 @@
+<%# A cart's price summary over the summary shape totals project. Takes the words from the page. %>
+<dl class="space-y-2 text-sm">
+  <div class="flex justify-between text-stone-600"><dt><%= t[:items] %></dt><dd><%= summary[:item_count] %></dd></div>
+  <div class="flex justify-between text-stone-600"><dt><%= t[:subtotal] %></dt><dd><%= summary[:subtotal] %></dd></div>
+  <% if summary[:promo_code] %>
+    <div class="flex justify-between text-brand-700"><dt><%= t[:discount] %> (<%= summary[:promo_code] %>)</dt><dd>-<%= summary[:discount] %></dd></div>
+  <% end %>
+  <% if summary[:gift_wrap_total]&.positive? %>
+    <div class="flex justify-between text-stone-600"><dt><%= t[:gift_wrap] %></dt><dd><%= summary[:gift_wrap_total] %></dd></div>
+  <% end %>
+  <% if summary[:tier_label] %>
+    <div class="flex justify-between text-brand-700"><dt><%= summary[:tier_label] %></dt><dd>-<%= summary[:discount] %></dd></div>
+  <% end %>
+  <div class="flex justify-between text-stone-600"><dt><%= t[:shipping] %> (<%= summary[:shipping_label] %>)</dt><dd><%= summary[:shipping_cost].zero? ? t[:free] : summary[:shipping_cost] %></dd></div>
+  <div class="flex items-center justify-between border-t border-stone-200 pt-3 text-lg font-semibold text-stone-900"><dt><%= t[:total] %></dt><dd><%= summary[:total] %></dd></div>
+</dl>

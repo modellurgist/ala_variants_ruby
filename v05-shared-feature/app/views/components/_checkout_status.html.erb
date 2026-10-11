@@ -1,0 +1,18 @@
+<%# A payment's progress: processing, failed with a retry, or complete and leaving for success_url.
+    Replaced live when the payment job finishes; takes the id the replacement targets. %>
+<div id="<%= id %>">
+  <% case step
+     when :processing %>
+    <div class="flex items-center gap-3 py-6 text-stone-500">
+      <svg class="h-5 w-5 animate-spin text-brand-700" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+      <%= t[:processing] %>
+    </div>
+  <% when :error %>
+    <div class="space-y-3">
+      <p class="rounded-xl bg-red-50 p-4 text-sm text-red-700"><%= t[:payment_failed] %></p>
+      <%= button_to t[:try_again], pay_url, class: "rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800" %>
+    </div>
+  <% when :complete %>
+    <p class="py-6 text-stone-500" data-controller="visit" data-visit-url-value="<%= success_url %>"><%= t[:redirecting] %></p>
+  <% end %>
+</div>

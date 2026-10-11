@@ -1,0 +1,4 @@
+<%# A list pane: one `item` partial per row (the page says which), or the empty note. Takes the rows,
+    the item partial's name, and the words. %>
+<%= render partial: item, collection: rows, as: :row, locals: { t: t } %>
+<% if rows.empty? %><div class="py-14 text-center text-sm text-stone-400"><%= t[:empty] %></div><% end %>

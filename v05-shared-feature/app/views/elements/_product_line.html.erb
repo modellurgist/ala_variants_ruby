@@ -1,0 +1,10 @@
+<%# A product line: thumbnail, name and price, with its actions in a block. Takes a projected row
+    (name, thumbnail, amount); knows nothing of carts, wishlists or orders. %>
+<div id="<%= local_assigns[:id] %>" class="grid grid-cols-[4rem_1fr_auto] items-center gap-4 border-b border-stone-200 py-5 last:border-b-0">
+  <img class="h-16 w-16 rounded-lg object-cover ring-1 ring-stone-200" src="<%= row[:thumbnail] %>" alt="<%= row[:name] %>">
+  <div class="min-w-0">
+    <div class="truncate font-medium text-stone-900"><%= row[:name] %></div>
+    <div class="text-sm text-stone-500"><%= row[:amount] %><%= local_assigns[:price_suffix] %></div>
+  </div>
+  <div class="flex items-center justify-end gap-3"><%= yield if block_given? %></div>
+</div>

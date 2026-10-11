@@ -3,7 +3,8 @@ module DomainAbstractions
   # valve stops the flow. It turns its own heater off when it runs dry or the valve is open; that rule
   # is the boiler's, never the application's.
   # In: sense (a SensorReading), on (DataFlow boolean), open_valve (DataFlow boolean).
-  # Out: empty (DataFlow boolean, whenever it changes), heater (DataFlow :on/:off), valve (DataFlow :open/:closed).
+  # Out: empty (DataFlow boolean), heater (DataFlow :on/:off), valve (DataFlow :open/:closed), each
+  # sent only when its value changes, so a cycle that moves two inputs commands each actuator once.
   class Boiler
     include Foundation::Ports
     output :empty, ProgrammingParadigms::DataFlow, many: true
@@ -19,13 +20,19 @@ module DomainAbstractions
     input(:on, ProgrammingParadigms::DataFlow) { |v| @on = v; drive }
     input(:open_valve, ProgrammingParadigms::DataFlow) { |v| @open = v; drive }
 
-    def initialize = (@on, @open, @dry = false, false, nil)
+    def initialize = (@on, @open, @dry, @sent = false, false, nil, {})
 
     private
 
     def drive
-      emit(:valve, @open ? :open : :closed)
-      emit(:heater, @on && !@dry && !@open ? :on : :off)
+      changed(:valve, @open ? :open : :closed)
+      changed(:heater, @on && !@dry && !@open ? :on : :off)
+    end
+
+    def changed(port, value)
+      return if @sent[port] == value
+      @sent[port] = value
+      emit(port, value)
     end
   end
 end

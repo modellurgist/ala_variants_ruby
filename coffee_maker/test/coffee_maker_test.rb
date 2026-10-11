@@ -87,6 +87,26 @@ class CoffeeMakerTest < Minitest::Test
   end
 end
 
+class BoilerTest < Minitest::Test
+  Recorder = Struct.new(:got) do
+    include Foundation::Ports
+    input(:input, ProgrammingParadigms::DataFlow) { |v| (self.got ||= []) << v }
+  end
+
+  # Three inputs can move in one cycle; the actuators must hear each new command once, not once per input.
+  def test_the_boiler_commands_its_heater_and_valve_only_when_they_change
+    boiler = DomainAbstractions::Boiler.new
+    boiler.wire_to(heater = Recorder.new, from: :heater).wire_to(valve = Recorder.new, from: :valve)
+    boiler.input_port(:sense).push(Foundation::SensorReading.idle)
+    boiler.input_port(:on).push(true)
+    boiler.input_port(:sense).push(Foundation::SensorReading.idle)
+    boiler.input_port(:open_valve).push(true)
+    boiler.input_port(:open_valve).push(true)
+    assert_equal [ :off, :on, :off ], heater.got
+    assert_equal [ :closed, :open ], valve.got
+  end
+end
+
 class WiringTest < Minitest::Test
   def test_every_output_of_every_part_is_wired
     maker = CoffeeMaker.new

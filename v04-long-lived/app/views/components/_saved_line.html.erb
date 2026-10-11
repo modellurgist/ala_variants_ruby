@@ -1,0 +1,5 @@
+<%# A line set aside for later: a product line with one action, moving it back to the cart. Takes a
+    projected row (with its URL) and the words. %>
+<%= render "elements/product_line", row: row do %>
+  <%= button_to t[:move], row[:urls][:move], class: "text-sm font-medium text-brand-700 hover:text-brand-800" %>
+<% end %>

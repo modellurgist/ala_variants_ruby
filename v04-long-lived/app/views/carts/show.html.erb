@@ -1,0 +1,32 @@
+<% content_for :title, "Your Cart · GoodDeal" %>
+<%= turbo_stream_from Screens::Catalog::STREAM %>
+<h1 class="pb-6 text-3xl font-semibold tracking-tight">Your Cart</h1>
+<div id="<%= undo_id %>">
+  <%= render "elements/notice_with_action", shown: @s.undo_pending, text: @texts[:undo][:text], action: @texts[:undo][:undo],
+        url: cart_undo_path, expire_url: expire_cart_undo_path, after_ms: Screens::Store::UNDO_WINDOW.in_milliseconds %>
+</div>
+<div class="grid items-start gap-8 lg:grid-cols-[1fr_22rem]">
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm" data-controller="tabs">
+    <div id="<%= tabs_id %>"><%= render "elements/tabs", tabs: @s.tabs %></div>
+    <div data-tabs-target="pane" data-name="items">
+      <div id="<%= items_pane_id %>">
+        <%= render partial: "components/cart_line", collection: @s.rows, as: :row,
+              locals: { wishlist_ids: @s.wishlist_ids, t: @texts[:cart], labels: Screens::Store::STOCK_LABELS } %>
+      </div>
+      <div id="<%= empty_note_id %>"><%= render "elements/none", count: @s.summary[:item_count], text: @texts[:cart][:empty] %></div>
+    </div>
+    <div data-tabs-target="pane" data-name="saved" hidden>
+      <div id="<%= saved_pane_id %>"><%= render "elements/pane", rows: @s.saved_rows, item: "components/saved_line", t: @texts[:saved] %></div>
+    </div>
+    <div data-tabs-target="pane" data-name="wishlist" hidden>
+      <div id="<%= wishlist_pane_id %>"><%= render "elements/pane", rows: @s.wishlist_rows, item: "components/wishlist_line", t: @texts[:wishlist] %></div>
+    </div>
+  </section>
+  <section class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm lg:sticky lg:top-6">
+    <div id="<%= summary_id %>"><%= render "components/cart_summary", summary: @s.summary, t: @texts[:cart] %></div>
+    <div id="<%= shipping_selector_id %>"><%= render "components/shipping_selector", summary: @s.summary, heading: @texts[:cart][:shipping], free_over: @texts[:cart][:free_over], url: shipping_cart_path %></div>
+    <div id="<%= promo_form_id %>"><%= render "components/promo_form", code: @s.summary[:promo_code], error: flash[:promo_error], url: promo_cart_path, t: @texts[:cart] %></div>
+    <%= button_to "#{@texts[:cart][:checkout]} · #{@s.summary[:total]}", cart_checkout_path, disabled: @s.summary[:empty],
+          class: "mt-6 w-full rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-stone-300" %>
+  </section>
+</div>
