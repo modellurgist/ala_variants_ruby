@@ -1,0 +1,6 @@
+<%# A wishlisted product: a product line that can be added to the cart or dropped. Takes a projected
+    row (with its URLs) and the words. %>
+<%= render "elements/product_line", row: row do %>
+  <%= button_to t[:add], row[:urls][:add], class: "text-sm font-medium text-brand-700 hover:text-brand-800" %>
+  <%= button_to t[:remove], row[:urls][:remove], method: :delete, class: "text-sm font-medium text-stone-400 hover:text-red-600" %>
+<% end %>

@@ -1,0 +1,12 @@
+en:
+  activerecord:
+    errors:
+      models:
+        checkout:
+          attributes:
+            postal_code:
+              invalid: "must be 4–10 digits"
+        order_submission:
+          attributes:
+            po_number:
+              invalid: "must look like PO-1234"
