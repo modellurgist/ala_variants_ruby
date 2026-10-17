@@ -33,11 +33,11 @@ trace is on. The test helper turns it on and, after the suite:
 
 The match is by class, output, target class and input, not by instance: a wire that carried
 something in one screen counts for the same wire in another, and a domain test's hops count too.
-That is coarser than V52's per-page hops and precise enough to find what it found. Its first run
+That is coarser than V51B's per-page hops and precise enough to find what it found. Its first run
 reported four wires: the cart's `wishlist.dropped` (no test took a wishlisted item off from the
 cart line; one does now) and the checkout's three write wires from its `CartLines` to its store,
 which could never fire because the checkout only reads the lines. Those three wires are gone and the
-ports are listed as grounded in the wiring test. V52 found the same kind of thing on its first run.
+ports are listed as grounded in the wiring test. V51B found the same kind of thing on its first run.
 
 **The checkout, kept.** V04 kept the cart and left the checkout per request because its payment ran
 in a job that rebuilt the screen. Now `LongLived` registries have names (`LongLived.register(:checkout_screens, ...)`,
