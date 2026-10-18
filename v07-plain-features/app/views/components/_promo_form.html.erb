@@ -1,0 +1,8 @@
+<%# A promo-code form with an inline error. Takes the current code, the error to show, the URL and words. %>
+<%= form_with url: url, class: "pt-6" do |f| %>
+  <div class="flex gap-2">
+    <%= f.text_field :code, value: code, placeholder: t[:promo_placeholder], class: "min-w-0 flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-600 focus:ring-2 focus:ring-brand-100" %>
+    <%= f.submit t[:apply], class: "rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50" %>
+  </div>
+  <% if error %><p class="pt-2 text-sm text-red-600"><%= error %></p><% end %>
+<% end %>
