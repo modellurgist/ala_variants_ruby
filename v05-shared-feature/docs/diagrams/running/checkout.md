@@ -21,12 +21,12 @@ flowchart LR
   flow -- step --> screen
   flow -- form --> screen
   flow -- blocked --> screen
-  flow -- ready_to_pay --> dataflowport_37624([DataFlow port])
+  flow -- ready_to_pay --> dataflowport_47176([DataFlow port])
   flow -- done --> screen
   charge -- charged → settle --> settle
   charge -- charged → succeeded --> flow
   charge -- declined → failed --> flow
   charge -- charged --> screen
   charge -- declined --> screen
-  settle -- stock_changed → push --> liveupdate_37632([LiveUpdate])
+  settle -- stock_changed → push --> liveupdate_47184([LiveUpdate])
 ```

@@ -159,25 +159,52 @@ each:
 - **Other writers.** A second Puma process, the checkout job, the catalogue's "add to cart" and the
   portal all write the same tables without going through this composition. `carts.version` is the
   cart's write stamp: every row that belongs to a cart bumps it on commit (`after_commit { Cart.bump
-  (cart_id) }` in the four line models, accepted under R1 as the store's own stamp, not a decision).
-  The registry reads the stamp before each request and sends `reload` when it moved, then records
-  the stamp after the request so the composition's own writes are not stale. A composition kept by
-  another process sees the bump on its next request: no cache invalidation bus, one integer column.
+  (cart_id) }` in the four line models, accepted under R1 as the store's own stamp, not a decision;
+  a product bumps every open cart that shows it, below).
+  The registry reads the stamp as each request starts, sends `reload` when it moved, and keeps that
+  reading as seen, so any bump after it (the request's own included) reloads the next request. A
+  composition kept by another process sees the bump on its next request: no cache invalidation bus,
+  one integer column.
 - **Across processes, what holds and what is assumed.** Each process (every Puma worker, the Solid
   Queue worker) keeps its own table; nothing is shared but the database. Safe: every write a kept
   composition reads goes through a model that bumps the cart (the four line models, `Checkout` and
   `Order`; the portal's `OrderSubmission` does not and need not, the portal being rebuilt per
-  request), so another process's composition reloads before its next use. Assumed: a request sees a consistent
+  request) and every product write bumps the open carts that show the product, so another process's
+  composition reloads before its next use. The guarantee: a bump that commits after a request's stamp
+  read, by anyone, is never recorded as seen, so the next request on that key reloads; one that
+  commits before the read is seen by that request's `reload`. The cost is that a request that wrote
+  makes the next one reload too. Assumed: a request sees a consistent
   cart only after `with`'s stamp check, so nothing reads a kept composition outside `with`; `reload`
   re-reads *everything* a part keeps from a store, or that part goes stale silently; and what a
   part keeps without a store (the checkout's `done`, a flash) is this process's only. Not covered:
-  writes to tables that do not belong to the cart. A product's name, price or stock moves no cart's
-  stamp, so a kept cart or checkout shows (and the checkout charges) the product as it last loaded.
+  any other table a kept part might come to read without a model that bumps the carts it affects.
+  *Fixed 2026-10-19:* product writes moved no cart's stamp, so a kept cart showed, and a kept checkout
+  charged, a price as it last loaded (in one process as much as across several). `Product`'s
+  `after_commit { Cart.bump(Cart.holding(id)) }` bumps, in one `UPDATE`, every open cart with the
+  product on a line (an undoable removal included, since `Undo` fetches it back), saved or
+  wishlisted; the same R1 acceptance as the line models. Completed carts are left: their price was
+  charged and no page shows it again, and their lines would make every edit touch the store's whole
+  history. Settlement's `decrement_stock` was an `update_all`, invisible to callbacks; it now locks the
+  row and saves the record, so taking stock moves the badge on other kept carts too. Every kept part
+  that shows a product (`CartLines`, `SavedItems`, `Wishlist`, the checkout's `CartLines`) already
+  asks `ProductIndex` again in `load`, so `reload` needed nothing new. Four tests in
+  `ProductChangesTest` hold the kept instance and see it re-read.
   *Fixed 2026-10-19:* the checkout's `reload` re-read its lines and pricing but not its flow's
   `PersistedSteps`, which keeps its record; with the payment job in another process the step moved
   and the stamp with it, yet the web process's checkout kept answering "processing" (204 from
   `status`). `PersistedSteps#reload` reads the record again and the flow's `load` input sends it;
   `CheckoutTest` delivers the payment through a second `LongLived` the way a job process would.
+  *Fixed 2026-10-19:* `with` recorded as seen the stamp read *after* the request, so the request's
+  own bumps would not force a reload. A bump by another writer (another worker, a job, a product
+  edit) committed during the request was recorded with them, and the kept composition missed it
+  until some later bump. A `version` lambda cannot tell whose a bump was; counting the request's own
+  bumps would need per-thread state in `Cart.bump` that `LongLived` reads (an R2 channel between the
+  store and the execution model) and would still trust that every write the request made is in the
+  composition's memory. `with` now keeps the reading taken before the request. A request that wrote
+  costs the next request a `reload`: on a one-line cart a GET after a change runs 11 queries instead
+  of 5, while every request runs one fewer (no second version read). One test in `LongLivedTest`
+  (replacing "a version moved by the request itself is not stale", which asserted the race) and one in
+  `ProductChangesTest` change a product during another turn.
 - **A request's own state.** Flash and patches belong to one request; `begin` clears them. Values,
   landed rows and the summary belong to the cart and stay.
 
@@ -204,6 +231,8 @@ clicks, and it is where keeping the composition shows.
   its next request), one lock per cart, and `to_prepare` so development reloads rebuild the table.
 - A GET on a kept cart runs no store queries except `Undo`'s window check and the version read; a
   change runs the one write its input decided plus the stamp. V03 ran every load on every request.
+  The request after a change reloads, though, since the registry cannot tell its own bump from
+  another writer's (above): only a run of GETs avoids the stores.
 - Memory per kept cart: the values, their catalogue snapshots and the landed rows. A thousand carts of
   a few lines is small; a long tail of abandoned carts is what `capacity` bounds.
 - Correctness now rests on the stamp. A write that bypasses the models (`update_all`, SQL) is invisible

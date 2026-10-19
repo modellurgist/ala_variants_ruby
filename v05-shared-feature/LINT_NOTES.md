@@ -8,13 +8,16 @@ Run on 2026-10-10, and again on 2026-10-19 with the clone check, with `../../ala
 | `--strict` | 100/100 | 10 of 10 | all |
 | `--super-strict` | 100/100 | 10 of 10 | all |
 
-Nine lines are accepted (`--list-accepted` prints them with the finding each covers; none is stale):
+Ten lines are accepted (`--list-accepted` prints them with the finding each covers; none is stale):
 
 - `app/ala/programming_paradigms/long_lived.rb`, R2: the class-level table of registries by name. A job
   reaches a kept composition by naming its registry; the table is process-wide by nature, and the
   execution model is where that lives.
 - `app/models/{checkout,order}.rb`, R1: the same write stamp as the line models, added when the
   checkout became long-lived.
+- `app/models/product.rb`, R1: the same stamp for the open carts that show the product (2026-10-19,
+  when product edits were found to leave kept carts and checkouts on the old price). Same comment
+  as the line models; the carts are found by `Cart.holding`, which no check flags.
 
 
 - `app/ala/programming_paradigms/long_lived.rb`, two lines, R4: the execution model makes a `Mutex`

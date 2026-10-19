@@ -31,11 +31,12 @@ class LongLivedTest < ActiveSupport::TestCase
     assert_equal %i[load begin load begin], c.log
   end
 
-  test "a version moved by the request itself is not stale" do
+  test "a version moved during a request, by it or by another writer, reloads the instance before its next use" do
     r = registry
-    c = r.with(:a) { @versions[:a] += 1; _1 }
+    c = r.with(:a) { _1 }
+    r.with(:a) { @versions[:a] += 1 }
     r.with(:a) { _1 }
-    assert_equal %i[load begin begin], c.log
+    assert_equal %i[load begin begin load begin], c.log
   end
 
   test "two threads on one key take turns; two keys run at once" do

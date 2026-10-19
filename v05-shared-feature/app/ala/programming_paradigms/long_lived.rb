@@ -3,8 +3,9 @@ module ProgrammingParadigms
   # server that handles requests on several threads. One instance per key is kept in this process
   # and a request runs under that instance's own lock, so each stateful instance is used by one
   # thread at a time (§3.9), decided here and never inside a class (§3.10.2: the arbitrator). A
-  # `version` lambda answers the store's stamp for the key: a change made by another process (a
-  # second worker, a job) moves it, and the composition is told to `reload` before it is used.
+  # `version` lambda answers the store's stamp for the key, read once as a request starts and kept as
+  # seen: any bump after that read, the request's own or another writer's, makes the next request
+  # `reload` first. A lambda cannot tell whose a bump was, so none is taken as already seen.
   # `begin`, if given, is the input that opens a request. Config: build (a lambda of the key),
   # version (a lambda of the key), reload and begin (input names), capacity (keys kept).
   class LongLived
@@ -28,14 +29,10 @@ module ProgrammingParadigms
       entry = @lock.synchronize { @entries[key] ||= admit(key) }
       entry.lock.synchronize do
         current = @version.(key)
-        if entry.seen != current
-          entry.instance.input_port(@reload).send_event
-          entry.seen = current
-        end
+        entry.instance.input_port(@reload).send_event if entry.seen != current
+        entry.seen = current
         entry.instance.input_port(@begin).send_event if @begin
-        result = yield entry.instance
-        entry.seen = @version.(key)
-        result
+        yield entry.instance
       end
     end
 

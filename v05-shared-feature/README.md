@@ -15,11 +15,12 @@ screen must have carried something at least once and `docs/diagrams/running/` dr
 the wires that did solid and the rest dotted; and the **checkout kept across requests** too, with
 the payment job delivering `charge` into the kept composition through a registry it names.
 
-**Status:** 89 integration tests (V04's 66, plus 3 of the feature on fakes, 1 the trace asked for,
-13 unit tests of the abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, and 5 for
-the defect fixes below) and 7 Cuprite browser tests, 0 failures;
+**Status:** 94 integration tests (V04's 66, plus 3 of the feature on fakes, 1 the trace asked for,
+13 unit tests of the abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, 5 for
+the defect fixes below, 4 for product changes reaching kept carts, and a net 1 for the stamp race:
+two new, one of them replacing V04's test that asserted it) and 7 Cuprite browser tests, 0 failures;
 after the full suite, **0 wires never carried anything**; RuboCop clean; `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it
-**100/100** with nine accepted lines (282 functions). `LINT_NOTES.md` has the run. The drawings in
+**100/100** with ten accepted lines (283 functions). `LINT_NOTES.md` has the run. The drawings in
 `docs/diagrams/` draw the feature as a subgraph with its own wires inside; those in
 `docs/diagrams/running/` are the same graphs as the suite exercised them.
 
@@ -46,8 +47,13 @@ agree through the database alone. Every write a kept composition reads bumps the
 and `LongLived#with` sends `reload` when it moved, so a request is consistent once that check has
 run. A payment job in its own process exposed a gap (fixed 2026-10-19, two tests): the checkout's
 `reload` skipped its flow's kept `Checkout` record, so the web process kept answering "processing".
-Product edits move no cart's stamp, so a kept cart shows a product as it last loaded. `DESIGN.md`,
-"Other writers", has the rest.
+Product writes were a second gap (fixed 2026-10-19, four tests): they moved no cart's stamp, so a kept
+cart showed a changed price and a kept checkout charged it. A product's commit now bumps every open
+cart that shows it (`Cart.holding`: its lines, saved items and wishlist), and settlement takes stock
+through the record so its commit does the same. A third (fixed 2026-10-19, two tests): `with`
+recorded the stamp read after the request as seen, so another writer's bump committed during the
+request was never reloaded. It now keeps the reading taken before; the cost is a `reload` on the
+request after one that wrote. `DESIGN.md`, "Other writers", has the rest.
 
 ## Run it
 
@@ -86,7 +92,7 @@ end
 
 `change` runs its block inside `Rails.configuration.x.cart_screens.with(cart_id)`: the registry
 hands it the cart's composition (built by `Screens::Cart.new(cart_id:)` the first time), reloaded
-if the cart's `version` moved since the composition last used it, with its flash and patches
+if the cart's `version` moved since its last request started, with its flash and patches
 cleared; then answers with the patches the outputs made. `Screens::Cart.new` builds the page's
 instances, configures them from `Screens::Store`, and wires them: `@lines.wire_to(@undo, from: :removed, to: :capture)`, `@undo.on(:restored) { say
 :notice, "Item restored" }`. Data moves between instances through their ports; the screen keeps only
