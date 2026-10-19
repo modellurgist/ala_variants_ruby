@@ -15,6 +15,7 @@ flowchart LR
   lines -- contents --> totals
   lines -- removed --> undo
   undo -- pending --> screen
+  undo -- restored --> screen
   catalog -- rows --> screen
   add_line -- added --> screen
   totals -- summary --> screen

@@ -90,6 +90,18 @@ class CartTest < ActionDispatch::IntegrationTest
     assert_select "body", { text: /Widget/, count: 0 }
   end
 
+  test "removing a wrapped item clears its gift wrap, so undo brings it back unwrapped" do
+    open_cart
+    patch gift_wrap_cart_item_path(@item_a)
+    delete cart_item_path(@item_a)
+    assert_not @item_a.reload.gift_wrapped
+    post cart_undo_path
+    follow_redirect!
+    assert_select "#cart_item_#{@item_a.id}"
+    assert_select "dt", { text: "Gift wrap", count: 0 }
+    assert_select "#cart_summary", /\$40\.99/
+  end
+
   test "toggle gift wrap adds a gift-wrap line to the summary, and toggling again removes it" do
     open_cart
     patch gift_wrap_cart_item_path(@item_a)

@@ -6,8 +6,8 @@ module DomainAbstractions
     OUTPUTS = %i[added].freeze
 
     def add(request)
-      product_id, quantity = request.is_a?(Hash) ? request.values_at(:product_id, :quantity) : [ request, 1 ]
-      { added: @lines.add(@cart_id, product_id, [ quantity.to_i, 1 ].max) }
+      line = Rules::LineRequest.call(request)
+      { added: @lines.add(@cart_id, line[:product_id], line[:quantity]) }
     end
 
     def initialize(lines:, cart_id:) = (@lines, @cart_id = lines, cart_id)

@@ -1,0 +1,3 @@
+<%= turbo_stream.remove @line %>
+<%= turbo_stream.update "undo_banner", partial: "shared/undo_banner", locals: { undo_path: portal_undo_path } %>
+<%= render "portals/refresh", cart: current_portal_cart %>

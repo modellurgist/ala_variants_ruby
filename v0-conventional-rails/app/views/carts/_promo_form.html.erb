@@ -1,0 +1,8 @@
+<%= form_with url: cart_promo_code_path, method: :patch, class: "space-y-1 text-sm" do |form| %>
+  <%= form.label :code, "Promo code", class: "font-medium" %>
+  <div class="flex gap-2">
+    <%= form.text_field :code, class: "flex-1 rounded-md border border-stone-300 px-2 py-1" %>
+    <%= form.submit "Apply", class: "rounded-md border border-stone-300 px-3 py-1" %>
+  </div>
+  <% if error %><p class="text-red-700"><%= error %></p><% end %>
+<% end %>

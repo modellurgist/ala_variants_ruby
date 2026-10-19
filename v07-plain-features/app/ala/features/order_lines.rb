@@ -4,12 +4,12 @@ module Features
   # `CartLines` value and an `Undo` are wired to each other in `wire`; what leaves is said with `out`
   # and returned to the page, which wires it to its store, its totals and its patches as it would any
   # part's outputs. Placed by the cart page and the portal page with different links and windows.
-  # Config: cart_id, products (a lambda of product ids giving rows), links (a lambda of the item id
-  # giving a row's URLs), undo_lines (the store Undo marks), undo_window (a duration).
+  # Config: cart_id, held (a Rules::HeldProducts with the page's products and links), undo_lines (the
+  # store Undo marks), undo_window (a duration).
   # In: load (the stored lines), lines (answers { cart_id:, lines: }), bump, set_quantity, remove,
   # save_for_later, toggle_gift_wrap, line, receive, arrived, undo, expire_undo.
   # Out: changed and adding (for the lines store), rows, row_added, row_changed, row_removed,
-  # contents, saved, line, undo_pending, restored.
+  # contents, saved, line, undo_pending, restored (an item id, after its line is back).
   class OrderLines
     include ProgrammingParadigms::Wiring
     OUTPUTS = %i[changed adding rows row_added row_changed row_removed contents saved line undo_pending restored].freeze
@@ -30,8 +30,8 @@ module Features
     def undo = collect { run(:undo, @undo.restore) }
     def expire_undo = collect { run(:undo, @undo.expire) }
 
-    def initialize(cart_id:, products:, links:, undo_lines:, undo_window:)
-      @lines = DomainAbstractions::CartLines.new(cart_id:, products:, links:)
+    def initialize(cart_id:, held:, undo_lines:, undo_window:)
+      @lines = DomainAbstractions::CartLines.new(cart_id:, held:)
       @undo = DomainAbstractions::Undo.new(lines: undo_lines, cart_id:, window: undo_window)
     end
 
@@ -41,6 +41,7 @@ module Features
     def wire(part, output, payload)
       case [ part, output ]
       in [ :lines, :removed ] then run(:undo, @undo.capture(payload))
+      in [ :undo, :restored ] then run(:lines, @lines.arrived(payload)); out(:restored, payload[:id])
       in [ :undo, :pending ] then out(:undo_pending, payload)
       in [ :lines, _ ] | [ :undo, _ ] then out(output, payload)
       end

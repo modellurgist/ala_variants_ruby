@@ -1,7 +1,9 @@
 module DomainAbstractions
   # Holds one removal open for a while so it can be undone (R4). A held line stays in the store, marked,
-  # and is deleted once the window elapses or another removal replaces it. Config: lines (the store,
-  # whose `pending_removal` scope and `removed_at` column it uses), cart_id, window (a duration).
+  # and is deleted once the window elapses or another removal replaces it. Holding it clears its gift
+  # wrap (R3.4), so a restored line comes back unwrapped. Config: lines (the store, whose
+  # `pending_removal` scope and `removed_at` and `gift_wrapped` columns it uses), cart_id, window (a
+  # duration).
   # Ports in: load, capture (an item id), restore, expire. Ports out: pending (whether a removal can
   # be undone, after load and after every change), restored (the line's id).
   class Undo
@@ -17,7 +19,7 @@ module DomainAbstractions
     # Only the latest removal is undoable: holding a new one makes any other final.
     input(:capture, ProgrammingParadigms::DataFlow) do |item_id|
       finalize(held.where.not(id: item_id))
-      @lines.find(item_id).update!(removed_at: Time.current)
+      @lines.find(item_id).update!(removed_at: Time.current, gift_wrapped: false)
       emit(:pending, true)
     end
 

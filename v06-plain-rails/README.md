@@ -14,12 +14,37 @@ here: `Foundation::Trace` is thirteen lines, the test suite turns it on, after a
 declared output must have been routed at least once, and `docs/diagrams/running/` draws each screen
 from the hops. The structural drawing in `docs/diagrams/` is read from the `wire` arms with Prism.
 
-**Status:** 57 integration tests (V03's, plus one the trace asked for) and 5 Cuprite browser tests,
-0 failures; after the full suite, **0 declared outputs never routed**; RuboCop clean;
+**Status:** 79 integration tests (V03's, plus one the trace asked for, 18 unit tests of the
+abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, fixed that day, and 3 for the
+defect fixes below) and 7 Cuprite browser tests, 0 failures; after the full suite, **0 declared outputs never routed**; RuboCop clean;
 `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it **100/100 at every tier with
-no scored finding and no accepted line** (324 functions). The linter learned two shapes to read it,
+no scored finding**, 10 of 10 rules met (348 functions; one inherent declaration, the drawing's edge
+label, added 2026-10-19 when the linter's Prism fix first checked `drawing.rb` and `wiring.rb`; two
+accepted lines, below). The linter learned two shapes to read it,
 recorded in `LINT_NOTES.md`. Familiarity 5 of 5 (judgement): a plain class, methods that return a
 Hash, and one `case`.
+
+*Since 2026-10-19:* the linter's clone check (duplicated logic, R7, scored from `--strict`) found 8
+duplicates, which held both strict tiers to 98. Seven were one concept written twice and are now one
+abstraction each: `Rules::LineRequest` (a product id or `{ product_id:, quantity: }`, read by `AddLine`
+and `CartLines#receive`); `Rules::LineRow` (a held line shown as its product, each product looked up
+once, in place of three row projections and three product caches; each screen configures one per
+value with that value's links); `Rules::Pricing.summary` (the figures both totals show); and
+`ProgrammingParadigms::Wizard` (a multi-step form kept in a record, the shared core of
+`CheckoutFlow` and `SubmitOrder`, which their screens configure with the flow table). Two lines are
+accepted: `CartLines#save_for_later` mirrors `SavedItems#move_to_cart` (each list removes its own
+line and hands on the same `{ product_id:, quantity: }`), and `CheckoutFlow#show` is its wizard's
+`visit` unchanged, delegation in place of inheritance (§7.16). `ala_lint --list-accepted` shows both.
+The two `clone_inside` reports (unscored) are left as they were.
+
+*Fixes ported from V07 (2026-10-19), each test first:* an undo over Turbo now puts the line back
+through the lines value (`[ :undo, :restored ]` pulls it from the store and hands it to
+`CartLines#arrived`), so the row reappears and the totals follow; removing a line clears its gift
+wrap (R3.4, in `Undo#capture`); the portal's undo flashes "Item restored" instead of grounding it;
+the checkout button is a component the summary arm patches, so its total and its disabled state
+follow every change; and the payment's waiting step asks `GET /cart/checkout/status` (a Stimulus
+`catch-up` controller) when it appears and whenever its stream subscribes, so an outcome broadcast
+before the page was listening is not lost.
 
 ## Run it
 
@@ -37,9 +62,9 @@ bin/rails ala:diagrams        # docs/diagrams/*.md from the wire arms
 |---|---|---|
 | Application | `app/ala/screens/`, `app/controllers/`, `app/views/{products,carts,checkouts,portals,...}`, `config/routes.rb` | `Screens::Store` (the calibration); one screen per page that builds and configures its parts and wires them in `wire`; controllers that call one input and redirect or render; page templates that place components |
 | Domain abstractions | `app/ala/domain_abstractions/`, `app/views/components/` | `CartLines`, `SavedItems`, `Wishlist` (values), `CartItemsStore`, `SavedItemsStore`, `WishlistStore` (their stores), `Undo`, `ProductIndex`, `PricingChoices`, `CartTotals`, `OrderTotals`, `CheckoutFlow`, `SubmitOrder`, `Records`, `AddLine`, `Charge`, `SettleOrder`; the domain UI partials |
-| Rules | `app/ala/rules/`, `app/views/elements/` | the pure rules and projections; the generic UI elements |
-| Programming paradigms | `app/ala/programming_paradigms/` | `Wiring` (`run`, and the trace hooks), `Transitions`, `LiveUpdate` (a Turbo Stream broadcast sink), `Patches` (a Turbo Stream response), `PushLater` (an Active Job that rebuilds a screen and calls an input), `Drawing` (the wire arms as Mermaid, structural or as they ran) |
-| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Trace`, `Money`, `DomTargets`, `LedgerGateway`; the Active Record models as persistence; five small Stimulus controllers |
+| Rules | `app/ala/rules/`, `app/views/elements/` | the pure rules and projections (among them `LineRow`, a held line shown as its product); the generic UI elements |
+| Programming paradigms | `app/ala/programming_paradigms/` | `Wiring` (`run`, and the trace hooks), `Transitions`, `Wizard` (a step flow kept in a record), `LiveUpdate` (a Turbo Stream broadcast sink), `Patches` (a Turbo Stream response), `PushLater` (an Active Job that rebuilds a screen and calls an input), `Drawing` (the wire arms as Mermaid, structural or as they ran) |
+| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Trace`, `Money`, `DomTargets`, `LedgerGateway`; the Active Record models as persistence; seven small Stimulus controllers |
 
 ## How a request runs
 

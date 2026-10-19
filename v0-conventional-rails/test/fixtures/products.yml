@@ -1,0 +1,24 @@
+widget:
+  name: Widget
+  description: A fine widget
+  amount: 1000
+  stock: 10
+  thumbnail: https://example.com/widget.png
+
+gadget:
+  name: Gadget
+  description: Running low
+  amount: 2500
+  stock: 3
+
+sold_out:
+  name: Sold Out Thing
+  description: None left
+  amount: 500
+  stock: 0
+
+pallet:
+  name: Pallet
+  description: Bulk goods
+  amount: 10000
+  stock: 50

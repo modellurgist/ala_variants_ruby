@@ -1,0 +1,10 @@
+<% content_for :title, @product.name %>
+<%= turbo_stream_from "products" %>
+
+<div class="max-w-md space-y-4">
+  <%= render @product %>
+  <div class="flex gap-4 text-sm">
+    <%= link_to "Edit this product", show_edit_product_path(@product), data: { turbo_frame: "modal" }, class: "underline" %>
+    <%= link_to "Back to products", products_path, class: "underline" %>
+  </div>
+</div>

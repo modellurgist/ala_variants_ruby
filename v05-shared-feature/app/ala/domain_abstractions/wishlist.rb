@@ -1,8 +1,8 @@
 module DomainAbstractions
   # Products a shopper wants to remember, as a value: the ids pulled through `items` on load, changed
   # in memory, every change sent out on `changed` for the store the composition wires; it asks its
-  # `products` port what they look like. Config: links (a lambda of the product id giving its row's
-  # URLs). Ports in: load, show (rows, count and ids again, from memory), toggle, remove and take (a product id). Ports out: items (a request),
+  # `products` port what they look like. Config: row (a LineRow: the product fields and URLs
+  # a wishlisted product's row carries). Ports in: load, show (rows, count and ids again, from memory), toggle, remove and take (a product id). Ports out: items (a request),
   # products (a request of product ids), changed ({ op: :add | :remove, product_id: }), rows, count
   # and ids (after load; rows_changed, count and ids again after a change), added and dropped (a
   # product id, after a toggle), taken (a product id the shopper wants in the cart).
@@ -57,7 +57,7 @@ module DomainAbstractions
       changed
     end
 
-    def initialize(cart_id:, links: ->(_id) { {} }) = (@cart_id, @links, @wanted, @catalog = cart_id, links, [], {})
+    def initialize(cart_id:, row:) = (@cart_id, @row, @wanted, @catalog = cart_id, row, [], {})
 
     private
 
@@ -72,6 +72,6 @@ module DomainAbstractions
       emit(:ids, @wanted)
     end
 
-    def rows = @wanted.map { |id| p = @catalog.fetch(id); { id: id, name: p[:name], thumbnail: p[:thumbnail], amount: p[:amount], urls: @links.(id) } }
+    def rows = @wanted.map { @row.(_1, @catalog.fetch(_1)) }
   end
 end

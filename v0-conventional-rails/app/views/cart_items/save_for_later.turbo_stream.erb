@@ -1,0 +1,3 @@
+<%= turbo_stream.remove @cart_item %>
+<%= turbo_stream.append "saved_items", partial: "cart_items/saved_item", locals: { saved_item: @cart_item } %>
+<%= render "carts/refresh", cart: current_cart %>

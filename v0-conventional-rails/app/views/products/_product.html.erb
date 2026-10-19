@@ -1,0 +1,19 @@
+<article id="<%= dom_id product %>" class="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4">
+  <div class="flex gap-3">
+    <%= image_tag product.thumbnail, alt: "", class: "size-16 rounded object-cover" if product.thumbnail.present? %>
+    <div class="min-w-0 flex-1">
+      <h2 class="font-semibold"><%= link_to product.name, product, data: { turbo_frame: "_top" } %></h2>
+      <p class="text-sm text-stone-600"><%= product.description %></p>
+    </div>
+  </div>
+  <div class="flex items-center justify-between text-sm">
+    <span class="font-medium"><%= money(product.amount) %></span>
+    <span>Stock: <%= product.stock %></span>
+    <%= stock_badge(product) %>
+  </div>
+  <div class="flex items-center gap-2 text-sm">
+    <%= button_to "Add to cart", cart_items_path, params: { product_id: product.id }, class: "rounded-md bg-emerald-700 px-3 py-1.5 font-medium text-white hover:bg-emerald-800" %>
+    <%= link_to "Edit", edit_product_path(product), data: { turbo_frame: "modal" }, class: "rounded-md border border-stone-300 px-3 py-1.5" %>
+    <%= button_to "Delete", product, method: :delete, data: { turbo_confirm: "Delete #{product.name}?" }, class: "rounded-md border border-red-300 px-3 py-1.5 text-red-700" %>
+  </div>
+</article>

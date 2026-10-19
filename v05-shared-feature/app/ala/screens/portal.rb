@@ -17,7 +17,7 @@ module Screens
       empty: "No lines yet. Add products below.", each: " each", remove: "Remove", add: "Add", default_quantity: 10,
       back: "Back to lines", submit: "Submit order", submitted: "Order submitted", reference: "Reference", items: "items",
       undo_text: "Item removed.", undo: "Undo", summary: Store::SUMMARY_TEXTS,
-      notices: { added: "Added to order", empty: "Your order is empty", submitted: "Order submitted" }
+      notices: { added: "Added to order", restored: "Item restored", empty: "Your order is empty", submitted: "Order submitted" }
     }.freeze
 
     attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash
@@ -57,11 +57,13 @@ module Screens
       @products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       @items = CartItemsStore.new(model: CartItem, cart_id:)
       @order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::PORTAL_UNDO_WINDOW,
-                                        links: ->(id) { { quantity: urls.portal_line_path(id), remove: urls.portal_line_path(id) } })
+                                        row: LineRow.new(fields: %i[name thumbnail amount stock stock_status],
+                                                         links: ->(id) { { quantity: urls.portal_line_path(id), remove: urls.portal_line_path(id) } }))
       @catalog = Records.new(model: Product, project: ProductRow.new(stock_rule:, links: ->(_id) { { add: urls.portal_lines_path } }))
       @add_line = AddLine.new(lines: CartItem, cart_id:)
       @totals = OrderTotals.new(shipping: CalculateShipping.new(rates: Store::RATES), volume: VolumeTier.new(tiers: Store::VOLUME_TIERS), shipping_method: :standard)
-      @flow = SubmitOrder.new(store: OrderSubmission, cart_id:, flow: FLOW, start: :lines, url_edges: URL_EDGES, orders: Order)
+      @flow = SubmitOrder.new(steps: ProgrammingParadigms::PersistedSteps.new(find: -> { OrderSubmission.for_cart(cart_id) }, table: FLOW, start: :lines, jumps: URL_EDGES),
+                              cart_id:, orders: Order)
 
       @order.wire_to(@items, from: :items, to: :lookup)
       @order.wire_to(@products, from: :products, to: :lookup)
@@ -73,6 +75,7 @@ module Screens
       @order.on(:rows) { @rows = _1 }
       @order.wire_to(@totals, from: :contents, to: :contents)
       @order.on(:undo_pending) { @undo_pending = _1 }
+      @order.on(:restored) { @flash[:notice] = say[:restored] }
       @catalog.on(:rows) { @catalog_rows = _1 }
       @add_line.on(:added) { @flash[:notice] = say[:added] }
       @totals.on(:summary) { @summary = _1 }

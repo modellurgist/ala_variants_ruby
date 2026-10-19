@@ -6,6 +6,9 @@ module ProgrammingParadigms
   # inside, and an arm that says `out` leaves it. `gaps` and `unrouted` read the same arms and hops
   # against every part's OUTPUTS, the feature's included.
   module Drawing
+    # The drawing's own notation, the same for any app (R3's domain-vocabulary exception)
+    INHERENT_LABELS = { request: "request", other_outputs: "every other output" }.freeze
+
     def self.mermaid(screen) = chart(screen) { |composition, name| arm_edges(composition, name) }
 
     def self.running(screen) = chart(screen) { |composition, name| hop_edges(composition, name) }
@@ -45,7 +48,7 @@ module ProgrammingParadigms
 
     # the screen and every feature inside it, each with the prefix its parts are drawn under
     def self.compositions(screen, prefix = "")
-      [ [ screen, prefix ] ] + screen.parts.select { |_, part| part.respond_to?(:parts) }.flat_map { |name, part| compositions(part, "#{prefix}#{name}.") }
+      [ [ screen, prefix ] ] + screen.parts.select { |_, part| part.is_a?(Wiring) }.flat_map { |name, part| compositions(part, "#{prefix}#{name}.") }
     end
 
     def self.chart(screen, &edges)
@@ -56,7 +59,7 @@ module ProgrammingParadigms
     def self.nodes(composition, prefix)
       composition.parts.flat_map do |name, part|
         id = "#{prefix}#{name}"
-        if part.respond_to?(:parts)
+        if part.is_a?(Wiring)
           [ "  subgraph #{id} [#{name}: #{part.class.name.split('::').last}]" ] + nodes(part, "#{id}_") + [ "  end" ]
         else
           [ "  #{id}[#{name}]" ]
@@ -70,19 +73,19 @@ module ProgrammingParadigms
         targets = arm[:to].map { "#{prefix}#{_1}" } + arm[:out].map { owner }
         (targets.empty? ? [ owner ] : targets).map { "  #{from} -- #{arm[:output]} --> #{_1}" }
       end
-      rest = arms(composition.class).select { _1[:output] == :_ }.map { "  #{prefix}#{_1[:part]} -- every other output --> #{owner}" }
+      rest = arms(composition.class).select { _1[:output] == :_ }.map { "  #{prefix}#{_1[:part]} -- #{INHERENT_LABELS[:other_outputs]} --> #{owner}" }
       own + rest + features(composition, prefix).flat_map { |id, part| arm_edges(part, id, "#{id}_") }
     end
 
     def self.hop_edges(composition, owner, prefix = "")
       own = Foundation::Trace.edges(composition.class).map do |from, to|
         target = to == :screen ? owner : "#{prefix}#{to}"
-        from == :outside ? "  outside -- request --> #{target}" : "  #{prefix}#{from[0]} -- #{from[1]} --> #{target}"
+        from == :outside ? "  outside -- #{INHERENT_LABELS[:request]} --> #{target}" : "  #{prefix}#{from[0]} -- #{from[1]} --> #{target}"
       end
       own + features(composition, prefix).flat_map { |id, part| hop_edges(part, id, "#{id}_") }
     end
 
-    def self.features(composition, prefix) = composition.parts.select { |_, part| part.respond_to?(:parts) }.map { |name, part| [ "#{prefix}#{name}", part ] }
+    def self.features(composition, prefix) = composition.parts.select { |_, part| part.is_a?(Wiring) }.map { |name, part| [ "#{prefix}#{name}", part ] }
 
     # a pattern is `[:part, :output]`, or several joined by `|`; `_` matches any output
     def self.patterns(node)

@@ -15,13 +15,8 @@ module DomainAbstractions
     private
 
     def summary
-      m = Foundation::Money
-      subtotal = Rules::Pricing.subtotal(@lines)
-      percent, tier_label = @volume.call(subtotal)
-      after_discount, discount = Rules::Pricing.apply_discount(subtotal, percent)
-      shipping = @shipping.call(@method, subtotal)
-      { empty: @lines.empty?, item_count: Rules::Pricing.item_count(@lines), subtotal: m[subtotal], discount: m[discount], tier_label:,
-        shipping_label: @shipping.label(@method), shipping_cost: m[shipping], total: m[after_discount + shipping] }
+      percent, tier_label = @volume.call(Rules::Pricing.subtotal(@lines))
+      Rules::Pricing.summary(@lines, percentage: percent, shipping: @shipping, method: @method).merge(tier_label:)
     end
   end
 end

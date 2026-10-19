@@ -16,6 +16,7 @@ module Screens
     BLOCKED = { empty: "Your cart is empty", out_of_stock: "Some items are out of stock" }.freeze
     ADDRESS_FIELDS = [ [ :name, :text, "Full name" ], [ :line1, :text, "Address" ], [ :city, :text, "City" ], [ :postal_code, :text, "Postal code" ] ].freeze
     STATUS_TARGET = "checkout_status"
+    OUTCOMES = %i[complete error].freeze
     TEXTS = { back: "← Back to cart", heading: "Checkout", continue: "Continue to payment", edit_address: "Edit address", pay: "Pay",
               payment_failed: "Payment failed.", try_again: "Try again", processing: "Processing payment…", redirecting: "Redirecting…",
               total: Store::SUMMARY_TEXTS[:total] }.freeze
@@ -24,9 +25,14 @@ module Screens
 
     def parts = { lines: @lines, pricing: @pricing, totals: @totals, flow: @flow, charge: @charge, settle: @settle, products: @products, items: @items }
 
-    # Lives across requests (see `LongLived`): `reload` reads the stores again, `begin` opens a request
-    # with an empty flash, and each input is one push on what the parts hold.
-    input(:reload, ProgrammingParadigms::Event) { @lines.input_port(:load).send_event; @pricing.input_port(:load).send_event }
+    # Lives across requests (see `LongLived`): `reload` reads the stores again, the flow's step included
+    # (a payment job in another process moves it), `begin` opens a request with an empty flash, and each
+    # input is one push on what the parts hold.
+    input(:reload, ProgrammingParadigms::Event) do
+      @lines.input_port(:load).send_event
+      @pricing.input_port(:load).send_event
+      @flow.input_port(:load).send_event
+    end
     input(:begin, ProgrammingParadigms::Event) { @flash = {} }
     input(:start, ProgrammingParadigms::Event) { @flow.input_port(:start).send_event }
     input(:show, ProgrammingParadigms::DataFlow) { |requested| @flow.input_port(:show).push(requested) }
@@ -52,7 +58,7 @@ module Screens
       @pricing = PricingChoices.new(store: CartPricingChoice, cart_id:, shipping:, default_method: :standard,
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
-      @flow = CheckoutFlow.new(store: ::Checkout, cart_id:, flow: FLOW, start: :address, url_edges: URL_EDGES,
+      @flow = CheckoutFlow.new(steps: ProgrammingParadigms::PersistedSteps.new(find: -> { ::Checkout.for_cart(cart_id) }, table: FLOW, start: :address, jumps: URL_EDGES),
                                stock_levels: ->(ids) { Product.stock_levels(ids) }, line_items: BuildLineItems.new(currency: Store::CURRENCY))
       @charge = Charge.new(gateway: Rails.configuration.x.payment_gateway.constantize.new, metadata: ->(id) { { "cart_id" => id } })
       @settle = SettleOrder.new(orders: Order, lines: CartItem, products: Product, cart_id:)

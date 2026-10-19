@@ -1,6 +1,6 @@
 module Rules
   # The single-function pricing abstractions: plain calls, because each is an algorithm, not a
-  # communicating instance (§7.5). All amounts are integer cents.
+  # communicating instance (§7.5). All amounts are integer cents, until `summary` shows them as Money.
   module Pricing
     # Σ amount × quantity over lines of { quantity:, amount: }.
     def self.subtotal(lines) = lines.sum { _1[:amount] * _1[:quantity] }
@@ -12,6 +12,17 @@ module Rules
       return [ subtotal, 0 ] if percentage.nil? || percentage.zero?
       discount = subtotal * percentage / 100
       [ [ subtotal - discount, 0 ].max, discount ]
+    end
+
+    # The figures every priced summary shows: a percentage off the subtotal, then extra (gift wrap, say),
+    # then shipping by method (a CalculateShipping) on the subtotal before the discount.
+    def self.summary(lines, percentage:, shipping:, method:, extra: 0)
+      m = Foundation::Money
+      gross = subtotal(lines)
+      after_discount, discount = apply_discount(gross, percentage)
+      cost = shipping.call(method, gross)
+      { empty: lines.empty?, item_count: item_count(lines), subtotal: m[gross], discount: m[discount],
+        shipping_label: shipping.label(method), shipping_cost: m[cost], total: m[after_discount + extra + cost] }
     end
   end
 end

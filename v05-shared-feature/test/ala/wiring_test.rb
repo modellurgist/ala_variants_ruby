@@ -8,7 +8,7 @@ class WiringTest < ActiveSupport::TestCase
     Screens::Catalog => [],
     Screens::Cart => [],
     Screens::Checkout => %w[items.added items.found lines.changed lines.adding lines.rows lines.row_added lines.row_changed lines.row_removed lines.removed lines.saved lines.line pricing.promo_applied pricing.promo_rejected],
-    Screens::Portal => %w[order.row_added order.row_changed order.row_removed order.saved order.line order.restored catalog.record catalog.form catalog.created catalog.updated catalog.deleted]
+    Screens::Portal => %w[order.row_added order.row_changed order.row_removed order.saved order.line catalog.record catalog.form catalog.created catalog.updated catalog.deleted]
   }.freeze
 
   GROUNDED.each do |screen_class, grounded|

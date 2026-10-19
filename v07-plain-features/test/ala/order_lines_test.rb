@@ -7,9 +7,10 @@ class OrderLinesTest < ActiveSupport::TestCase
 
   def order(links: ->(id) { { remove: "/x/#{id}" } })
     cart = Cart.create!(status: "open")
-    item = CartItem.add(cart.id, create_product.id)
-    order = Features::OrderLines.new(cart_id: cart.id, products: ->(ids) { ROWS.slice(*ids) }, links:, undo_lines: CartItem, undo_window: 5.seconds)
-    order.load([ { id: item.id, product_id: 7, quantity: 2, gift_wrapped: false } ])
+    item = CartItem.add(cart.id, create_product.id, 2)
+    held = Rules::HeldProducts.new(products: ->(ids) { ids.to_h { [ _1, ROWS[7] ] } }, links:)
+    order = Features::OrderLines.new(cart_id: cart.id, held:, undo_lines: CartItem, undo_window: 5.seconds)
+    order.load([ { id: item.id, product_id: item.product_id, quantity: 2, gift_wrapped: false } ])
     [ order, item ]
   end
 
@@ -22,6 +23,8 @@ class OrderLinesTest < ActiveSupport::TestCase
     assert_not_nil item.reload.removed_at
     out = o.undo.to_h
     assert_equal item.id, out[:restored]
+    assert_equal item.id, out[:row_added][:id]
+    assert_equal [ { quantity: 2, amount: 1000 } ], out[:contents][:lines]
     assert_equal false, out[:undo_pending]
     assert_nil item.reload.removed_at
   end
@@ -36,6 +39,6 @@ class OrderLinesTest < ActiveSupport::TestCase
 
   test "the same feature carries a page's own links" do
     o, item = order(links: ->(id) { { quantity: "/portal/lines/#{id}" } })
-    assert_equal({ quantity: "/portal/lines/#{item.id}" }, o.load([ { id: item.id, product_id: 7, quantity: 2, gift_wrapped: false } ]).to_h[:rows].first[:urls])
+    assert_equal({ quantity: "/portal/lines/#{item.id}" }, o.load([ { id: item.id, product_id: item.product_id, quantity: 2, gift_wrapped: false } ]).to_h[:rows].first[:urls])
   end
 end

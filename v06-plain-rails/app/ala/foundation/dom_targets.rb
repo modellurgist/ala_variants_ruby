@@ -16,6 +16,7 @@ module Foundation
     def summary_id = "cart_summary"
     def shipping_selector_id = "cart_shipping"
     def promo_form_id = "cart_promo"
+    def checkout_button_id = "cart_checkout"
     def undo_id = "cart_undo"
     def flash_id = "flash"
   end

@@ -1,0 +1,3 @@
+<%= turbo_stream.remove @wishlist_item %>
+<%= turbo_stream.append "cart_items", @cart_item %>
+<%= render "carts/refresh", cart: current_cart %>

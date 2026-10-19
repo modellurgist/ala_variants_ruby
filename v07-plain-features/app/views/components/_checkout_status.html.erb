@@ -1,9 +1,10 @@
 <%# A payment's progress: processing, failed with a retry, or complete and leaving for success_url.
-    Replaced live when the payment job finishes; takes the id the replacement targets. %>
+    Replaced live when the payment job finishes; takes the id the replacement targets. While
+    processing it asks status_url for an outcome it may have missed. %>
 <div id="<%= id %>">
   <% case step
      when :processing %>
-    <div class="flex items-center gap-3 py-6 text-stone-500">
+    <div class="flex items-center gap-3 py-6 text-stone-500" data-controller="catch-up" data-catch-up-url-value="<%= status_url %>">
       <svg class="h-5 w-5 animate-spin text-brand-700" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
       <%= t[:processing] %>
     </div>

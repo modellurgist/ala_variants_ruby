@@ -3,8 +3,8 @@ module Features
   # feature (§2.2), a composition of domain abstractions a page places as one part. Inside, a
   # `CartLines` value and an `Undo` are wired to each other; outside, the page wires this feature's
   # ports to a lines store, a product index, its totals and its patches. Used by the cart page (kept
-  # across requests) and the portal page (built per request) with different links and windows.
-  # Config: cart_id, links (a lambda of the item id giving a row's URLs), undo_lines (the store
+  # across requests) and the portal page (built per request) with different rows and windows.
+  # Config: cart_id, row (a LineRow: what a displayed line carries, URLs included), undo_lines (the store
   # `Undo` marks), undo_window (a duration).
   # Ports in: load, show, lines (a request), bump, set_quantity, remove, save_for_later,
   # toggle_gift_wrap, line (an item id), receive (a product id or { product_id:, quantity: }), arrived
@@ -45,8 +45,8 @@ module Features
 
     def parts = { lines: @lines, undo: @undo }
 
-    def initialize(cart_id:, links:, undo_lines:, undo_window:)
-      @lines = DomainAbstractions::CartLines.new(cart_id:, links:)
+    def initialize(cart_id:, row:, undo_lines:, undo_window:)
+      @lines = DomainAbstractions::CartLines.new(cart_id:, row:)
       @undo = DomainAbstractions::Undo.new(lines: undo_lines, cart_id:, window: undo_window)
 
       @lines.wire_to(@undo, from: :removed, to: :capture)

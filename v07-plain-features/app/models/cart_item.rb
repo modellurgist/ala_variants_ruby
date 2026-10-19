@@ -14,4 +14,7 @@ class CartItem < ApplicationRecord
     line.save!
     line
   end
+
+  # The neutral shape a lines value is handed, whether the line was just added or brought back by undo.
+  def to_line = { id:, product_id:, quantity:, gift_wrapped: }
 end

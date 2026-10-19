@@ -25,6 +25,11 @@ class PureCoreTest < ActiveSupport::TestCase
     lines
   end
 
+  test "a change to a line it doesn't hold is refused by name" do
+    error = assert_raises(ArgumentError) { lines.input_port(:bump).push(item_id: 99, delta: 1) }
+    assert_equal "no line 99", error.message
+  end
+
   test "a bump changes the value, announces the write, and prices what it holds" do
     l = lines.wire_to(row = Recorder.new, from: :row_changed)
     l.input_port(:bump).push(item_id: 42, delta: 1)

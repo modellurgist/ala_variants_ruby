@@ -2,8 +2,8 @@ module DomainAbstractions
   # What's in a shopper's cart, as a value: the lines it was given on load, with quantities and gift
   # wrap, changed in memory and announced. It does no I/O: it pulls its lines and its products
   # through ports, and sends every change out on `changed` for a store the composition wires. It
-  # prices nothing; `contents` hands pricing only what it reads. Config: links (a lambda of the item
-  # id giving the URLs a row's actions post to).
+  # prices nothing; `contents` hands pricing only what it reads. Config: row (a LineRow: the product
+  # fields a displayed line carries and the URLs its actions post to).
   # Ports in: load, show (rows and contents again, from memory), lines (a request answered with { cart_id:, lines: [...] }), bump ({ item_id:,
   # delta: }), set_quantity ({ item_id:, quantity: }), remove, save_for_later, toggle_gift_wrap and
   # line (an item id), receive (a product id, or { product_id:, quantity: }), arrived (a stored line's
@@ -99,11 +99,11 @@ module DomainAbstractions
 
     input(:line, ProgrammingParadigms::DataFlow) { |item_id| emit(:line, snapshot(find(item_id))) }
 
-    def initialize(cart_id:, links: ->(_id) { {} }) = (@cart_id, @links, @held, @catalog = cart_id, links, [], {})
+    def initialize(cart_id:, row: Rules::LineRow.new(fields: [])) = (@cart_id, @row, @held, @catalog = cart_id, row, [], {})
 
     private
 
-    def find(item_id) = @held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}"
+    def find(item_id) = (@held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}")
     def take(item_id) = find(item_id).tap { |item| @held.delete(item) }
     def product(item) = @catalog.fetch(item[:product_id])
 
@@ -118,12 +118,10 @@ module DomainAbstractions
         description: p[:description], thumbnail: p[:thumbnail] }
     end
 
-    # the neutral shape a displayed line carries
     def row(item)
       p = product(item)
-      { id: item[:id], product_id: item[:product_id], name: p[:name], thumbnail: p[:thumbnail], amount: p[:amount],
-        quantity: item[:quantity], line_total: p[:amount] * item[:quantity], gift_wrapped: item[:gift_wrapped],
-        stock: p[:stock], stock_status: p[:stock_status], urls: @links.(item[:id]) }
+      @row.(item[:id], p, product_id: item[:product_id], quantity: item[:quantity], line_total: p[:amount] * item[:quantity],
+                          gift_wrapped: item[:gift_wrapped])
     end
   end
 end

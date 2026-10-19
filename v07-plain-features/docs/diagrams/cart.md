@@ -46,6 +46,8 @@ flowchart LR
   pricing -- promo_rejected --> screen
   totals -- summary --> screen
   order_lines -- removed --> order_undo
+  order_undo -- restored --> order_lines
+  order_undo -- restored --> order
   order_undo -- pending --> order
   order_lines -- every other output --> order
   order_undo -- every other output --> order

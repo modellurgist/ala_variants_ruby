@@ -18,7 +18,7 @@ class OrderLinesTest < ActiveSupport::TestCase
   def order(links: ->(id) { { remove: "/x/#{id}" } })
     cart = Cart.create!(status: "open")
     item = CartItem.add(cart.id, create_product.id)
-    order = Features::OrderLines.new(cart_id: cart.id, links:, undo_lines: CartItem, undo_window: 5.seconds)
+    order = Features::OrderLines.new(cart_id: cart.id, row: Rules::LineRow.new(fields: %i[name], links:), undo_lines: CartItem, undo_window: 5.seconds)
     order.wire_to(Answerer.new([ { id: item.id, product_id: 7, quantity: 2, gift_wrapped: false } ]), from: :items, to: :ask)
     order.wire_to(Answerer.new(->(ids) { ROWS.slice(*ids) }), from: :products, to: :ask)
     order.wire_to(@changed = Recorder.new, from: :changed).wire_to(@contents = Recorder.new, from: :contents)

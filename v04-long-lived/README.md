@@ -8,11 +8,12 @@ write stamp moved behind its back. Between requests the values hold the cart in 
 works on what they hold and answers with its patches; a GET renders what they hold. `DESIGN.md`
 records the change, what it costs, and the hand walk.
 
-**Status:** 66 integration tests (V03's 57, plus 5 of the execution model and 4 of the long-lived
-cart) and 5 Cuprite browser tests, 0 failures; RuboCop clean;
+**Status:** 67 integration tests (V03's 57, plus 5 of the execution model, 4 of the long-lived
+cart, and one added 2026-10-19 for `CartLines#find`'s refusal) and 5 Cuprite browser tests, 0 failures; RuboCop clean;
 `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it **100/100** with six accepted
 lines (`--list-accepted` prints them: the locks in the execution model and the write stamp in the
-models). `LINT_NOTES.md` has the run.
+models). `LINT_NOTES.md` has the run. Since 2026-10-19 the linter's clone check (R7, scored from `--strict`) reports 3
+duplicates here, so `--strict` and `--super-strict` score 99; they are left as they are in this archived variant.
 
 ## Run it
 

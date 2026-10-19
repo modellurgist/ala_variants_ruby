@@ -44,7 +44,8 @@ in a job that rebuilt the screen. Now `LongLived` registries have names (`LongLi
 `LongLived.named(:checkout_screens)`), and `PushLater.port_for(:checkout_screens, cart_id, :charge)`
 enqueues a push that the job delivers with `LongLived.named(registry).with(key)`. In the web process
 the job finds the kept composition; in a separate job process it builds one, which reloads from the
-stores, delivers, and bumps the stamp so the web process reloads on its next request. The `Checkout`
+stores, delivers, and bumps the stamp so the web process reloads on its next request (until
+2026-10-19 that reload missed the flow's step; see "Other writers" below). The `Checkout`
 and `Order` models bump the cart's stamp like the line models. The checkout screen gained `reload`
 and `begin`, lost the loads in front of every input, and its controller renders inside the
 composition's turn, with the two step branches in private methods rather than in the wiring block
@@ -78,14 +79,14 @@ moves those into `Features::OrderLines`:
 @lines.on(:row_changed) { emit(:row_changed, _1) }
 @undo.on(:restored) { |id| emit(:fetch, id); emit(:restored, id) }
 
-# the cart page places it, kept across requests, with its links and window
-@order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::UNDO_WINDOW, links: ->(id) { ... cart URLs ... })
+# the cart page places it, kept across requests, with its row and window
+@order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::UNDO_WINDOW, row: LineRow.new(fields: %i[...], links: ->(id) { ... cart URLs ... }))
 @order.wire_to(@items, from: :items, to: :lookup)
 @order.wire_to(@totals, from: :contents, to: :contents)          # CartTotals, with pricing choices
 @order.wire_to(patch(:replace, ->(row) { dom.cart_line_id(row[:id]) }, line_html), from: :row_changed)
 
-# the portal page places it, per request, with its links and a longer window
-@order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::PORTAL_UNDO_WINDOW, links: ->(id) { ... portal URLs ... })
+# the portal page places it, per request, with its row and a longer window
+@order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::PORTAL_UNDO_WINDOW, row: LineRow.new(fields: %i[...], links: ->(id) { ... portal URLs ... }))
 @order.wire_to(@totals, from: :contents, to: :contents)          # OrderTotals, with volume tiers
 @flow.wire_to(@order, from: :lines, to: :lines)                  # the submit flow asks it for the lines
 ```
@@ -97,7 +98,7 @@ What makes it a feature and not a helper:
   `wire_to` and `on` are the whole mechanism, with `ask` and `emit` inside the feature forwarding
   an inner port to an outer one. A request/response output is forwarded the same way (`on(:products)
   { ask(:products, _1) }`), so the feature asks its page's product index without knowing it.
-- **Configuration, not knowledge.** The two pages differ in links, window, totals and what the
+- **Configuration, not knowledge.** The two pages differ in rows (fields and links), window, totals and what the
   page does with `saved` and `line` (the cart wires them to saved-for-later and the wishlist; the
   portal leaves them open, listed in the wiring test). The feature knows none of that.
 - **It composes.** The cart's long-lived composition keeps the feature between requests exactly as
@@ -162,6 +163,21 @@ each:
   The registry reads the stamp before each request and sends `reload` when it moved, then records
   the stamp after the request so the composition's own writes are not stale. A composition kept by
   another process sees the bump on its next request: no cache invalidation bus, one integer column.
+- **Across processes, what holds and what is assumed.** Each process (every Puma worker, the Solid
+  Queue worker) keeps its own table; nothing is shared but the database. Safe: every write a kept
+  composition reads goes through a model that bumps the cart (the four line models, `Checkout` and
+  `Order`; the portal's `OrderSubmission` does not and need not, the portal being rebuilt per
+  request), so another process's composition reloads before its next use. Assumed: a request sees a consistent
+  cart only after `with`'s stamp check, so nothing reads a kept composition outside `with`; `reload`
+  re-reads *everything* a part keeps from a store, or that part goes stale silently; and what a
+  part keeps without a store (the checkout's `done`, a flash) is this process's only. Not covered:
+  writes to tables that do not belong to the cart. A product's name, price or stock moves no cart's
+  stamp, so a kept cart or checkout shows (and the checkout charges) the product as it last loaded.
+  *Fixed 2026-10-19:* the checkout's `reload` re-read its lines and pricing but not its flow's
+  `PersistedSteps`, which keeps its record; with the payment job in another process the step moved
+  and the stamp with it, yet the web process's checkout kept answering "processing" (204 from
+  `status`). `PersistedSteps#reload` reads the record again and the flow's `load` input sends it;
+  `CheckoutTest` delivers the payment through a second `LongLived` the way a job process would.
 - **A request's own state.** Flash and patches belong to one request; `begin` clears them. Values,
   landed rows and the summary belong to the cart and stay.
 
@@ -261,8 +277,8 @@ reload to show those; a page that is patched can't.
 |---|---|---|
 | **application** | `Screens::*`, controllers, page templates, routes | the composition: instances, configuration, wiring, words |
 | **domain** | `DomainAbstractions::*` (stateful, ported), `views/components/` (domain UI: a cart line, an order line, a catalogue row, a price summary) | abstractions that know a concept of the store's world |
-| **rules** | `Rules::*` (pure: pricing, shipping, promo, volume tier, stock status, line items, the product projection), `views/elements/` (generic UI: a product line, a stock badge, tabs, a modal, milestones, a record form) | significantly more general than the domain: they take any input and know no store |
-| **paradigms** | `DataFlow`, `Event`, `RequestResponse`, `Transitions`, `LiveUpdate` (a broadcast sink), `PushLater` (an asynchronous execution model) | how a connection runs |
+| **rules** | `Rules::*` (pure: pricing, shipping, promo, volume tier, stock status, line items, the product projection and a held line's row), `views/elements/` (generic UI: a product line, a stock badge, tabs, a modal, milestones, a record form) | significantly more general than the domain: they take any input and know no store |
+| **paradigms** | `DataFlow`, `Event`, `RequestResponse`, `Transitions`, `PersistedSteps` (a state machine kept in a record), `LiveUpdate` (a broadcast sink), `PushLater` (an asynchronous execution model) | how a connection runs |
 | **foundation** | `Ports`, `Money`, `DomTargets`, `LedgerGateway`, the Active Record models | the wiring operator, the money type, the names, the stores |
 
 V01 had one domain layer and found seven peer edges in it (totals → pricing, flow → stock check) and
@@ -290,7 +306,9 @@ id (the identity key) and nothing else; the catalogue's shape can change without
 **Rows carry what the page needs (R11).** Each row a feature emits carries its own URLs, from a
 `links` lambda the screen configures with the route helpers (`->(id) { { remove:
 urls.cart_item_path(id), ... } }`): a small function passed in as configuration (§3.11.3), so no
-component knows a route and no page computes one per row. The cart line takes the wishlist's ids
+component knows a route and no page computes one per row. Since 2026-10-19 the lambda goes in a
+`Rules::LineRow` with the product fields the page's partial reads, one projection the three lists
+share where each had written its own. The cart line takes the wishlist's ids
 and marks itself; the tabs element takes counts and words and writes its labels.
 
 **Names flow down (R5).** `Foundation::DomTargets` (the DOM ids and marker classes live updates
@@ -349,7 +367,7 @@ What the first V05 build added:
 |---|---|---|
 | R1 | met | the feature depends on two domain abstractions and the Foundation; the two pages depend on it; nothing in the domain knows it exists |
 | R9 | met | one owned interface, ports; `respond_to?` on a peer was the build's one finding and is gone |
-| R3 | met | links, window and the undo store are configuration; the portal's longer window is a `Store` constant with its reason |
+| R3 | met | the row (fields and links), window and the undo store are configuration; the portal's longer window is a `Store` constant with its reason |
 | R6 | met | the feature's header comment lists every port; the forwarding lines are wiring, not logic |
 | R8 | met, better | the two pages' wiring reads as "place the order lines, give them a store, totals and patches"; the drawing shows the feature as one box that opens |
 

@@ -1,0 +1,27 @@
+shared:
+  undo_window_seconds: 5
+  low_stock_threshold: 5
+  gift_wrap_cents: 299
+  payment_gateway: LocalPaymentGateway
+  shipping_methods:
+    standard:
+      label: "Standard (5–7 days)"
+      cents: 599
+      free_above_cents: 5000
+    express:
+      label: "Express (2–3 days)"
+      cents: 1299
+    overnight:
+      label: "Overnight"
+      cents: 2499
+  promo_codes:
+    SAVE10: 10
+    SAVE20: 20
+    HALF: 50
+  volume_tiers:
+    - min_cents: 200000
+      percent: 10
+      label: "10% volume discount"
+    - min_cents: 50000
+      percent: 5
+      label: "5% volume discount"

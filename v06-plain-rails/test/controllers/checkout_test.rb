@@ -90,6 +90,21 @@ class CheckoutTest < ActionDispatch::IntegrationTest
     assert_equal 2, FakeGateway.charges.size
   end
 
+  test "a page waiting on the payment can ask for the outcome: nothing while processing, then the outcome" do
+    FakeGateway.reset([ [ :error, :declined ] ])
+    open_cart
+    post cart_checkout_path
+    patch address_cart_checkout_path, params: address
+    post pay_cart_checkout_path
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_response :no_content
+
+    perform_enqueued_jobs
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_match(/<turbo-stream action="replace" target="checkout_status">/, response.body)
+    assert_match(/Payment failed\./, response.body)
+  end
+
   test "browser back returns to the address step; a forward URL jump is ignored; a reload lands on the step" do
     open_cart
     post cart_checkout_path

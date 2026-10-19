@@ -1,13 +1,14 @@
 module DomainAbstractions
   # The lines table as a source and a sink (§5.2.2): answers a cart's stored lines, and applies the
   # changes a lines abstraction decided. Config: model, cart_id. In: lookup (answers [{ id:,
-  # product_id:, quantity:, gift_wrapped: }]), apply ({ op:, ... } with op :quantity { id:, quantity: },
-  # :gift_wrap { id:, gift_wrapped: }, :remove { id: }), add ({ product_id:, quantity: }). Out: added
-  # (the stored line's snapshot, after add).
+  # product_id:, quantity:, gift_wrapped: }]), line (an item id; answers that one line), apply ({ op:,
+  # ... } with op :quantity { id:, quantity: }, :gift_wrap { id:, gift_wrapped: }, :remove { id: }),
+  # add ({ product_id:, quantity: }). Out: added (the stored line's snapshot, after add).
   class CartItemsStore
     OUTPUTS = %i[added].freeze
 
     def lookup = mine.map { snapshot(_1) }
+    def line(item_id) = snapshot(mine.find(item_id))
 
     def apply(change)
       case change[:op]

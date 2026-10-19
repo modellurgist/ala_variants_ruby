@@ -97,7 +97,7 @@ module DomainAbstractions
 
     private
 
-    def find(item_id) = @held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}"
+    def find(item_id) = (@held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}")
     def take(item_id) = find(item_id).tap { |item| @held.delete(item) }
     def product(item) = @catalog.fetch(item[:product_id])
 

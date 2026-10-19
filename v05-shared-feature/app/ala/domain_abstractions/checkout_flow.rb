@@ -1,10 +1,9 @@
 module DomainAbstractions
   # Where a shopper is in paying for a cart: a step machine over a flow table, kept in a store of its
-  # own, plus the address they enter. Config: store (one record per cart, with `step` and the
-  # address columns), cart_id, flow ([[from, event, to]]), start, url_edges (the jumps a URL may
-  # make), stock_levels (a lambda of product ids giving { id => stock }), line_items (a
-  # BuildLineItems). It pulls the cart's lines through its `lines` port when it starts and when it
-  # pays (§4.4.3: a read is pulled). Ports in: start, show, validate, submit_address, edit_address,
+  # own, plus the address they enter. Config: steps (a PersistedSteps over one record per cart, with
+  # `step` and the address columns), stock_levels (a lambda of product ids giving { id => stock }),
+  # line_items (a BuildLineItems). It pulls the cart's lines through its `lines` port when it starts and when it
+  # pays (§4.4.3: a read is pulled). Ports in: load (read the record again), start, show, validate, submit_address, edit_address,
   # pay, succeeded, failed. Ports out: step (the step now showing), form (the address
   # record to render, with errors when it has any), blocked (:empty or :out_of_stock), ready_to_pay
   # ({ line_items:, cart_id: }), done (the payment reference, once paid).
@@ -17,17 +16,17 @@ module DomainAbstractions
     output :ready_to_pay, ProgrammingParadigms::DataFlow, many: true
     output :done, ProgrammingParadigms::DataFlow, many: true
 
+    input(:load, ProgrammingParadigms::Event) { @steps.reload }
+
     # Begin: an empty cart can't check out.
     input(:start, ProgrammingParadigms::Event) do
       next emit(:blocked, :empty) if ask(:lines)[:lines].empty?
-      record.update!(step: @start.to_s)
-      emit(:step, @start)
+      emit(:step, @steps.restart)
     end
 
     # The URL asks for a step: honour it along an allowed jump, otherwise stay; then show the step.
     input(:show, ProgrammingParadigms::DataFlow) do |requested|
-      record.update!(step: requested.to_s) if requested && @url_edges.include?([ step_now, requested ])
-      emit(:step, step_now)
+      emit(:step, @steps.jump(requested))
       emit(:form, record)
     end
 
@@ -37,7 +36,7 @@ module DomainAbstractions
       r = record
       r.assign_attributes(params)
       next advance(:submit_address) if r.save(context: :address)
-      emit(:step, step_now)
+      emit(:step, @steps.now)
       emit(:form, r)
     end
 
@@ -61,19 +60,11 @@ module DomainAbstractions
 
     input(:failed, ProgrammingParadigms::DataFlow) { |_reason| advance(:failed) }
 
-    def initialize(store:, cart_id:, flow:, start:, url_edges:, stock_levels:, line_items:)
-      @store, @cart_id, @flow, @start, @url_edges, @stock_levels, @line_items = store, cart_id, flow, start, url_edges, stock_levels, line_items
-    end
+    def initialize(steps:, stock_levels:, line_items:) = (@steps, @stock_levels, @line_items = steps, stock_levels, line_items)
 
     private
 
-    def record = @record ||= @store.for_cart(@cart_id)
-    def step_now = record.step.to_sym
-
-    def advance(event)
-      moved, to = ProgrammingParadigms::Transitions.step(@flow, step_now, event)
-      record.update!(step: to.to_s) if moved == :moved
-      emit(:step, to)
-    end
+    def record = @steps.record
+    def advance(event) = emit(:step, @steps.fire(event))
   end
 end

@@ -17,3 +17,26 @@ V06 at the same scores:
 - The public-surface count leaves out `parts` along with `initialize`: it is the paradigm's message,
   read by a drawing or a coverage test, not an input a page sends. With it, the feature's twelve
   inputs were counted as thirteen.
+
+## 2026-10-19: the clone check
+
+The linter's clone check found 9 duplicates across units (`--strict` and `--super-strict` 98). All
+were extracted (README, "Since 2026-10-19"); three lines are accepted by hand:
+
+| tier | score | rules met | functions clean |
+|---|---|---|---|
+| default | 100/100 (A) | 10 of 10 checked | 370/370 |
+| `--strict` | 100/100 | 10 of 10 | 370/370 |
+| `--super-strict` | 100/100 | 10 of 10 | 370/370 |
+
+- `CartLines#initialize`, clone of `SavedItems#initialize`, and `CheckoutFlow#initialize`, clone of
+  `SubmitOrder#initialize`: each builds the extracted abstraction from the same config as its twin.
+- `CheckoutFlow#show`, passthrough: delegation to `StepRecord` in place of inheriting it (§7.16).
+
+Later the same day the pages took over building `HeldProducts` and `StepRecord` and hand them in
+(`held:`, `steps:`), as V05 and V06 do; the two constructor clones went with it and their accepts
+were removed. Still 100/100 and 10 of 10 at every tier, 370/370 functions, the same six advisory
+lines, and one accepted line: `CheckoutFlow#show`, still a delegation the linter can't tell from
+proliferation.
+
+The `clone_inside` findings (in `CartLines` and `Drawing`) are reported and unscored by design.

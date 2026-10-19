@@ -1,0 +1,11 @@
+<% content_for :title, "Products" %>
+<%= turbo_stream_from "products" %>
+
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Products</h1>
+  <%= link_to "New Product", new_product_path, data: { turbo_frame: "modal" }, class: "rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800" %>
+</div>
+
+<div id="products" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <%= render @products %>
+</div>

@@ -8,9 +8,14 @@ class PureCoreTest < ActiveSupport::TestCase
   ROWS = { 7 => { id: 7, name: "Widget", amount: Foundation::Money[1000], stock: 3, stock_status: :low_stock, thumbnail: "w", description: "d" } }.freeze
 
   def lines
-    lines = CartLines.new(cart_id: 1, products: ->(ids) { ROWS.slice(*ids) })
+    lines = CartLines.new(cart_id: 1, rows: Rules::LineRow.new(products: ->(ids) { ROWS.slice(*ids) }))
     lines.load([ { id: 42, product_id: 7, quantity: 2, gift_wrapped: false } ])
     lines
+  end
+
+  test "a change to a line it doesn't hold is refused by name" do
+    error = assert_raises(ArgumentError) { lines.bump(item_id: 99, delta: 1) }
+    assert_equal "no line 99", error.message
   end
 
   test "a bump changes the value, announces the write, and prices what it holds" do

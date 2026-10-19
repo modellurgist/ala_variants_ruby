@@ -51,10 +51,11 @@ class DomainTest < ActiveSupport::TestCase
     assert_equal "$26.98", summary[:total].to_s
   end
 
-  test "Undo holds only the latest removal and restores it within the window" do
+  test "Undo holds only the latest removal, unwrapped, and restores it within the window" do
     cart = Cart.create!(status: "open")
     a = CartItem.add(cart.id, create_product(name: "A").id)
     b = CartItem.add(cart.id, create_product(name: "B").id)
+    b.update!(gift_wrapped: true)
     undo = Undo.new(lines: CartItem, cart_id: cart.id, window: 5.seconds)
 
     undo.capture(a.id)
@@ -63,16 +64,18 @@ class DomainTest < ActiveSupport::TestCase
 
     assert_equal({ restored: b.id, pending: false }, undo.restore)
     assert_nil b.reload.removed_at
+    assert_not b.gift_wrapped
   end
 
   test "CheckoutFlow follows its table and ignores a forward jump" do
     cart = Cart.create!(status: "open")
     CartItem.add(cart.id, create_product.id)
     index = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule: StockStatus.new(low_at: 5)))
-    lines = CartLines.new(cart_id: cart.id, products: ->(ids) { index.lookup(ids) })
+    lines = CartLines.new(cart_id: cart.id, rows: LineRow.new(products: ->(ids) { index.lookup(ids) }))
     lines.load(CartItemsStore.new(model: CartItem, cart_id: cart.id).lookup)
-    flow = CheckoutFlow.new(store: Checkout, cart_id: cart.id, flow: Screens::Checkout::FLOW, start: :address,
-                            url_edges: Screens::Checkout::URL_EDGES, stock_levels: ->(ids) { Product.stock_levels(ids) },
+    wizard = ProgrammingParadigms::Wizard.new(record: -> { Checkout.for_cart(cart.id) }, flow: Screens::Checkout::FLOW, start: :address,
+                                              url_edges: Screens::Checkout::URL_EDGES)
+    flow = CheckoutFlow.new(steps: wizard, stock_levels: ->(ids) { Product.stock_levels(ids) },
                             line_items: BuildLineItems.new(currency: "usd"))
 
     steps = [ flow.start(lines.lines), flow.show(:payment), flow.submit_address(name: "Ada", line1: "1 Ave", city: "L", postal_code: "12345"), flow.show(:address) ]

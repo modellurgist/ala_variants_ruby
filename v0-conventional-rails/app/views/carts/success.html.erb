@@ -1,0 +1,6 @@
+<% content_for :title, "Thank you" %>
+<div class="mx-auto max-w-md space-y-3 text-center">
+  <h1 class="text-2xl font-semibold">Thank you for your order!</h1>
+  <% if @order %><p>Your order reference is <strong><%= @order.reference %></strong>.</p><% end %>
+  <%= link_to "Continue shopping", products_path, class: "underline" %>
+</div>

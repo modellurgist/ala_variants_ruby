@@ -68,13 +68,13 @@ module Screens
       @items = CartItemsStore.new(model: CartItem, cart_id:)
       @saved_store = SavedItemsStore.new(model: SavedItem, cart_id:)
       @wishlist_store = WishlistStore.new(model: WishlistItem, cart_id:)
-      @lines = CartLines.new(cart_id:, products: lookup,
+      @lines = CartLines.new(cart_id:, rows: LineRow.new(products: lookup,
                              links: ->(id) { { quantity: urls.cart_item_path(id), remove: urls.cart_item_path(id),
                                                gift_wrap: urls.gift_wrap_cart_item_path(id), save: urls.save_cart_item_path(id),
-                                               wishlist: urls.wishlist_cart_item_path(id) } })
+                                               wishlist: urls.wishlist_cart_item_path(id) } }))
       @undo = Undo.new(lines: CartItem, cart_id:, window: Store::UNDO_WINDOW)
-      @saved = SavedItems.new(cart_id:, products: lookup, links: ->(id) { { move: urls.move_cart_saved_item_path(id) } })
-      @wishlist = Wishlist.new(cart_id:, products: lookup, links: ->(id) { { add: urls.add_to_cart_cart_wishlist_item_path(id), remove: urls.cart_wishlist_item_path(id) } })
+      @saved = SavedItems.new(cart_id:, rows: LineRow.new(products: lookup, links: ->(id) { { move: urls.move_cart_saved_item_path(id) } }))
+      @wishlist = Wishlist.new(cart_id:, rows: LineRow.new(products: lookup, links: ->(id) { { add: urls.add_to_cart_cart_wishlist_item_path(id), remove: urls.cart_wishlist_item_path(id) } }))
       @pricing = PricingChoices.new(store: CartPricingChoice, cart_id:, shipping:, default_method: :standard,
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
@@ -104,7 +104,7 @@ module Screens
       in [ :lines, :row_removed ] then @patches.remove(@dom.cart_line_id(payload[:id]))
       # the undo offer
       in [ :undo, :pending ] then @undo_pending = payload; @patches.update(@dom.undo_id, undo_html(payload))
-      in [ :undo, :restored ] then notice @say[:restored]
+      in [ :undo, :restored ] then run(:lines, @lines.arrived(@items.line(payload))); notice @say[:restored]
       # saved for later: written back, then reloaded for the ids the store gave; its pane is one patch
       in [ :saved, :changed ] then run(:saved_store, @saved_store.apply(payload)); run(:saved, @saved.reload(@saved_store.lookup))
       in [ :saved, :rows ] then @saved_rows = payload
@@ -132,6 +132,7 @@ module Screens
         @patches.update(@dom.shipping_selector_id, Partial.render("components/shipping_selector", summary: payload, heading: @t[:cart][:shipping], free_over: @t[:cart][:free_over], url: @urls.shipping_cart_path))
         @patches.update(@dom.promo_form_id, Partial.render("components/promo_form", code: payload[:promo_code], error: @flash[:promo_error], url: @urls.promo_cart_path, t: @t[:cart]))
         @patches.update(@dom.empty_note_id, Partial.render("elements/none", count: payload[:item_count], text: @t[:cart][:empty]))
+        @patches.update(@dom.checkout_button_id, Partial.render("components/checkout_button", summary: payload, label: @t[:cart][:checkout], url: @urls.cart_checkout_path))
       end
     end
 

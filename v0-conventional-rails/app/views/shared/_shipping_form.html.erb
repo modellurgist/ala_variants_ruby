@@ -1,0 +1,11 @@
+<%= form_with url: url, method: :patch, data: { controller: "auto-submit", action: "change->auto-submit#submit" }, class: "space-y-1 text-sm" do |form| %>
+  <fieldset>
+    <legend class="font-medium">Shipping method</legend>
+    <% ShippingMethod.all.each do |method| %>
+      <label class="flex items-center gap-2">
+        <%= form.radio_button :shipping_method, method.key, checked: cart.shipping_method == method.key %>
+        <%= method.label %> (<%= money(method.cents) %><%= " · free from #{money(method.free_above_cents)}" if method.free_above_cents %>)
+      </label>
+    <% end %>
+  </fieldset>
+<% end %>

@@ -1,0 +1,7 @@
+<%= turbo_stream.replace @cart_item %>
+<% if @wishlist_item.destroyed? %>
+  <%= turbo_stream.remove @wishlist_item %>
+<% else %>
+  <%= turbo_stream.append "wishlist_items", @wishlist_item %>
+<% end %>
+<%= render "carts/refresh", cart: current_cart %>

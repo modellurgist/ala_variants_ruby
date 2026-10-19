@@ -17,11 +17,11 @@ module Screens
       empty: "No lines yet. Add products below.", each: " each", remove: "Remove", add: "Add", default_quantity: 10,
       back: "Back to lines", submit: "Submit order", submitted: "Order submitted", reference: "Reference", items: "items",
       undo_text: "Item removed.", undo: "Undo", summary: Store::SUMMARY_TEXTS,
-      notices: { added: "Added to order", empty: "Your order is empty", submitted: "Order submitted" }
+      notices: { added: "Added to order", restored: "Item restored", empty: "Your order is empty", submitted: "Order submitted" }
     }.freeze
     # the portal's rows carry no gift wrap, saving or wishlist, redraw whole on each request, and are
     # added through AddLine rather than received by the value
-    GROUNDED = %i[lines.row_added lines.row_changed lines.row_removed lines.saved lines.line lines.adding items.added undo.restored
+    GROUNDED = %i[lines.row_added lines.row_changed lines.row_removed lines.saved lines.line lines.adding items.added
                   catalog.record catalog.form catalog.created catalog.updated catalog.deleted].freeze
 
     attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash
@@ -55,12 +55,13 @@ module Screens
 
       products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       @items = CartItemsStore.new(model: CartItem, cart_id:)
-      @lines = CartLines.new(cart_id:, products: ->(ids) { products.lookup(ids) }, links: ->(id) { { quantity: urls.portal_line_path(id), remove: urls.portal_line_path(id) } })
+      @lines = CartLines.new(cart_id:, rows: LineRow.new(products: ->(ids) { products.lookup(ids) }, links: ->(id) { { quantity: urls.portal_line_path(id), remove: urls.portal_line_path(id) } }))
       @undo = Undo.new(lines: CartItem, cart_id:, window: Store::UNDO_WINDOW)
       @catalog = Records.new(model: Product, project: ProductRow.new(stock_rule:, links: ->(_id) { { add: urls.portal_lines_path } }))
       @add_line = AddLine.new(lines: CartItem, cart_id:)
       @totals = OrderTotals.new(shipping: CalculateShipping.new(rates: Store::RATES), volume: VolumeTier.new(tiers: Store::VOLUME_TIERS), shipping_method: :standard)
-      @flow = SubmitOrder.new(store: OrderSubmission, cart_id:, flow: FLOW, start: :lines, url_edges: URL_EDGES, orders: Order)
+      @flow = SubmitOrder.new(steps: ProgrammingParadigms::Wizard.new(record: -> { OrderSubmission.for_cart(cart_id) }, flow: FLOW, start: :lines, url_edges: URL_EDGES),
+                              cart_id:, orders: Order)
     end
 
     private
@@ -75,6 +76,7 @@ module Screens
       in [ :lines, :contents ] then run(:totals, @totals.contents(payload))
       in [ :lines, :removed ] then run(:undo, @undo.capture(payload))
       in [ :undo, :pending ] then @undo_pending = payload
+      in [ :undo, :restored ] then @flash[:notice] = @say[:restored]
       in [ :catalog, :rows ] then @catalog_rows = payload
       in [ :add_line, :added ] then @flash[:notice] = @say[:added]
       in [ :totals, :summary ] then @summary = payload

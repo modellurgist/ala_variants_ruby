@@ -1,0 +1,18 @@
+<%= form_with model: product, class: "space-y-4",
+      data: { controller: "live-validation", action: "input->live-validation#validate",
+              live_validation_url_value: product.new_record? ? validate_products_path : validate_product_path(product) } do |form| %>
+  <div id="product_errors"><%= render "shared/errors", record: product %></div>
+
+  <% [ [ :name, :text_field, "Name" ], [ :description, :textarea, "Description" ], [ :amount, :number_field, "Amount (cents)" ],
+       [ :stock, :number_field, "Stock" ], [ :thumbnail, :text_field, "Thumbnail URL" ] ].each do |field, input, label| %>
+    <div>
+      <%= form.label field, label, class: "block text-sm font-medium" %>
+      <%= form.public_send input, field, class: "mt-1 block w-full rounded-md border border-stone-300 px-3 py-2" %>
+    </div>
+  <% end %>
+
+  <div class="flex items-center gap-3">
+    <%= form.submit "Save Product", class: "rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white" %>
+    <%= link_to "Cancel", cancel_path, data: { turbo_frame: "_top" }, class: "text-sm underline" %>
+  </div>
+<% end %>

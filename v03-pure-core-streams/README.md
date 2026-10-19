@@ -6,10 +6,11 @@ the screen wires, so the domain runs and tests without Postgres; and a change on
 answers a Turbo request with the **patches** its outputs made instead of a redirect, so the page is
 never rebuilt in the browser (R8.1 as written). `DESIGN.md` records the change and the hand walk.
 
-**Status:** 57 integration tests (V02's 50, plus 4 stream-response tests and 3 store-free tests of the
-pure core) and 5 Cuprite browser tests, 0 failures; RuboCop clean;
+**Status:** 58 integration tests (V02's 50, plus 4 stream-response tests and 4 store-free tests of the
+pure core, one added 2026-10-19 for `CartLines#find`'s refusal) and 5 Cuprite browser tests, 0 failures; RuboCop clean;
 `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it **100/100 with no scored finding
-at any tier** (238 functions). `LINT_NOTES.md` has the run.
+at any tier** (238 functions). `LINT_NOTES.md` has the run. Since 2026-10-19 the linter's clone check (R7, scored from `--strict`) reports 3
+duplicates here, so `--strict` and `--super-strict` score 99; they are left as they are in this archived variant.
 
 ## Run it
 

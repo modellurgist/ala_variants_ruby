@@ -77,7 +77,7 @@ class PortalTest < ActionDispatch::IntegrationTest
     assert_select "#portal_products"
   end
 
-  test "removing a line arms the undo banner; undo restores it" do
+  test "removing a line arms the undo banner; undo restores it with a notice" do
     open_portal
     post portal_lines_path, params: { product_id: @a.id, quantity: 2 }
     line = CartItem.find_by!(cart_id: session[:portal_cart_id], product_id: @a.id)
@@ -88,6 +88,7 @@ class PortalTest < ActionDispatch::IntegrationTest
 
     post portal_undo_path
     follow_redirect!
+    assert_select "#flash", /Item restored/
     assert_select "#order_lines", /Bulk Widget/
   end
 end

@@ -9,12 +9,12 @@ flowchart LR
   row_update[row_update]
   row_removal[row_removal]
   outside -- request --> records
-  records -- form --> screen
-  records -- created --> list_update
   records -- rows --> screen
   outside -- request --> add_line
   add_line -- added --> screen
-  records -- updated --> row_update
+  records -- form --> screen
+  records -- created --> list_update
   records -- record --> screen
+  records -- updated --> row_update
   records -- deleted --> row_removal
 ```

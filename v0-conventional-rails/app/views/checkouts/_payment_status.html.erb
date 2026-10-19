@@ -1,0 +1,12 @@
+<div id="payment" class="flex items-center gap-4">
+  <% if checkout.processing? %>
+    <span class="size-5 animate-spin rounded-full border-2 border-emerald-700 border-t-transparent" aria-hidden="true"></span>
+    <span role="status">Processing payment…</span>
+  <% elsif checkout.failed? %>
+    <span role="alert" class="text-red-700">Payment failed.</span>
+    <%= button_to "Retry payment", pay_cart_checkout_path, class: "rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white" %>
+  <% else %>
+    <%= link_to "Edit address", cart_checkout_path, class: "text-sm underline" %>
+    <%= button_to "Pay", pay_cart_checkout_path, class: "rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white" %>
+  <% end %>
+</div>

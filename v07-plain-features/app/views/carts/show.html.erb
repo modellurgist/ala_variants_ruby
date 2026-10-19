@@ -26,7 +26,6 @@
     <div id="<%= summary_id %>"><%= render "components/cart_summary", summary: @s.summary, t: @texts[:cart] %></div>
     <div id="<%= shipping_selector_id %>"><%= render "components/shipping_selector", summary: @s.summary, heading: @texts[:cart][:shipping], free_over: @texts[:cart][:free_over], url: shipping_cart_path %></div>
     <div id="<%= promo_form_id %>"><%= render "components/promo_form", code: @s.summary[:promo_code], error: flash[:promo_error], url: promo_cart_path, t: @texts[:cart] %></div>
-    <%= button_to "#{@texts[:cart][:checkout]} · #{@s.summary[:total]}", cart_checkout_path, disabled: @s.summary[:empty],
-          class: "mt-6 w-full rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-stone-300" %>
+    <div id="<%= checkout_button_id %>"><%= render "components/checkout_button", summary: @s.summary, label: @texts[:cart][:checkout], url: cart_checkout_path %></div>
   </section>
 </div>

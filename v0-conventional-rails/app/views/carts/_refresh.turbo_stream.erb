@@ -1,0 +1,5 @@
+<% %w[items saved wishlist].each do |tab| %>
+  <%= turbo_stream.update "#{tab}_count", cart_tab_count(cart, tab).to_s %>
+<% end %>
+<%= turbo_stream.update "cart_summary", partial: "carts/summary", locals: { cart: } %>
+<%= turbo_stream.update "flash", partial: "layouts/flash" %>

@@ -1,0 +1,3 @@
+<%= turbo_stream.update "undo_banner", "" %>
+<%= turbo_stream.append "cart_items", @cart_item if @cart_item %>
+<%= render "carts/refresh", cart: current_cart %>

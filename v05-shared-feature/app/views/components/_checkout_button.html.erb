@@ -1,0 +1,3 @@
+<%# The button that starts checkout, with the cart's total; disabled while the cart is empty. %>
+<%= button_to "#{label} · #{summary[:total]}", url, disabled: summary[:empty],
+      class: "mt-6 w-full rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-stone-300" %>

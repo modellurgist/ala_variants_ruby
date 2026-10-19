@@ -24,7 +24,7 @@ flowchart LR
   lines -- row_changed --> screen
   lines -- row_removed --> screen
   undo -- pending --> screen
-  undo -- restored --> screen
+  undo -- restored --> lines
   saved -- changed --> saved_store
   saved -- changed --> saved
   saved -- rows --> screen

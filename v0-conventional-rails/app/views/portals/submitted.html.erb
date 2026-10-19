@@ -1,0 +1,7 @@
+<% content_for :title, "Order submitted" %>
+<div class="mx-auto max-w-lg space-y-4">
+  <%= render "shared/steps", steps: %w[Order Review Submitted], current: "Submitted" %>
+  <h1 class="text-2xl font-semibold">Thank you — your order is in</h1>
+  <p>Order reference <strong><%= @order.reference %></strong> · PO <%= @order.po_number %></p>
+  <%= link_to "Start a new order", portal_path, class: "underline" %>
+</div>

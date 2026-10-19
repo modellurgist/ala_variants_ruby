@@ -1,0 +1,4 @@
+<% totals = cart.totals %>
+<% if totals.empty? %><p class="mb-3 text-sm text-stone-600">No order lines yet.</p><% end %>
+<%= render "shared/totals", totals: %>
+<%= link_to "Review order", review_portal_path, class: "mt-4 block rounded-md bg-emerald-700 px-4 py-2 text-center text-sm font-medium text-white" %>

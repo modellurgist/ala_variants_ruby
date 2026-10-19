@@ -1,0 +1,20 @@
+<% content_for :title, "Checkout · Address" %>
+<div class="mx-auto max-w-lg">
+  <h1 class="mb-4 text-2xl font-semibold">Checkout</h1>
+  <%= render "shared/steps", steps: %w[Address Payment], current: "Address" %>
+
+  <%= form_with model: @checkout, url: cart_checkout_path, method: :patch, class: "space-y-4",
+        data: { controller: "live-validation", action: "input->live-validation#validate", live_validation_url_value: validate_cart_checkout_path } do |form| %>
+    <div id="checkout_errors"><%= render "shared/errors", record: @checkout %></div>
+    <% { name: "Full name", address: "Address", city: "City", postal_code: "Postal code" }.each do |field, label| %>
+      <div>
+        <%= form.label field, label, class: "block text-sm font-medium" %>
+        <%= form.text_field field, class: "mt-1 block w-full rounded-md border border-stone-300 px-3 py-2" %>
+      </div>
+    <% end %>
+    <div class="flex items-center gap-4">
+      <%= form.submit "Continue to payment", class: "rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white" %>
+      <%= link_to "Back to cart", cart_path, class: "text-sm underline" %>
+    </div>
+  <% end %>
+</div>

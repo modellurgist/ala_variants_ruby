@@ -93,6 +93,66 @@ class CheckoutTest < ActionDispatch::IntegrationTest
     assert_equal 2, FakeGateway.charges.size
   end
 
+  test "a page waiting on the payment can ask for the outcome: nothing while processing, then the outcome" do
+    FakeGateway.reset([ [ :error, :declined ] ])
+    open_cart
+    post cart_checkout_path
+    patch address_cart_checkout_path, params: address
+    post pay_cart_checkout_path
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_response :no_content
+
+    perform_enqueued_jobs
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_match(/<turbo-stream action="replace" target="checkout_status">/, response.body)
+    assert_match(/Payment failed\./, response.body)
+  end
+
+  # A job process keeps its own table: it builds a checkout of its own, delivers there, and only the
+  # stamp tells the web process's kept checkout that the step moved.
+  def pay_in_another_process
+    job = enqueued_jobs.shift
+    _registry, key, port, payload = ActiveJob::Arguments.deserialize(job[:args])
+    other = ProgrammingParadigms::LongLived.new(build: ->(id) { Screens::Checkout.new(cart_id: id) }, version: ->(id) { Cart.version_of(id) },
+                                                reload: :reload, begin: :begin, capacity: 1)
+    other.with(key) { _1.input_port(port.to_sym).push(payload) }
+  end
+
+  def paying
+    open_cart
+    post cart_checkout_path
+    patch address_cart_checkout_path, params: address
+    post pay_cart_checkout_path
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_response :no_content
+  end
+
+  test "a payment settled by a job in another process reaches the kept checkout" do
+    paying
+    pay_in_another_process
+    assert_equal 1, ProgrammingParadigms::LongLived.named(:checkout_screens).size
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_response :ok
+    assert_match(/<turbo-stream action="replace" target="checkout_status">/, response.body)
+    get cart_checkout_step_path(:payment)
+    assert_redirected_to cart_success_path
+  end
+
+  test "a payment declined in another process reaches the kept checkout, and the retry pays" do
+    FakeGateway.reset([ [ :error, :declined ], [ :ok, "chg_retry" ] ])
+    paying
+    pay_in_another_process
+    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_match(/Payment failed\./, response.body)
+    get cart_checkout_step_path(:payment)
+    assert_select "form[action=?] button", pay_cart_checkout_path, "Try again"
+
+    post pay_cart_checkout_path
+    pay_in_another_process
+    get cart_checkout_step_path(:payment)
+    assert_redirected_to cart_success_path
+  end
+
   test "browser back returns to the address step; a forward URL jump is ignored; a reload lands on the step" do
     open_cart
     post cart_checkout_path

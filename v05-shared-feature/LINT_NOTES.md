@@ -1,6 +1,6 @@
 # V05 under ala_lint_ruby
 
-Run on 2026-10-10 with `../../ala_lint_ruby/bin/ala_lint --root .` and a six-layer map: V02's five with `features` between application and domain.
+Run on 2026-10-10, and again on 2026-10-19 with the clone check, with `../../ala_lint_ruby/bin/ala_lint --root .` and a six-layer map: V02's five with `features` between application and domain.
 
 | tier | score | rules met | functions clean |
 |---|---|---|---|
@@ -24,6 +24,24 @@ Nine lines are accepted (`--list-accepted` prints them with the finding each cov
   that bumps the cart's version. The check flags a model callback reaching another model as a lower
   record deciding what happens next. Here nothing happens next: the stamp is the store's own, read
   by whoever wants to know whether the cart changed.
+
+Findings fixed when the linter gained its clone check (2026-10-19), all three scored from `--strict`:
+
+- `CartLines#row`/`#snapshot`, `SavedItems#rows` and `Wishlist#rows`: a held line joined with its
+  product's display fields and its URLs, written four ways. `Rules::LineRow` is that projection; the
+  pages configure one per list with the fields their partial reads and the links. `snapshot` (a
+  line in cents for payment, no URLs) is a different concept and stays.
+- `CartTotals#summary` and `OrderTotals#summary`: subtotal, a discount at a percentage, shipping on
+  the subtotal, total. One pricing of an order; `Rules::Pricing.summary` computes it and each totals
+  adds its own (gift wrap, promo, shipping options; the volume tier's label).
+- `CheckoutFlow#advance` and `SubmitOrder#advance` (with `show`'s URL jump and the record lookup):
+  a state machine whose state is a record's `step` column. `ProgrammingParadigms::PersistedSteps`;
+  the pages build one with their table, start and URL jumps and hand it to the flow.
+  The first extraction built the `LineRow`s and `PersistedSteps` inside the classes and the check
+  reported the constructors as clones in turn; moving the configuration to the pages answered it.
+
+Two `clone_inside` reports (`Ports#on`/`#input_port`, `Drawing.nodes`/`.edge`) are unscored by
+design and left as they are.
 
 Findings fixed when the running trace and the kept checkout were added (2026-10-11):
 

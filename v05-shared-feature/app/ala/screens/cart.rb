@@ -73,11 +73,13 @@ module Screens
       @saved_store = SavedItemsStore.new(model: SavedItem, cart_id:)
       @wishlist_store = WishlistStore.new(model: WishlistItem, cart_id:)
       @order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::UNDO_WINDOW,
-                                        links: ->(id) { { quantity: urls.cart_item_path(id), remove: urls.cart_item_path(id),
-                                                          gift_wrap: urls.gift_wrap_cart_item_path(id), save: urls.save_cart_item_path(id),
-                                                          wishlist: urls.wishlist_cart_item_path(id) } })
-      @saved = SavedItems.new(cart_id:, links: ->(id) { { move: urls.move_cart_saved_item_path(id) } })
-      @wishlist = Wishlist.new(cart_id:, links: ->(id) { { add: urls.add_to_cart_cart_wishlist_item_path(id), remove: urls.cart_wishlist_item_path(id) } })
+                                        row: LineRow.new(fields: %i[name thumbnail amount stock stock_status],
+                                                         links: ->(id) { { quantity: urls.cart_item_path(id), remove: urls.cart_item_path(id),
+                                                                           gift_wrap: urls.gift_wrap_cart_item_path(id), save: urls.save_cart_item_path(id),
+                                                                           wishlist: urls.wishlist_cart_item_path(id) } }))
+      @saved = SavedItems.new(cart_id:, row: LineRow.new(fields: %i[name thumbnail amount], links: ->(id) { { move: urls.move_cart_saved_item_path(id) } }))
+      @wishlist = Wishlist.new(cart_id:, row: LineRow.new(fields: %i[name thumbnail amount],
+                                                          links: ->(id) { { add: urls.add_to_cart_cart_wishlist_item_path(id), remove: urls.cart_wishlist_item_path(id) } }))
       @pricing = PricingChoices.new(store: CartPricingChoice, cart_id:, shipping:, default_method: :standard,
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
@@ -143,6 +145,7 @@ module Screens
       @totals.wire_to(patch(:update, dom.shipping_selector_id, ->(summary) { Partial.render("components/shipping_selector", summary:, heading: t[:cart][:shipping], free_over: t[:cart][:free_over], url: urls.shipping_cart_path) }), from: :summary)
       @totals.wire_to(patch(:update, dom.promo_form_id, ->(summary) { Partial.render("components/promo_form", code: summary[:promo_code], error: @flash[:promo_error], url: urls.promo_cart_path, t: t[:cart]) }), from: :summary)
       @totals.wire_to(patch(:update, dom.empty_note_id, ->(summary) { Partial.render("elements/none", count: summary[:item_count], text: t[:cart][:empty]) }), from: :summary)
+      @totals.wire_to(patch(:update, dom.checkout_button_id, ->(summary) { Partial.render("components/checkout_button", summary:, label: t[:cart][:checkout], url: urls.cart_checkout_path) }), from: :summary)
     end
 
     def tabs(summary = @summary)

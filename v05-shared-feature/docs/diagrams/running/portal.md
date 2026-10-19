@@ -21,6 +21,7 @@ flowchart LR
   order -- rows --> screen
   order -- contents → contents --> totals
   order -- undo_pending --> screen
+  order -- restored --> screen
   order_lines -- removed → capture --> order_undo
   order_lines -- items --> order
   order_lines -- products --> order

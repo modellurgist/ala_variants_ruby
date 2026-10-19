@@ -1,0 +1,10 @@
+<ol class="mb-6 flex gap-4 text-sm" aria-label="Progress">
+  <% steps.each_with_index do |step, index| %>
+    <% state = index < steps.index(current) ? "done" : (step == current ? "current" : "upcoming") %>
+    <%= tag.li data: { step_state: state }, aria: { current: ("step" if state == "current") },
+          class: [ "flex items-center gap-2", { "done" => "text-emerald-700", "current" => "font-semibold", "upcoming" => "text-stone-400" }[state] ] do %>
+      <span class="flex size-6 items-center justify-center rounded-full border border-current"><%= state == "done" ? "✓" : index + 1 %></span>
+      <%= step %>
+    <% end %>
+  <% end %>
+</ol>

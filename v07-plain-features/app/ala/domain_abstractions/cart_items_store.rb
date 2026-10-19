@@ -3,11 +3,11 @@ module DomainAbstractions
   # changes a lines abstraction decided. Config: model, cart_id. In: lookup (answers [{ id:,
   # product_id:, quantity:, gift_wrapped: }]), apply ({ op:, ... } with op :quantity { id:, quantity: },
   # :gift_wrap { id:, gift_wrapped: }, :remove { id: }), add ({ product_id:, quantity: }). Out: added
-  # (the stored line's snapshot, after add).
+  # (the stored line's `to_line`, after add).
   class CartItemsStore
     OUTPUTS = %i[added].freeze
 
-    def lookup = mine.map { snapshot(_1) }
+    def lookup = mine.map(&:to_line)
 
     def apply(change)
       case change[:op]
@@ -18,13 +18,12 @@ module DomainAbstractions
       nil
     end
 
-    def add(line) = { added: snapshot(@model.add(@cart_id, line[:product_id], line[:quantity])) }
+    def add(line) = { added: @model.add(@cart_id, line[:product_id], line[:quantity]).to_line }
 
     def initialize(model:, cart_id:) = (@model, @cart_id = model, cart_id)
 
     private
 
     def mine = @model.active.where(cart_id: @cart_id)
-    def snapshot(item) = { id: item.id, product_id: item.product_id, quantity: item.quantity, gift_wrapped: item.gift_wrapped }
   end
 end

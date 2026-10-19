@@ -1,0 +1,3 @@
+<%= render layout: "shared/modal", locals: { title: "Edit Product" } do %>
+  <%= render "form", product: @product, cancel_path: request.path.end_with?("/show/edit") ? product_path(@product) : products_path %>
+<% end %>

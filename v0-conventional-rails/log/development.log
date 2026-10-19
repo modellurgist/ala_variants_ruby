@@ -1,0 +1,755 @@
+  [1m[35mSQL (0.3ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (33.5ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_development" /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (6.6ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_test" /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (234.6ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_development" ENCODING = 'unicode' /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (123.0ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_test" ENCODING = 'unicode' /*application='V0ConventionalRails'*/[0m
+  [1m[35m (3.8ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8085448808277827280) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.8ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-19 08:48:01.962215', '2026-10-19 08:48:01.962216') RETURNING "key" /*application='V0ConventionalRails'*/[0m
+Migrating to CreateProducts (20261019084745)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (2.4ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.6ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084745') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateCarts (20261019084746)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "kind" character varying DEFAULT 'storefront' NOT NULL, "promo_code" character varying, "shipping_method" character varying DEFAULT 'standard' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084746') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateCartItems (20261019084747)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (2.7ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrap" boolean DEFAULT FALSE NOT NULL, "saved_for_later" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084747') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateWishlistItems (20261019084748)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084748') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateCheckouts (20261019084749)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (2.3ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "name" character varying, "address" character varying, "city" character varying, "postal_code" character varying, "payment_status" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084749') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateOrders (20261019084750)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (2.0ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "total_cents" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084750') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+Migrating to CreateOrderItems (20261019084751)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer NOT NULL, "unit_amount" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+, CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084751') RETURNING "version" /*application='V0ConventionalRails'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT pg_advisory_unlock(8085448808277827280) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (83.6ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_development" /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (20.7ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_test" /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (51.8ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_development" ENCODING = 'unicode' /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35m (51.7ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_test" ENCODING = 'unicode' /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.4ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrap" boolean DEFAULT FALSE NOT NULL, "saved_for_later" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "kind" character varying DEFAULT 'storefront' NOT NULL, "promo_code" character varying, "shipping_method" character varying DEFAULT 'standard' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "checkouts" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "name" character varying, "address" character varying, "city" character varying, "postal_code" character varying, "payment_status" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_items" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer NOT NULL, "unit_amount" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "total_cents" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "wishlist_items" CASCADE /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "checkouts" ADD CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.1ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='V0ConventionalRails'*/[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20261019084751) /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20261019084750),
+(20261019084749),
+(20261019084748),
+(20261019084747),
+(20261019084746),
+(20261019084745); /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-19 08:48:10.101010', '2026-10-19 08:48:10.101011') RETURNING "key" /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'abda1130ce11d16155c075795f4e758217c64207', '2026-10-19 08:48:10.102819', '2026-10-19 08:48:10.102819') RETURNING "key" /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8085448808277827280) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='V0ConventionalRails'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(8085448808277827280) /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='V0ConventionalRails'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='V0ConventionalRails'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.5ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.5ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Espresso Beans' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (1.0ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Espresso Beans', 'Dark roast, 1 kg bag', 2499, 40, 'https://picsum.photos/seed/beans/96', '2026-10-19 08:53:30.829447', '2026-10-19 08:53:30.829447') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 13.1ms | GC: 0.2ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_1\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 5.5ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_1\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Pour-over Kettle' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.8ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Pour-over Kettle', 'Gooseneck, 1 L', 5900, 12, 'https://picsum.photos/seed/kettle/96', '2026-10-19 08:53:30.942673', '2026-10-19 08:53:30.942673') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_2\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_2\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Ceramic Mug' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Ceramic Mug', '350 ml, stoneware', 1500, 4, 'https://picsum.photos/seed/mug/96', '2026-10-19 08:53:30.946667', '2026-10-19 08:53:30.946667') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_3\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_3\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Burr Grinder' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.8ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Burr Grinder', 'Conical burrs, 40 settings', 12900, 7, 'https://picsum.photos/seed/grinder/96', '2026-10-19 08:53:30.950346', '2026-10-19 08:53:30.950346') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_4\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_4\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Paper Filters' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Paper Filters', 'Pack of 100', 699, 0, 'https://picsum.photos/seed/filters/96', '2026-10-19 08:53:30.954099', '2026-10-19 08:53:30.954099') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_5\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_5\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Count (37.6ms)[0m  [1m[34mSELECT COUNT(*) FROM "products" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (186.7ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_development" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (26.4ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_test" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (55.7ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_development" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (53.0ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_test" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrap" boolean DEFAULT FALSE NOT NULL, "saved_for_later" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "kind" character varying DEFAULT 'storefront' NOT NULL, "promo_code" character varying, "shipping_method" character varying DEFAULT 'standard' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "checkouts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "name" character varying, "address" character varying, "city" character varying, "postal_code" character varying, "payment_status" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.7ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer NOT NULL, "unit_amount" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "total_cents" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.0ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mDROP TABLE IF EXISTS "wishlist_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "checkouts" ADD CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20261019084751) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20261019084750),
+(20261019084749),
+(20261019084748),
+(20261019084747),
+(20261019084746),
+(20261019084745); /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-19 08:55:32.934766', '2026-10-19 08:55:32.934767') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'abda1130ce11d16155c075795f4e758217c64207', '2026-10-19 08:55:32.936583', '2026-10-19 08:55:32.936583') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.6ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Espresso Beans' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.4ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Espresso Beans', 'Dark roast, 1 kg bag', 2499, 40, 'https://picsum.photos/seed/beans/96', '2026-10-19 08:55:34.494494', '2026-10-19 08:55:34.494494') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 11.8ms | GC: 0.9ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_1\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 3.4ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_1\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Pour-over Kettle' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.8ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Pour-over Kettle', 'Gooseneck, 1 L', 5900, 12, 'https://picsum.photos/seed/kettle/96', '2026-10-19 08:55:34.580527', '2026-10-19 08:55:34.580527') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_2\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_2\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Ceramic Mug' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Ceramic Mug', '350 ml, stoneware', 1500, 4, 'https://picsum.photos/seed/mug/96', '2026-10-19 08:55:34.583957', '2026-10-19 08:55:34.583957') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_3\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_3\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Burr Grinder' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Burr Grinder', 'Conical burrs, 40 settings', 12900, 7, 'https://picsum.photos/seed/grinder/96', '2026-10-19 08:55:34.587089', '2026-10-19 08:55:34.587089') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_4\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_4\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Paper Filters' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Paper Filters', 'Pack of 100', 699, 0, 'https://picsum.photos/seed/filters/96', '2026-10-19 08:55:34.590248', '2026-10-19 08:55:34.590248') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_5\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_5\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.4ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (64.8ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_development" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (22.0ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_test" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (54.9ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_development" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (45.7ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_test" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.2ms)[0m  [1m[35mCREATE EXTENSION IF NOT EXISTS "plpgsql" SCHEMA pg_catalog /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "cart_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrap" boolean DEFAULT FALSE NOT NULL, "saved_for_later" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "carts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (1.2ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "kind" character varying DEFAULT 'storefront' NOT NULL, "promo_code" character varying, "shipping_method" character varying DEFAULT 'standard' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[35mDROP TABLE IF EXISTS "checkouts" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "name" character varying, "address" character varying, "city" character varying, "postal_code" character varying, "payment_status" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "order_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer NOT NULL, "unit_amount" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "orders" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "total_cents" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "products" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[35mDROP TABLE IF EXISTS "wishlist_items" CASCADE /*application='GoodDeal'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "cart_items" ADD CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mALTER TABLE "checkouts" ADD CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.6ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "order_items" ADD CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "orders" ADD CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mALTER TABLE "wishlist_items" ADD CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES (20261019084751) /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" (version) VALUES
+(20261019084750),
+(20261019084749),
+(20261019084748),
+(20261019084747),
+(20261019084746),
+(20261019084745); /*application='GoodDeal'*/[0m
+  [1m[35m (0.8ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-19 08:55:44.976686', '2026-10-19 08:55:44.976687') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'schema_sha1' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.2ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('schema_sha1', 'abda1130ce11d16155c075795f4e758217c64207', '2026-10-19 08:55:44.978284', '2026-10-19 08:55:44.978285') RETURNING "key" /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_advisory_unlock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Espresso Beans' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.3ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Espresso Beans', 'Dark roast, 1 kg bag', 2499, 40, 'https://picsum.photos/seed/beans/96', '2026-10-19 08:55:45.616120', '2026-10-19 08:55:45.616120') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 11.1ms | GC: 1.1ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_1\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 3.6ms | GC: 0.2ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_1\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Pour-over Kettle' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.8ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Pour-over Kettle', 'Gooseneck, 1 L', 5900, 12, 'https://picsum.photos/seed/kettle/96', '2026-10-19 08:55:45.694698', '2026-10-19 08:55:45.694698') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_2\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.3ms | GC: 0.1ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_2\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Ceramic Mug' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Ceramic Mug', '350 ml, stoneware', 1500, 4, 'https://picsum.photos/seed/mug/96', '2026-10-19 08:55:45.698209', '2026-10-19 08:55:45.698209') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_3\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_3\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Burr Grinder' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Burr Grinder', 'Conical burrs, 40 settings', 12900, 7, 'https://picsum.photos/seed/grinder/96', '2026-10-19 08:55:45.701261', '2026-10-19 08:55:45.701261') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_4\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_4\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Paper Filters' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Paper Filters', 'Pack of 100', 699, 0, 'https://picsum.photos/seed/filters/96', '2026-10-19 08:55:45.704282', '2026-10-19 08:55:45.704282') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_5\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_5\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (73.6ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_development" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (25.1ms)[0m  [1m[35mDROP DATABASE IF EXISTS "good_deal_rails_v0_test" /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (61.2ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_development" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35m (48.2ms)[0m  [1m[35mCREATE DATABASE "good_deal_rails_v0_test" ENCODING = 'unicode' /*application='GoodDeal'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" character varying NOT NULL PRIMARY KEY) /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" character varying NOT NULL PRIMARY KEY, "value" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.1ms)[0m  [1m[34mSELECT pg_try_advisory_lock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.3ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = 'environment' ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.3ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES ('environment', 'development', '2026-10-19 08:55:54.552798', '2026-10-19 08:55:54.552799') RETURNING "key" /*application='GoodDeal'*/[0m
+Migrating to CreateProducts (20261019084745)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "products" ("id" bigserial primary key, "name" character varying NOT NULL, "description" text, "amount" integer NOT NULL, "stock" integer DEFAULT 0 NOT NULL, "thumbnail" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084745') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateCarts (20261019084746)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (0.9ms)[0m  [1m[35mCREATE TABLE "carts" ("id" bigserial primary key, "status" character varying DEFAULT 'open' NOT NULL, "kind" character varying DEFAULT 'storefront' NOT NULL, "promo_code" character varying, "shipping_method" character varying DEFAULT 'standard' NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084746') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateCartItems (20261019084747)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (1.3ms)[0m  [1m[35mCREATE TABLE "cart_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "quantity" integer DEFAULT 1 NOT NULL, "gift_wrap" boolean DEFAULT FALSE NOT NULL, "saved_for_later" boolean DEFAULT FALSE NOT NULL, "removed_at" timestamp(6), "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_6cdb1f0139"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_681a180e84"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_cart_id" ON "cart_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.5ms)[0m  [1m[35mCREATE INDEX "index_cart_items_on_product_id" ON "cart_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.4ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_cart_items_on_cart_id_and_product_id" ON "cart_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084747') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateWishlistItems (20261019084748)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (9.6ms)[0m  [1m[35mCREATE TABLE "wishlist_items" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "product_id" bigint NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_fa1885f672"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+, CONSTRAINT "fk_rails_d31985edcf"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_cart_id" ON "wishlist_items" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_wishlist_items_on_product_id" ON "wishlist_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_wishlist_items_on_cart_id_and_product_id" ON "wishlist_items" ("cart_id", "product_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084748') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateCheckouts (20261019084749)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "checkouts" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "name" character varying, "address" character varying, "city" character varying, "postal_code" character varying, "payment_status" character varying, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_1d46b283d4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_checkouts_on_cart_id" ON "checkouts" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084749') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateOrders (20261019084750)
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (1.4ms)[0m  [1m[35mCREATE TABLE "orders" ("id" bigserial primary key, "cart_id" bigint NOT NULL, "po_number" character varying, "total_cents" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_5cdf0e0ad4"
+FOREIGN KEY ("cart_id")
+  REFERENCES "carts" ("id")
+) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE UNIQUE INDEX "index_orders_on_cart_id" ON "orders" ("cart_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084750') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+Migrating to CreateOrderItems (20261019084751)
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[35m (1.6ms)[0m  [1m[35mCREATE TABLE "order_items" ("id" bigserial primary key, "order_id" bigint NOT NULL, "product_id" bigint, "name" character varying NOT NULL, "quantity" integer NOT NULL, "unit_amount" integer NOT NULL, "created_at" timestamp(6) NOT NULL, "updated_at" timestamp(6) NOT NULL, CONSTRAINT "fk_rails_e3cb28f071"
+FOREIGN KEY ("order_id")
+  REFERENCES "orders" ("id")
+, CONSTRAINT "fk_rails_f1a29ddd47"
+FOREIGN KEY ("product_id")
+  REFERENCES "products" ("id")
+ ON DELETE SET NULL) /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_order_id" ON "order_items" ("order_id") /*application='GoodDeal'*/[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE INDEX "index_order_items_on_product_id" ON "order_items" ("product_id") /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Create (0.1ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES ('20261019084751') RETURNING "version" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT pg_advisory_unlock(8085448808277827280) /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO public /*application='GoodDeal'*/[0m
+  [1m[35mSQL (0.1ms)[0m  [1m[35mSET search_path TO "$user", public /*application='GoodDeal'*/[0m
+  [1m[36mActiveRecord::SchemaMigration Load (0.4ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Espresso Beans' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.3ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Espresso Beans', 'Dark roast, 1 kg bag', 2499, 40, 'https://picsum.photos/seed/beans/96', '2026-10-19 08:55:55.239953', '2026-10-19 08:55:55.239953') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.5ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 11.6ms | GC: 3.8ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_1\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 1.7ms | GC: 0.2ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_1\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.3ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Pour-over Kettle' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.9ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Pour-over Kettle', 'Gooseneck, 1 L', 5900, 12, 'https://picsum.photos/seed/kettle/96', '2026-10-19 08:55:55.295568', '2026-10-19 08:55:55.295568') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.3ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_2\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_2\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.2ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Ceramic Mug' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (1.0ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Ceramic Mug', '350 ml, stoneware', 1500, 4, 'https://picsum.photos/seed/mug/96', '2026-10-19 08:55:55.299484', '2026-10-19 08:55:55.299484') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_3\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_3\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Burr Grinder' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Burr Grinder', 'Conical burrs, 40 settings', 12900, 7, 'https://picsum.photos/seed/grinder/96', '2026-10-19 08:55:55.303020', '2026-10-19 08:55:55.303020') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_4\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_4\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" WHERE "products"."name" = 'Paper Filters' LIMIT 1 /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  [1m[36mProduct Create (0.7ms)[0m  [1m[32mINSERT INTO "products" ("name", "description", "amount", "stock", "thumbnail", "created_at", "updated_at") VALUES ('Paper Filters', 'Pack of 100', 699, 0, 'https://picsum.photos/seed/filters/96', '2026-10-19 08:55:55.306272', '2026-10-19 08:55:55.306272') RETURNING "id" /*application='GoodDeal'*/[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  Rendered products/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to products: "<turbo-stream action=\"append\" target=\"products\"><template><!-- BEGIN app/views/products/_product.html.erb\n--><article id=\"product_5\" class=\"flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4\">\n  <div class=\"flex gap-3\">\n    <img alt=\"\" class=\"size-16 rounded obje...
+  Rendered portals/_product.html.erb (Duration: 0.2ms | GC: 0.0ms)
+[ActionCable] Broadcasting to portal_products: "<turbo-stream action=\"append\" target=\"portal_products\"><template><!-- BEGIN app/views/portals/_product.html.erb\n--><form id=\"portal_product_5\" class=\"flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 text-sm\" action=\"/portal/lines\" accept-charset=\"UTF-8\" method...
+Started GET "/products" for ::1 at 2026-10-19 12:03:28 +0300
+  [1m[36mActiveRecord::SchemaMigration Load (0.3ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='GoodDeal'*/[0m
+Processing by ProductsController#index as */*
+  Rendering layout layouts/application.html.erb
+  Rendering products/index.html.erb within layouts/application
+  [1m[36mProduct Load (0.5ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."created_at" ASC, "products"."id" ASC /*action='index',application='GoodDeal',controller='products'*/[0m
+  ↳ app/views/products/index.html.erb:11
+  Rendered collection of products/_product.html.erb [5 times] (Duration: 4.5ms | GC: 0.0ms)
+  Rendered products/index.html.erb within layouts/application (Duration: 10.5ms | GC: 0.0ms)
+  Rendered layouts/_flash.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 17.1ms | GC: 0.0ms)
+Completed 200 OK in 53ms (Views: 19.0ms | ActiveRecord: 4.9ms (1 query, 0 cached) | GC: 1.2ms)
+
+
+Started GET "/cart" for ::1 at 2026-10-19 12:03:28 +0300
+Processing by CartsController#show as */*
+  [1m[36mCart Load (0.5ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."status" = 'open' AND "carts"."id" IS NULL AND "carts"."kind" = 'storefront' LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mCart Create (1.1ms)[0m  [1m[32mINSERT INTO "carts" ("status", "kind", "promo_code", "shipping_method", "created_at", "updated_at") VALUES ('open', 'storefront', NULL, 'standard', '2026-10-19 09:03:28.843254', '2026-10-19 09:03:28.843254') RETURNING "id" /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  Rendering layout layouts/application.html.erb
+  Rendering carts/show.html.erb within layouts/application
+  [1m[36mCartItem Load (1.1ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NOT NULL ORDER BY "cart_items"."removed_at" DESC LIMIT 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/models/cart.rb:30:in 'Cart#pending_removal'
+  [1m[36mCartItem Sum (0.2ms)[0m  [1m[34mSELECT SUM("cart_items"."quantity") FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/helpers/carts_helper.rb:4:in 'CartsHelper#cart_tab_count'
+  [1m[36mCartItem Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = TRUE /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/helpers/carts_helper.rb:5:in 'CartsHelper#cart_tab_count'
+  [1m[36mWishlistItem Count (0.6ms)[0m  [1m[34mSELECT COUNT(*) FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 1 /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/helpers/carts_helper.rb:6:in 'CartsHelper#cart_tab_count'
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE ORDER BY "cart_items"."created_at" ASC, "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/views/carts/show.html.erb:23
+  Rendered collection of templates [0 times] (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = TRUE ORDER BY "cart_items"."updated_at" ASC, "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/views/carts/show.html.erb:26
+  Rendered collection of cart_items/_saved_item.html.erb [0 times] (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mWishlistItem Load (0.2ms)[0m  [1m[34mSELECT "wishlist_items".* FROM "wishlist_items" WHERE "wishlist_items"."cart_id" = 1 ORDER BY "wishlist_items"."created_at" ASC, "wishlist_items"."id" ASC /*action='show',application='GoodDeal',controller='carts'*/[0m
+  ↳ app/views/carts/show.html.erb:29
+  Rendered collection of templates [0 times] (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mCACHE CartItem Load (0.0ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 1 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE ORDER BY "cart_items"."created_at" ASC, "cart_items"."id" ASC[0m
+  ↳ app/models/cart_totals.rb:6:in 'CartTotals#initialize'
+  Rendered shared/_totals.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered carts/_summary.html.erb (Duration: 3.9ms | GC: 0.0ms)
+  Rendered carts/_promo_form.html.erb (Duration: 3.2ms | GC: 0.0ms)
+  Rendered shared/_shipping_form.html.erb (Duration: 1.7ms | GC: 0.0ms)
+  Rendered carts/show.html.erb within layouts/application (Duration: 28.5ms | GC: 0.0ms)
+  Rendered layouts/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 28.9ms | GC: 0.0ms)
+Completed 200 OK in 41ms (Views: 25.4ms | ActiveRecord: 6.8ms (10 queries, 1 cached) | GC: 0.0ms)
+
+
+Started GET "/portal" for ::1 at 2026-10-19 12:03:28 +0300
+Processing by PortalsController#show as */*
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."status" = 'open' AND "carts"."id" IS NULL AND "carts"."kind" = 'portal' LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mCart Create (0.7ms)[0m  [1m[32mINSERT INTO "carts" ("status", "kind", "promo_code", "shipping_method", "created_at", "updated_at") VALUES ('open', 'portal', NULL, 'standard', '2026-10-19 09:03:28.889088', '2026-10-19 09:03:28.889088') RETURNING "id" /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  Rendering layout layouts/application.html.erb
+  Rendering portals/show.html.erb within layouts/application
+  Rendered shared/_steps.html.erb (Duration: 0.2ms | GC: 0.0ms)
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" IS NOT NULL ORDER BY "cart_items"."removed_at" DESC LIMIT 1 /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/models/cart.rb:30:in 'Cart#pending_removal'
+  [1m[36mProduct Load (0.1ms)[0m  [1m[34mSELECT "products".* FROM "products" ORDER BY "products"."created_at" ASC, "products"."id" ASC /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/views/portals/show.html.erb:16
+  Rendered collection of portals/_product.html.erb [5 times] (Duration: 2.1ms | GC: 0.0ms)
+  [1m[36mCartItem Load (0.2ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE ORDER BY "cart_items"."created_at" ASC, "cart_items"."id" ASC /*action='show',application='GoodDeal',controller='portals'*/[0m
+  ↳ app/views/portals/show.html.erb:21
+  Rendered collection of portal/lines/_line.html.erb [0 times] (Duration: 0.0ms | GC: 0.0ms)
+  [1m[36mCACHE CartItem Load (0.0ms)[0m  [1m[34mSELECT "cart_items".* FROM "cart_items" WHERE "cart_items"."cart_id" = 2 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE ORDER BY "cart_items"."created_at" ASC, "cart_items"."id" ASC[0m
+  ↳ app/models/cart_totals.rb:6:in 'CartTotals#initialize'
+  Rendered shared/_totals.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered portals/_summary.html.erb (Duration: 0.6ms | GC: 0.0ms)
+  Rendered shared/_shipping_form.html.erb (Duration: 0.4ms | GC: 0.0ms)
+  Rendered portals/show.html.erb within layouts/application (Duration: 6.6ms | GC: 0.0ms)
+  Rendered layouts/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 7.0ms | GC: 0.0ms)
+Completed 200 OK in 11ms (Views: 6.8ms | ActiveRecord: 1.7ms (6 queries, 1 cached) | GC: 0.0ms)
+
+
+Started GET "/products/new" for ::1 at 2026-10-19 12:03:28 +0300
+Processing by ProductsController#new as */*
+  Rendering layout layouts/application.html.erb
+  Rendering products/new.html.erb within layouts/application
+  Rendered shared/_errors.html.erb (Duration: 0.1ms | GC: 0.0ms)
+  Rendered products/_form.html.erb (Duration: 1.7ms | GC: 0.0ms)
+  Rendered shared/_modal.html.erb (Duration: 2.1ms | GC: 0.0ms)
+  Rendered products/new.html.erb within layouts/application (Duration: 2.6ms | GC: 0.0ms)
+  Rendered layouts/_flash.html.erb (Duration: 0.0ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 2.9ms | GC: 0.0ms)
+Completed 200 OK in 4ms (Views: 3.1ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/cart/checkout" for ::1 at 2026-10-19 12:03:28 +0300
+Processing by CheckoutsController#show as */*
+  [1m[36mCart Load (0.3ms)[0m  [1m[34mSELECT "carts".* FROM "carts" WHERE "carts"."status" = 'open' AND "carts"."id" IS NULL AND "carts"."kind" = 'storefront' LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mCart Create (0.6ms)[0m  [1m[32mINSERT INTO "carts" ("status", "kind", "promo_code", "shipping_method", "created_at", "updated_at") VALUES ('open', 'storefront', NULL, 'standard', '2026-10-19 09:03:28.927423', '2026-10-19 09:03:28.927423') RETURNING "id" /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/controllers/concerns/current_cart.rb:18:in 'CurrentCart#find_or_create_cart'
+  [1m[36mCartItem Exists? (0.2ms)[0m  [1m[34mSELECT 1 AS one FROM "cart_items" WHERE "cart_items"."cart_id" = 3 AND "cart_items"."removed_at" IS NULL AND "cart_items"."saved_for_later" = FALSE LIMIT 1 /*action='show',application='GoodDeal',controller='checkouts'*/[0m
+  ↳ app/controllers/checkouts_controller.rb:52:in 'CheckoutsController#require_items'
+Redirected to http://localhost:3917/cart
+↳ app/controllers/checkouts_controller.rb:52:in 'CheckoutsController#require_items'
+Filter chain halted as :require_items rendered or redirected
+Completed 302 Found in 4ms (ActiveRecord: 1.3ms (3 queries, 0 cached) | GC: 0.0ms)
+
+

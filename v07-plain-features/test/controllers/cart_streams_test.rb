@@ -33,8 +33,22 @@ class CartStreamsTest < ActionDispatch::IntegrationTest
     assert_match(/Item removed/, response.body)
     post cart_undo_path, headers: TURBO
     assert_includes actions, [ "update", "cart_undo" ]
+    assert_includes actions, [ "append", "cart_items" ]
+    assert_match(/id="cart_item_#{@item.id}"/, response.body)
+    assert_match(/\$15\.99/, response.body)
     assert_match(/Item restored/, response.body)
     assert_nil @item.reload.removed_at
+  end
+
+  test "every change patches the checkout button's total, and an emptied cart disables it" do
+    open_cart
+    patch cart_item_path(@item), params: { delta: 1 }, headers: TURBO
+    assert_includes actions, [ "update", "cart_checkout" ]
+    assert_match(/Checkout · \$25\.99/, response.body)
+    delete cart_item_path(@item), headers: TURBO
+    assert_match(/<button[^>]*disabled="disabled"[^>]*>Checkout · \$0\.00/, response.body)
+    post cart_undo_path, headers: TURBO
+    assert_match(/<button(?![^>]*disabled="disabled")[^>]*>Checkout · \$25\.99/, response.body)
   end
 
   test "saving for later removes the line and redraws the saved pane; moving back appends a line" do

@@ -10,7 +10,12 @@ module ProgrammingParadigms
   # A feature (§2.2) is a composition that is itself a part of another: its inputs wrap their runs in
   # `collect`, and an arm that says `out(name, payload)` makes that pair one of the feature's own
   # outputs, returned to whoever ran it.
+  #
+  # Every composition names its parts in `parts` (what the drawing and the coverage check read); the
+  # paradigm declares it so the message is the paradigm's, not each composition's own.
   module Wiring
+    def parts = {}
+
     private
 
     def run(part, outputs)

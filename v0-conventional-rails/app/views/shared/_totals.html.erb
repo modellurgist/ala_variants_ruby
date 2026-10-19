@@ -1,0 +1,18 @@
+<dl class="space-y-1 text-sm">
+  <div class="flex justify-between"><dt>Items</dt><dd><%= totals.item_count %></dd></div>
+  <div class="flex justify-between"><dt>Subtotal</dt><dd><%= money(totals.subtotal) %></dd></div>
+  <% if totals.discount.positive? %>
+    <div class="flex justify-between text-emerald-700"><dt>Discount (<%= totals.cart.promo_code %>)</dt><dd>−<%= money(totals.discount) %></dd></div>
+  <% end %>
+  <% if totals.volume_discount.positive? %>
+    <div class="flex justify-between text-emerald-700"><dt><%= totals.volume_tier[:label] %></dt><dd>−<%= money(totals.volume_discount) %></dd></div>
+  <% end %>
+  <% if totals.gift_wrap.positive? %>
+    <div class="flex justify-between"><dt>Gift wrap</dt><dd><%= money(totals.gift_wrap) %></dd></div>
+  <% end %>
+  <div class="flex justify-between">
+    <dt>Shipping (<%= totals.shipping_label %>)</dt>
+    <dd><%= totals.shipping.zero? ? "Free" : money(totals.shipping) %></dd>
+  </div>
+  <div class="flex justify-between border-t border-stone-200 pt-2 text-base font-semibold"><dt>Total</dt><dd><%= money(totals.total) %></dd></div>
+</dl>

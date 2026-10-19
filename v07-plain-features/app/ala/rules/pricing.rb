@@ -13,5 +13,16 @@ module Rules
       discount = subtotal * percentage / 100
       [ [ subtotal - discount, 0 ].max, discount ]
     end
+
+    # The figures every priced summary shows, as Money. Shipping (a CalculateShipping) is charged on the
+    # subtotal before the discount; extras (cents, such as gift wrap) are added after it.
+    def self.summary(lines, percentage:, shipping:, method:, extras: 0)
+      m = Foundation::Money
+      subtotal = subtotal(lines)
+      after_discount, discount = apply_discount(subtotal, percentage)
+      cost = shipping.call(method, subtotal)
+      { empty: lines.empty?, item_count: item_count(lines), subtotal: m[subtotal], discount: m[discount],
+        shipping_label: shipping.label(method), shipping_cost: m[cost], total: m[after_discount + extras + cost] }
+    end
   end
 end

@@ -21,15 +21,10 @@ module DomainAbstractions
 
     def summary
       m = Foundation::Money
-      subtotal = Rules::Pricing.subtotal(@lines)
-      after_discount, discount = Rules::Pricing.apply_discount(subtotal, @discount&.dig(:percentage))
       gift_wrap = @gift_wrap ? @gift_wrap.call(@wrapped) : 0
-      shipping = @shipping.call(@method, subtotal)
-      { empty: @lines.empty?, item_count: Rules::Pricing.item_count(@lines), subtotal: m[subtotal], discount: m[discount],
-        promo_code: @discount&.dig(:code), gift_wrap_total: m[gift_wrap], shipping_method: @method,
-        shipping_label: @shipping.label(@method), shipping_cost: m[shipping],
-        shipping_options: @shipping.options.map { |o| o.merge(cost: m[o[:cost]], free_above: o[:free_above] && m[o[:free_above]]) },
-        total: m[after_discount + gift_wrap + shipping] }
+      Rules::Pricing.summary(@lines, percentage: @discount&.dig(:percentage), shipping: @shipping, method: @method, extras: gift_wrap)
+        .merge(promo_code: @discount&.dig(:code), gift_wrap_total: m[gift_wrap], shipping_method: @method,
+               shipping_options: @shipping.options.map { |o| o.merge(cost: m[o[:cost]], free_above: o[:free_above] && m[o[:free_above]]) })
     end
   end
 end

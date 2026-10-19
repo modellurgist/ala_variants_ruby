@@ -1,0 +1,5 @@
+<div id="<%= dom_id saved_item, :saved %>" class="flex items-center justify-between rounded-lg border border-stone-200 bg-white p-3 text-sm">
+  <span class="font-medium"><%= saved_item.product.name %></span>
+  <span><%= money(saved_item.product.amount) %> × <%= saved_item.quantity %></span>
+  <%= button_to "Move to cart", move_to_cart_cart_item_path(saved_item), method: :patch, class: "underline" %>
+</div>

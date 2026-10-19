@@ -1,0 +1,3 @@
+<%= turbo_stream.remove dom_id(@cart_item, :saved) %>
+<%= turbo_stream.append "cart_items", @cart_item %>
+<%= render "carts/refresh", cart: current_cart %>

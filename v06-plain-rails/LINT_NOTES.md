@@ -8,7 +8,7 @@ Run on 2026-10-12 with `../../ala_lint_ruby/bin/ala_lint --root .` and V02's fiv
 | `--strict` | 100/100 | 10 of 10 | 324/324 |
 | `--super-strict` | 100/100 | 10 of 10 | 324/324 |
 
-No line is accepted. The linter needed to learn two shapes, the way the Elixir linter learned two to
+No line was accepted then; the clone check added on 2026-10-19 led to two (the README's status). The linter needed to learn two shapes, the way the Elixir linter learned two to
 read V51, and both are precision rules rather than exemptions:
 
 - **A wiring table.** A `case [part, output]` in a method named `wire`, whose arms all match two

@@ -223,3 +223,39 @@ FOREIGN KEY ("product_id")
   ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
   [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
   ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mCart Create (2.2ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at", "version") VALUES ('open', '2026-10-19 14:21:57.606627', '2026-10-19 14:21:57.606627', 0) RETURNING "id" /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mCart Destroy (6.1ms)[0m  [1m[31mDELETE FROM "carts" WHERE "carts"."id" = 4 /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mCart Create (1.1ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at", "version") VALUES ('open', '2026-10-19 18:02:27.247727', '2026-10-19 18:02:27.247727', 0) RETURNING "id" /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mCart Destroy (5.6ms)[0m  [1m[31mDELETE FROM "carts" WHERE "carts"."id" = 5 /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mCart Create (1.2ms)[0m  [1m[32mINSERT INTO "carts" ("status", "created_at", "updated_at", "version") VALUES ('open', '2026-10-19 19:23:44.560397', '2026-10-19 19:23:44.560397', 0) RETURNING "id" /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:4:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mCart Destroy (3.2ms)[0m  [1m[31mDELETE FROM "carts" WHERE "carts"."id" = 6 /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mCOMMIT /*application='GoodDeal'*/[0m
+  ↳ lib/tasks/ala.rake:12:in 'block (2 levels) in <main>'

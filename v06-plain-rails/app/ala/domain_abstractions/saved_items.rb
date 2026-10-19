@@ -1,8 +1,8 @@
 module DomainAbstractions
   # Lines a shopper set aside for later, as a value: given its stored lines on load, changed in
-  # memory, every change sent out on `changed` for the store the composition wires; it asks the
-  # configured `products` lambda what the products look like. Config: products, links (a lambda of
-  # the saved item's id giving its row's URLs). In: load (the stored lines), reload (them again, after a stash: the
+  # memory, every change sent out on `changed` for the store the composition wires; it asks its
+  # configured rows what the products look like. Config: cart_id, rows (a LineRow, with the saved
+  # item's URLs). In: load (the stored lines), reload (them again, after a stash: the
   # store gives the new line its id), stash ({ product_id:, quantity: }), move_to_cart (an id).
   # Out: changed ({ op:, ... }), rows and count (after load), rows_changed and count (after a
   # change), moved ({ product_id:, quantity: } the shopper wants back in the cart).
@@ -11,7 +11,7 @@ module DomainAbstractions
 
     def load(items)
       @held = items
-      @catalog = @products.(@held.map { _1[:product_id] }.uniq)
+      @rows.fill(@held.map { _1[:product_id] })
       { rows: rows, count: @held.size }
     end
 
@@ -27,10 +27,10 @@ module DomainAbstractions
       { changed: { op: :remove, id: }, moved: { product_id: item[:product_id], quantity: item[:quantity] }, rows_changed: rows, count: @held.size }
     end
 
-    def initialize(cart_id:, products:, links: ->(_id) { {} }) = (@cart_id, @products, @links, @held, @catalog = cart_id, products, links, [], {})
+    def initialize(cart_id:, rows:) = (@cart_id, @rows, @held = cart_id, rows, [])
 
     private
 
-    def rows = @held.map { |i| p = @catalog.fetch(i[:product_id]); { id: i[:id], name: p[:name], thumbnail: p[:thumbnail], amount: p[:amount], urls: @links.(i[:id]) } }
+    def rows = @held.map { @rows.(_1) }
   end
 end

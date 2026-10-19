@@ -58,10 +58,11 @@ class DomainTest < ActiveSupport::TestCase
     assert_equal "$26.98", summary[:total].to_s
   end
 
-  test "Undo holds only the latest removal and restores it within the window" do
+  test "Undo holds only the latest removal, unwrapped, and restores it within the window" do
     cart = Cart.create!(status: "open")
     a = CartItem.add(cart.id, create_product(name: "A").id)
     b = CartItem.add(cart.id, create_product(name: "B").id)
+    b.update!(gift_wrapped: true)
     undo = Undo.new(lines: CartItem, cart_id: cart.id, window: 5.seconds)
     undo.wire_to(restored = Recorder.new, from: :restored)
 
@@ -72,6 +73,7 @@ class DomainTest < ActiveSupport::TestCase
     undo.input_port(:restore).send_event
     assert_equal [ b.id ], restored.got
     assert_nil b.reload.removed_at
+    assert_not b.gift_wrapped
   end
 
   test "CheckoutFlow follows its table and ignores a forward jump" do
@@ -81,9 +83,9 @@ class DomainTest < ActiveSupport::TestCase
     lines.wire_to(CartItemsStore.new(model: CartItem, cart_id: cart.id), from: :items, to: :lookup)
     lines.wire_to(ProductIndex.new(model: Product, project: ProductRow.new(stock_rule: StockStatus.new(low_at: 5))), from: :products, to: :lookup)
     lines.input_port(:load).send_event
-    flow = CheckoutFlow.new(store: Checkout, cart_id: cart.id, flow: Screens::Checkout::FLOW, start: :address,
-                            url_edges: Screens::Checkout::URL_EDGES, stock_levels: ->(ids) { Product.stock_levels(ids) },
-                            line_items: BuildLineItems.new(currency: "usd"))
+    machine = ProgrammingParadigms::PersistedSteps.new(find: -> { Checkout.for_cart(cart.id) }, table: Screens::Checkout::FLOW, start: :address,
+                                                       jumps: Screens::Checkout::URL_EDGES)
+    flow = CheckoutFlow.new(steps: machine, stock_levels: ->(ids) { Product.stock_levels(ids) }, line_items: BuildLineItems.new(currency: "usd"))
     flow.wire_to(lines, from: :lines, to: :lines).wire_to(steps = Recorder.new, from: :step)
 
     flow.input_port(:start).send_event

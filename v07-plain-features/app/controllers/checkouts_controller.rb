@@ -39,6 +39,14 @@ class CheckoutsController < ApplicationController
     redirect_to cart_checkout_step_path(:payment), flash: screen.flash
   end
 
+  # A waiting page asks in case it missed the broadcast; answering "processing" could overwrite an outcome that arrived meanwhile.
+  def status
+    screen.show(nil)
+    return head(:no_content) unless Screens::Checkout::OUTCOMES.include?(screen.step)
+    render turbo_stream: turbo_stream.replace(Screens::Checkout::STATUS_TARGET, partial: "components/checkout_status",
+      locals: { id: Screens::Checkout::STATUS_TARGET, step: screen.step, t: Screens::Checkout::TEXTS, pay_url: pay_cart_checkout_path, success_url: cart_success_path })
+  end
+
   private
 
   def screen(id = current_cart_id) = @screen ||= Screens::Checkout.new(cart_id: id)

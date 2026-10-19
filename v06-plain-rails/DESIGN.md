@@ -50,7 +50,9 @@ arguments, and the wiring is the table. Nothing else connects two parts.
 passes what the value needs: `run(:lines, @lines.load(@items.lookup))`, and the flows take the lines
 when they start or pay: `run(:flow, @flow.pay(@lines.lines))`. The product lookup the three values
 need mid-change is a configured lambda, `products: ->(ids) { products.lookup(ids) }`, which is
-Spray's lambda-as-configuration (§3.11.3) and the form V02 already used for a row's links.
+Spray's lambda-as-configuration (§3.11.3) and the form V02 already used for a row's links; both
+lambdas configure the `Rules::LineRow` the screen gives each value (`rows:`), which looks each
+product up once and shows a held line as its product.
 `SavedItems` gained `reload`, since a stash gives the new line its id in the store and the value
 can no longer ask for it itself; the arm writes and reloads in one line.
 
@@ -83,7 +85,8 @@ and two portal outputs that could never fire (`lines.adding`, `items.added`: the
 ## Checklist walk (Ruby edition, by hand)
 
 After the build: 57 + 5 tests green, 0 declared outputs unrouted after the full suite, RuboCop clean,
-`ala_lint` 100/100 at every tier with no finding and no accepted line. V03's walk holds; what V06
+`ala_lint` 100/100 at every tier with no finding and no accepted line. (Since 2026-10-19 the clone
+check holds it to 100 with two accepted lines; the README says which.) V03's walk holds; what V06
 changes:
 
 | Rule | Verdict | Evidence |

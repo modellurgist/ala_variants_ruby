@@ -1,1 +1,2 @@
-<%= render "components/checkout_status", id: Screens::Checkout::STATUS_TARGET, step: :processing, t: @t, pay_url: pay_cart_checkout_path, success_url: cart_success_path %>
+<%= render "components/checkout_status", id: Screens::Checkout::STATUS_TARGET, step: :processing, t: @t, pay_url: pay_cart_checkout_path, success_url: cart_success_path,
+      status_url: status_cart_checkout_path %>

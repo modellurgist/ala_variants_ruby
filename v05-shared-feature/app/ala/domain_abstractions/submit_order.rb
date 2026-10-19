@@ -1,7 +1,7 @@
 module DomainAbstractions
   # Submitting a bulk order: a step machine over a flow table, kept in a store of its own, plus the
-  # purchase order the buyer enters. Config: store (one record per cart, with `step` and the PO
-  # columns), cart_id, flow, start, url_edges, orders (where the order is placed). It pulls the
+  # purchase order the buyer enters. Config: steps (a PersistedSteps over one record per cart, with
+  # `step` and the PO columns), cart_id, orders (where the order is placed). It pulls the
   # order's lines through its `lines` port when the buyer asks to review. Ports in: review, show (the
   # step a URL asks for), edit_lines, validate, submit. Ports out: step, form (the PO record to render,
   # after show, validate or a failed submit), blocked (:empty), reference (the placed order's id).
@@ -19,10 +19,9 @@ module DomainAbstractions
     end
 
     input(:show, ProgrammingParadigms::DataFlow) do |requested|
-      record.update!(step: requested.to_s) if requested && @url_edges.include?([ step_now, requested ])
-      emit(:step, step_now)
+      emit(:step, @steps.jump(requested))
       emit(:form, record)
-      emit(:reference, @orders.find_by(cart_id: @cart_id)&.id) if step_now == :submitted
+      emit(:reference, @orders.find_by(cart_id: @cart_id)&.id) if @steps.now == :submitted
     end
 
     input(:edit_lines, ProgrammingParadigms::Event) { advance(:edit_lines) }
@@ -31,25 +30,17 @@ module DomainAbstractions
     input(:submit, ProgrammingParadigms::DataFlow) do |params|
       r = record
       r.assign_attributes(params)
-      next (emit(:step, step_now); emit(:form, r)) unless r.save(context: :submit)
+      next (emit(:step, @steps.now); emit(:form, r)) unless r.save(context: :submit)
       order = @orders.place(@cart_id, po_number: r.po_number)
       advance(:submit_order)
       emit(:reference, order.id)
     end
 
-    def initialize(store:, cart_id:, flow:, start:, url_edges:, orders:)
-      @store, @cart_id, @flow, @start, @url_edges, @orders = store, cart_id, flow, start, url_edges, orders
-    end
+    def initialize(steps:, cart_id:, orders:) = (@steps, @cart_id, @orders = steps, cart_id, orders)
 
     private
 
-    def record = @record ||= @store.for_cart(@cart_id)
-    def step_now = record.step.to_sym
-
-    def advance(event)
-      moved, to = ProgrammingParadigms::Transitions.step(@flow, step_now, event)
-      record.update!(step: to.to_s) if moved == :moved
-      emit(:step, to)
-    end
+    def record = @steps.record
+    def advance(event) = emit(:step, @steps.fire(event))
   end
 end

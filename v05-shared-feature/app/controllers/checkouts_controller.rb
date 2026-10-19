@@ -41,6 +41,14 @@ class CheckoutsController < ApplicationController
     end
   end
 
+  # A waiting page asks in case it missed the broadcast; answering "processing" could overwrite an outcome that arrived meanwhile.
+  def status
+    with_screen do |s|
+      s.input_port(:show).push(nil)
+      show_outcome(s)
+    end
+  end
+
   private
 
   # the cart's kept checkout, one request at a time; for a flow that outlives its cart, the cart last used
@@ -53,6 +61,12 @@ class CheckoutsController < ApplicationController
     @s = s
     @t = Screens::Checkout::TEXTS
     render :show
+  end
+
+  def show_outcome(s)
+    return head(:no_content) unless Screens::Checkout::OUTCOMES.include?(s.step)
+    @t = Screens::Checkout::TEXTS
+    render turbo_stream: turbo_stream.replace(Screens::Checkout::STATUS_TARGET, partial: "checkouts/#{s.step}")
   end
 
   def show_address_result(s)

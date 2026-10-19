@@ -3,6 +3,9 @@ module ProgrammingParadigms
   # picture is the code), and `running` draws what the trace saw: an edge per hop a test run made.
   # A node per part the composition names; an arm that runs no part lands on the composition.
   module Drawing
+    # The drawing's own notation, the same for any app (R3's domain-vocabulary exception)
+    INHERENT_LABELS = { request: "request" }.freeze
+
     def self.mermaid(screen_class)
       edges = arms(screen_class).flat_map do |arm|
         to = arm[:to].empty? ? [ "screen" ] : arm[:to]
@@ -13,7 +16,7 @@ module ProgrammingParadigms
 
     def self.running(screen_class)
       edges = Foundation::Trace.edges(screen_class).map do |from, to|
-        from == :outside ? "  outside -- request --> #{to}" : "  #{from[0]} -- #{from[1]} --> #{to}"
+        from == :outside ? "  outside -- #{INHERENT_LABELS[:request]} --> #{to}" : "  #{from[0]} -- #{from[1]} --> #{to}"
       end
       chart(screen_class, edges)
     end

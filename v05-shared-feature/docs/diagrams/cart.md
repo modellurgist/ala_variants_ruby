@@ -74,6 +74,7 @@ flowchart LR
   totals -- summary → push --> patch_8224([Patch])
   totals -- summary → push --> patch_8232([Patch])
   totals -- summary → push --> patch_8240([Patch])
+  totals -- summary → push --> patch_8248([Patch])
   items -- added → arrived --> order
   items -- found → arrived --> order
 ```

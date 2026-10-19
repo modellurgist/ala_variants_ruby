@@ -1,10 +1,9 @@
 module DomainAbstractions
   # What's in a shopper's cart, as a value: the lines it was given on load, with quantities and gift
   # wrap, changed in memory and announced. It does no I/O: the composition hands it its stored lines,
-  # it asks the configured `products` lambda what products look like, and every change it decides goes
-  # out on `changed` for a store the composition wires. It prices nothing; `contents` hands pricing
-  # only what it reads. Config: products (a lambda of product ids giving { id => row }), links (a
-  # lambda of the item id giving the URLs a row's actions post to).
+  # it asks its configured rows what products look like, and every change it decides goes out on
+  # `changed` for a store the composition wires. It prices nothing; `contents` hands pricing only what
+  # it reads. Config: cart_id, rows (a LineRow, with the URLs a line's actions post to).
   # In: load (the stored lines), lines (answers { cart_id:, lines: [...] }), bump ({ item_id:,
   # delta: }), set_quantity ({ item_id:, quantity: }), remove, save_for_later, toggle_gift_wrap and
   # line (an item id), receive (a product id, or { product_id:, quantity: }), arrived (a stored line's
@@ -18,7 +17,7 @@ module DomainAbstractions
 
     def load(items)
       @held = items
-      @catalog = @products.(@held.map { _1[:product_id] }.uniq)
+      @rows.fill(@held.map { _1[:product_id] })
       { rows: @held.map { row(_1) }, contents: contents }
     end
 
@@ -44,19 +43,16 @@ module DomainAbstractions
     end
 
     def save_for_later(item_id)
+      # ala:accept clone -- the mirror of SavedItems#move_to_cart: each list removes its own line and hands on the same { product_id:, quantity: }
       item = take(item_id)
       { changed: { op: :remove, id: item[:id] }, row_removed: row(item), saved: { product_id: item[:product_id], quantity: item[:quantity] }, contents: contents }
     end
 
-    def receive(request)
-      product_id, quantity = request.is_a?(Hash) ? request.values_at(:product_id, :quantity) : [ request, 1 ]
-      { adding: { product_id:, quantity: } }
-    end
+    def receive(request) = { adding: Rules::LineRequest.call(request) }
 
     def arrived(item)
       @held.reject! { _1[:id] == item[:id] }
       @held << item
-      @catalog.merge!(@products.([ item[:product_id] ])) unless @catalog.key?(item[:product_id])
       { row_added: row(item), contents: contents }
     end
 
@@ -68,13 +64,13 @@ module DomainAbstractions
 
     def line(item_id) = { line: snapshot(find(item_id)) }
 
-    def initialize(cart_id:, products:, links: ->(_id) { {} }) = (@cart_id, @products, @links, @held, @catalog = cart_id, products, links, [], {})
+    def initialize(cart_id:, rows:) = (@cart_id, @rows, @held = cart_id, rows, [])
 
     private
 
-    def find(item_id) = @held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}"
+    def find(item_id) = (@held.find { _1[:id] == item_id } or raise ArgumentError, "no line #{item_id}")
     def take(item_id) = find(item_id).tap { |item| @held.delete(item) }
-    def product(item) = @catalog.fetch(item[:product_id])
+    def product(item) = @rows.product(item[:product_id])
 
     def contents
       { lines: @held.map { { quantity: _1[:quantity], amount: product(_1)[:amount].cents } }, wrapped_count: @held.count { _1[:gift_wrapped] } }
@@ -86,12 +82,6 @@ module DomainAbstractions
         description: p[:description], thumbnail: p[:thumbnail] }
     end
 
-    # the neutral shape a displayed line carries
-    def row(item)
-      p = product(item)
-      { id: item[:id], product_id: item[:product_id], name: p[:name], thumbnail: p[:thumbnail], amount: p[:amount],
-        quantity: item[:quantity], line_total: p[:amount] * item[:quantity], gift_wrapped: item[:gift_wrapped],
-        stock: p[:stock], stock_status: p[:stock_status], urls: @links.(item[:id]) }
-    end
+    def row(item) = @rows.(item.merge(line_total: product(item)[:amount] * item[:quantity]))
   end
 end
