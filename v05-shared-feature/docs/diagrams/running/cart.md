@@ -25,11 +25,11 @@ flowchart LR
   order -- saved → stash --> saved
   order -- saved --> screen
   order -- line --> screen
-  order -- row_added → push --> patch_47000([Patch])
-  order -- row_changed → push --> patch_47008([Patch])
-  order -- row_removed → push --> patch_47016([Patch])
+  order -- row_added → push --> patch_42576([Patch])
+  order -- row_changed → push --> patch_42584([Patch])
+  order -- row_removed → push --> patch_42592([Patch])
   order -- undo_pending --> screen
-  order -- undo_pending → push --> patch_47024([Patch])
+  order -- undo_pending → push --> patch_42600([Patch])
   order -- restored --> screen
   order_lines -- removed → capture --> order_undo
   order_lines -- items --> order
@@ -50,7 +50,7 @@ flowchart LR
   saved -- changed → apply --> saved_store
   saved -- rows --> screen
   saved -- count --> screen
-  saved -- rows_changed → push --> patch_47048([Patch])
+  saved -- rows_changed → push --> patch_42624([Patch])
   saved -- moved → receive --> order
   saved -- moved --> screen
   wishlist -- items → lookup --> wishlist_store
@@ -59,7 +59,7 @@ flowchart LR
   wishlist -- rows --> screen
   wishlist -- count --> screen
   wishlist -- ids --> screen
-  wishlist -- rows_changed → push --> patch_47056([Patch])
+  wishlist -- rows_changed → push --> patch_42632([Patch])
   wishlist -- added --> screen
   wishlist -- dropped --> screen
   wishlist -- taken → receive --> order
@@ -69,12 +69,12 @@ flowchart LR
   pricing -- promo_applied --> screen
   pricing -- promo_rejected --> screen
   totals -- summary --> screen
-  totals -- summary → push --> patch_47064([Patch])
-  totals -- summary → push --> patch_47072([Patch])
-  totals -- summary → push --> patch_47080([Patch])
-  totals -- summary → push --> patch_47088([Patch])
-  totals -- summary → push --> patch_47096([Patch])
-  totals -- summary → push --> patch_47104([Patch])
+  totals -- summary → push --> patch_42640([Patch])
+  totals -- summary → push --> patch_42648([Patch])
+  totals -- summary → push --> patch_42656([Patch])
+  totals -- summary → push --> patch_42664([Patch])
+  totals -- summary → push --> patch_42672([Patch])
+  totals -- summary → push --> patch_42680([Patch])
   items -- added → arrived --> order
   items -- found → arrived --> order
 ```

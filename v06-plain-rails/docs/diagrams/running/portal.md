@@ -24,8 +24,8 @@ flowchart LR
   outside -- request --> add_line
   add_line -- added --> screen
   flow -- reference --> screen
-  flow -- blocked --> screen
   lines -- changed --> items
   lines -- removed --> undo
   undo -- restored --> screen
+  flow -- blocked --> screen
 ```

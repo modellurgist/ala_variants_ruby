@@ -16,18 +16,18 @@ flowchart LR
   totals -- summary --> screen
   outside -- request --> flow
   flow -- step --> screen
-  flow -- blocked --> screen
+  flow -- form --> screen
+  flow -- ready_to_pay --> screen
   outside -- request --> pricing
   pricing -- discount --> totals
   pricing -- shipping_method --> totals
-  flow -- form --> screen
-  flow -- ready_to_pay --> screen
   outside -- request --> charge
+  charge -- declined --> flow
+  charge -- declined --> status
   charge -- charged --> settle
   settle -- stock_changed --> stock_update
   charge -- charged --> flow
   flow -- done --> screen
   charge -- charged --> status
-  charge -- declined --> flow
-  charge -- declined --> status
+  flow -- blocked --> screen
 ```

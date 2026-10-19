@@ -28,25 +28,25 @@ flowchart LR
   outside -- request --> lines
   lines -- rows --> screen
   lines -- contents --> totals
+  lines -- line --> wishlist
+  wishlist -- changed --> wishlist_store
+  wishlist -- added --> screen
+  wishlist -- rows_changed --> screen
+  wishlist -- taken --> lines
+  lines -- adding --> items
+  items -- added --> lines
+  lines -- row_added --> screen
+  pricing -- promo_applied --> screen
+  pricing -- promo_rejected --> screen
   lines -- removed --> undo
   lines -- row_removed --> screen
   undo -- restored --> lines
-  lines -- row_added --> screen
   lines -- changed --> items
   lines -- row_changed --> screen
+  wishlist -- dropped --> screen
   lines -- saved --> saved
   saved -- changed --> saved_store
   saved -- changed --> saved
   saved -- rows_changed --> screen
   saved -- moved --> lines
-  lines -- adding --> items
-  items -- added --> lines
-  lines -- line --> wishlist
-  wishlist -- changed --> wishlist_store
-  wishlist -- added --> screen
-  wishlist -- rows_changed --> screen
-  wishlist -- dropped --> screen
-  wishlist -- taken --> lines
-  pricing -- promo_applied --> screen
-  pricing -- promo_rejected --> screen
 ```

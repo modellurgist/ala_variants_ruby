@@ -11,8 +11,8 @@ flowchart LR
   records -- created --> screen
   records -- updated --> screen
   records -- deleted --> screen
-  records -- created → push --> liveupdate_46904([LiveUpdate])
-  records -- updated → push --> liveupdate_46912([LiveUpdate])
-  records -- deleted → push --> liveupdate_46920([LiveUpdate])
+  records -- created → push --> liveupdate_42480([LiveUpdate])
+  records -- updated → push --> liveupdate_42488([LiveUpdate])
+  records -- deleted → push --> liveupdate_42496([LiveUpdate])
   add_line -- added --> screen
 ```

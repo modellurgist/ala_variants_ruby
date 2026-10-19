@@ -20,25 +20,25 @@ end
 
 # The wiring as it ran: after the suite, every wire of every screen (and of the features inside) must
 # have carried something at least once, and docs/diagrams/running/ draws each screen with the wires
-# that did solid and the rest dotted. A wire listed here is one no test reaches yet: the suite's debt,
+# that did solid and the rest dotted; only a whole run redraws them. A wire listed here is one no test reaches yet: the suite's debt,
 # not the design's.
 Foundation::Trace.enable
 UNEXERCISED = %w[].freeze
 Minitest.after_run do
   screens = [ Screens::Catalog, Screens::Cart, Screens::Checkout, Screens::Portal ]
-  FileUtils.mkdir_p("docs/diagrams/running")
+  whole_suite = Dir["test/{ala,controllers}/*_test.rb"].all? { $LOADED_FEATURES.include?(File.expand_path(_1)) }
+  FileUtils.mkdir_p("docs/diagrams/running") if whole_suite
   unfired = []
   Cart.transaction do
     cart = Cart.create!(status: "open")
     screens.each do |screen|
       composition = screen.new(cart_id: cart.id)
-      File.write("docs/diagrams/running/#{screen.name.demodulize.underscore}.md", "# #{screen.name}, as it ran\n\n```mermaid\n#{ProgrammingParadigms::Drawing.running(composition)}```\n")
+      File.write("docs/diagrams/running/#{screen.name.demodulize.underscore}.md", "# #{screen.name}, as it ran\n\n```mermaid\n#{ProgrammingParadigms::Drawing.running(composition)}```\n") if whole_suite
       unfired.concat(ProgrammingParadigms::Drawing.unfired(composition).map { "#{screen.name}: #{_1}" })
     end
     raise ActiveRecord::Rollback
   end
   debt = unfired - UNEXERCISED
-  whole_suite = Dir["test/{ala,controllers}/*_test.rb"].all? { $LOADED_FEATURES.include?(File.expand_path(_1)) }
   puts "\nWiring as it ran: #{Foundation::Trace.hops.size} distinct hops; #{unfired.size} wires never carried anything#{" (#{UNEXERCISED.size} listed as unexercised)" if UNEXERCISED.any?}#{" (a partial run: not enforced)" unless whole_suite}"
   unless debt.empty? || !whole_suite
     puts debt.map { "  #{_1}" }

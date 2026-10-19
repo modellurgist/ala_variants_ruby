@@ -22,12 +22,12 @@ flowchart LR
   outside -- request --> flow
   flow -- step --> screen
   flow -- form --> screen
+  flow -- blocked --> screen
   outside -- request --> add_line
   add_line -- added --> screen
-  flow -- reference --> screen
-  flow -- blocked --> screen
   order -- changed --> items
   order -- restored --> screen
+  flow -- reference --> screen
   outside -- request --> order_undo
   order_undo -- pending --> order
   outside -- request --> order_lines

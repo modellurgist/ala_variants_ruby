@@ -41,14 +41,14 @@ flowchart LR
   items -- added --> order
   order -- row_added --> screen
   order -- restored --> screen
+  pricing -- promo_applied --> screen
+  pricing -- promo_rejected --> screen
   order -- line --> wishlist
   wishlist -- changed --> wishlist_store
   wishlist -- added --> screen
   wishlist -- rows_changed --> screen
-  wishlist -- dropped --> screen
-  pricing -- promo_applied --> screen
-  pricing -- promo_rejected --> screen
   wishlist -- taken --> order
+  wishlist -- dropped --> screen
   outside -- request --> order_undo
   order_undo -- pending --> order
   outside -- request --> order_lines
