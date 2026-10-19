@@ -11,23 +11,23 @@ flowchart LR
   settle[settle]
   status[status]
   stock_update[stock_update]
-  outside -- request --> lines
-  lines -- contents --> totals
-  totals -- summary --> screen
-  outside -- request --> flow
-  flow -- step --> screen
-  flow -- form --> screen
-  flow -- ready_to_pay --> screen
-  outside -- request --> pricing
-  pricing -- discount --> totals
-  pricing -- shipping_method --> totals
   outside -- request --> charge
+  outside -- request --> flow
+  outside -- request --> lines
+  outside -- request --> pricing
+  charge -- charged --> flow
+  charge -- charged --> settle
+  charge -- charged --> status
   charge -- declined --> flow
   charge -- declined --> status
-  charge -- charged --> settle
-  settle -- stock_changed --> stock_update
-  charge -- charged --> flow
-  flow -- done --> screen
-  charge -- charged --> status
   flow -- blocked --> screen
+  flow -- done --> screen
+  flow -- form --> screen
+  flow -- ready_to_pay --> screen
+  flow -- step --> screen
+  lines -- contents --> totals
+  pricing -- discount --> totals
+  pricing -- shipping_method --> totals
+  settle -- stock_changed --> stock_update
+  totals -- summary --> screen
 ```

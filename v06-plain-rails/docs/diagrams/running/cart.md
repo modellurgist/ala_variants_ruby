@@ -12,41 +12,41 @@ flowchart LR
   saved_store[saved_store]
   wishlist_store[wishlist_store]
   pricing[pricing]
-  outside -- request --> undo
-  undo -- pending --> screen
-  outside -- request --> wishlist
-  wishlist -- rows --> screen
-  wishlist -- count --> screen
-  wishlist -- ids --> screen
-  outside -- request --> saved
-  saved -- rows --> screen
-  saved -- count --> screen
-  outside -- request --> pricing
-  pricing -- discount --> totals
-  totals -- summary --> screen
-  pricing -- shipping_method --> totals
   outside -- request --> lines
-  lines -- rows --> screen
+  outside -- request --> pricing
+  outside -- request --> saved
+  outside -- request --> undo
+  outside -- request --> wishlist
+  items -- added --> lines
+  lines -- adding --> items
+  lines -- changed --> items
   lines -- contents --> totals
   lines -- line --> wishlist
-  wishlist -- changed --> wishlist_store
-  wishlist -- added --> screen
-  wishlist -- rows_changed --> screen
-  wishlist -- taken --> lines
-  lines -- adding --> items
-  items -- added --> lines
+  lines -- removed --> undo
   lines -- row_added --> screen
+  lines -- row_changed --> screen
+  lines -- row_removed --> screen
+  lines -- rows --> screen
+  lines -- saved --> saved
+  pricing -- discount --> totals
   pricing -- promo_applied --> screen
   pricing -- promo_rejected --> screen
-  lines -- removed --> undo
-  lines -- row_removed --> screen
-  undo -- restored --> lines
-  lines -- changed --> items
-  lines -- row_changed --> screen
-  wishlist -- dropped --> screen
-  lines -- saved --> saved
-  saved -- changed --> saved_store
+  pricing -- shipping_method --> totals
   saved -- changed --> saved
-  saved -- rows_changed --> screen
+  saved -- changed --> saved_store
+  saved -- count --> screen
   saved -- moved --> lines
+  saved -- rows --> screen
+  saved -- rows_changed --> screen
+  totals -- summary --> screen
+  undo -- pending --> screen
+  undo -- restored --> lines
+  wishlist -- added --> screen
+  wishlist -- changed --> wishlist_store
+  wishlist -- count --> screen
+  wishlist -- dropped --> screen
+  wishlist -- ids --> screen
+  wishlist -- rows --> screen
+  wishlist -- rows_changed --> screen
+  wishlist -- taken --> lines
 ```

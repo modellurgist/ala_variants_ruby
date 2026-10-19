@@ -12,34 +12,34 @@ flowchart LR
   totals[totals]
   flow[flow]
   items[items]
-  outside -- request --> order
-  order -- undo_pending --> screen
-  order -- rows --> screen
-  order -- contents --> totals
-  totals -- summary --> screen
-  outside -- request --> catalog
-  catalog -- rows --> screen
-  outside -- request --> flow
-  flow -- step --> screen
-  flow -- form --> screen
-  flow -- blocked --> screen
   outside -- request --> add_line
+  outside -- request --> catalog
+  outside -- request --> flow
+  outside -- request --> order
   add_line -- added --> screen
-  order -- changed --> items
-  order -- restored --> screen
+  catalog -- rows --> screen
+  flow -- blocked --> screen
+  flow -- form --> screen
   flow -- reference --> screen
-  outside -- request --> order_undo
-  order_undo -- pending --> order
+  flow -- step --> screen
+  order -- changed --> items
+  order -- contents --> totals
+  order -- restored --> screen
+  order -- rows --> screen
+  order -- undo_pending --> screen
+  totals -- summary --> screen
   outside -- request --> order_lines
-  order_lines -- rows --> order
-  order_lines -- contents --> order
+  outside -- request --> order_undo
+  order_lines -- adding --> order
   order_lines -- changed --> order
+  order_lines -- contents --> order
+  order_lines -- line --> order
+  order_lines -- removed --> order_undo
+  order_lines -- row_added --> order
   order_lines -- row_changed --> order
   order_lines -- row_removed --> order
+  order_lines -- rows --> order
   order_lines -- saved --> order
-  order_lines -- adding --> order
-  order_lines -- row_added --> order
-  order_lines -- removed --> order_undo
+  order_undo -- pending --> order
   order_undo -- restored --> order_lines
-  order_lines -- line --> order
 ```

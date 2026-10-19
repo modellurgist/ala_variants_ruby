@@ -19,7 +19,13 @@ module ProgrammingParadigms
     end
 
     def self.chart(screen, &fired)
-      ([ "flowchart LR", "  screen[[#{screen.class.name}]]" ] + nodes(screen, "") + edges(screen, "", "screen", &fired).uniq).join("\n") + "\n"
+      ([ "flowchart LR", "  screen[[#{screen.class.name}]]" ] + nodes(screen, "") + numbered(edges(screen, "", "screen", &fired).uniq)).join("\n") + "\n"
+    end
+
+    # object ids change from run to run; numbering inline instances by first appearance keeps a drawing stable
+    def self.numbered(lines)
+      ids = {}
+      lines.map { |line| line.gsub(/_(\d+)\(\[/) { "_#{ids[$1] ||= ids.size + 1}([" } }
     end
 
     def self.nodes(composition, prefix)
@@ -52,7 +58,7 @@ module ProgrammingParadigms
       fired ? "  #{from} -- #{label} --> #{to}" : "  #{from} -. #{label} .-> #{to}"
     end
 
-    # An instance the composition made inline, drawn once per object, named by its class.
+    # An instance the composition made inline, drawn once per object, named by its class (`chart` renumbers it).
     def self.anonymous(target)
       owner, name = target.class.name.split("::").last(2)
       kind = name == "Port" ? "#{owner} port" : name

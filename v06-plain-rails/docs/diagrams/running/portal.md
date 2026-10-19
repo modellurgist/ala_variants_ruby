@@ -10,22 +10,22 @@ flowchart LR
   catalog[catalog]
   add_line[add_line]
   flow[flow]
-  outside -- request --> undo
-  undo -- pending --> screen
-  outside -- request --> lines
-  lines -- rows --> screen
-  lines -- contents --> totals
-  totals -- summary --> screen
-  outside -- request --> catalog
-  catalog -- rows --> screen
-  outside -- request --> flow
-  flow -- step --> screen
-  flow -- form --> screen
   outside -- request --> add_line
+  outside -- request --> catalog
+  outside -- request --> flow
+  outside -- request --> lines
+  outside -- request --> undo
   add_line -- added --> screen
-  flow -- reference --> screen
-  lines -- changed --> items
-  lines -- removed --> undo
-  undo -- restored --> screen
+  catalog -- rows --> screen
   flow -- blocked --> screen
+  flow -- form --> screen
+  flow -- reference --> screen
+  flow -- step --> screen
+  lines -- changed --> items
+  lines -- contents --> totals
+  lines -- removed --> undo
+  lines -- rows --> screen
+  totals -- summary --> screen
+  undo -- pending --> screen
+  undo -- restored --> screen
 ```

@@ -8,6 +8,7 @@ module Foundation
     def enable = @hops = Hash.new(0)
     def enabled? = !@hops.nil?
     def hop(composition, from, to) = @hops[[ composition.name, from, to ]] += 1
-    def edges(composition) = (@hops || {}).keys.select { _1[0] == composition.name }.map { _1.drop(1) }.uniq
+    # sorted, since tests run in random order and a drawing should only change when the wiring does
+    def edges(composition) = (@hops || {}).keys.select { _1[0] == composition.name }.map { _1.drop(1) }.uniq.sort_by(&:inspect)
   end
 end
