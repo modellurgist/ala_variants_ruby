@@ -56,4 +56,38 @@ class PureCoreTest < ActiveSupport::TestCase
     assert_equal 43, added.got.first[:id]
     assert_equal 2, @contents.got.last[:lines].size
   end
+
+  test "a product changed elsewhere is asked again, and only the lines holding it are redrawn and repriced" do
+    catalog = ROWS.dup
+    l = CartLines.new(cart_id: 1, row: Rules::LineRow.new(fields: %i[stock_status]))
+    l.wire_to(Answerer.new([ { id: 42, product_id: 7, quantity: 2, gift_wrapped: false } ]), from: :items, to: :ask)
+    l.wire_to(Answerer.new(->(ids) { catalog.slice(*ids) }), from: :products, to: :ask)
+    l.wire_to(contents = Recorder.new, from: :contents).wire_to(row = Recorder.new, from: :row_changed)
+    l.input_port(:load).send_event
+    catalog[7] = ROWS[7].merge(amount: Foundation::Money[1200], stock: 0, stock_status: :out_of_stock)
+    l.input_port(:product).push(product_id: 8)
+    assert_nil row.got
+    l.input_port(:product).push(product_id: 7, stock: 0)
+    assert_equal [ [ 42, :out_of_stock, "$24.00" ] ], row.got.map { [ _1[:id], _1[:stock_status], _1[:line_total].to_s ] }
+    assert_equal [ { quantity: 2, amount: 1200 } ], contents.got.last[:lines]
+  end
+
+  test "saved items and the wishlist redraw for a changed product they hold, and ignore one they don't" do
+    catalog = ROWS.dup
+    saved = SavedItems.new(cart_id: 1, row: Rules::LineRow.new(fields: %i[amount]))
+    saved.wire_to(Answerer.new([ { id: 5, product_id: 7, quantity: 1 } ]), from: :items, to: :ask)
+    wishlist = Wishlist.new(cart_id: 1, row: Rules::LineRow.new(fields: %i[amount]))
+    wishlist.wire_to(Answerer.new([ 7 ]), from: :items, to: :ask)
+    [ saved, wishlist ].each do |list|
+      list.wire_to(Answerer.new(->(ids) { catalog.slice(*ids) }), from: :products, to: :ask)
+      list.input_port(:load).send_event
+    end
+    saved.wire_to(saved_rows = Recorder.new, from: :rows_changed)
+    wishlist.wire_to(wished_rows = Recorder.new, from: :rows_changed)
+    catalog[7] = ROWS[7].merge(amount: Foundation::Money[1200])
+    [ saved, wishlist ].each { _1.input_port(:product).push(product_id: 8) }
+    assert_equal [ nil, nil ], [ saved_rows.got, wished_rows.got ]
+    [ saved, wishlist ].each { _1.input_port(:product).push(product_id: 7) }
+    assert_equal [ "$12.00", "$12.00" ], [ saved_rows.got.last.first[:amount].to_s, wished_rows.got.last.first[:amount].to_s ]
+  end
 end

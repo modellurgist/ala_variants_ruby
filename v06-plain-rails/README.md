@@ -14,11 +14,11 @@ here: `Foundation::Trace` is thirteen lines, the test suite turns it on, after a
 declared output must have been routed at least once, and `docs/diagrams/running/` draws each screen
 from the hops. The structural drawing in `docs/diagrams/` is read from the `wire` arms with Prism.
 
-**Status:** 79 integration tests (V03's, plus one the trace asked for, 18 unit tests of the
-abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, fixed that day, and 3 for the
-defect fixes below) and 7 Cuprite browser tests, 0 failures; after the full suite, **0 declared outputs never routed**; RuboCop clean;
+**Status:** 85 integration and unit tests (V03's, plus one the trace asked for, 18 unit tests of the
+abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, fixed that day, 3 for the
+defect fixes below, and 6 for the live paradigm of 2026-10-21) and 11 Cuprite browser tests, 0 failures; after the full suite, **0 declared outputs never routed**; RuboCop clean;
 `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it **100/100 at every tier with
-no scored finding**, 10 of 10 rules met (348 functions; one inherent declaration, the drawing's edge
+no scored finding**, 10 of 10 rules met (353 functions; one inherent declaration, the drawing's edge
 label, added 2026-10-19 when the linter's Prism fix first checked `drawing.rb` and `wiring.rb`; two
 accepted lines, below). The linter learned two shapes to read it,
 recorded in `LINT_NOTES.md`. Familiarity 5 of 5 (judgement): a plain class, methods that return a
@@ -46,6 +46,24 @@ follow every change; and the payment's waiting step asks `GET /cart/checkout/sta
 `catch-up` controller) when it appears and whenever its stream subscribes, so an outcome broadcast
 before the page was listening is not lost.
 
+*Later (2026-10-21): outside change is one paradigm.* `ProgrammingParadigms::ChangeFeed` replaces
+`LiveUpdate` and the hand-built paths around it: the catalogue's three rendered-row broadcasts, the
+checkout's stock-badge broadcast and its payment-status broadcast, and the payment page's
+`catch-up` controller with the `GET /cart/checkout/status` it asked. A screen that makes a change
+wires it to a `ChangeFeed::Publish` sink (`settle.stock_changed → stock_news`, `records.updated →
+product_news`, `charge.charged → payment_news`); a page renders the `ChangeFeed::Subscription` its screen configures
+with what it listens to (the cart: `stock` and `product`; the checkout's waiting step: its own
+`payment`, asking again on each subscription). What travels is a fact, a kind and identity keys
+(`{ kind: "stock", product_id:, stock: }`), never HTML. A fact the page hears refreshes it (a Turbo
+morph), and the rebuilt screen reads the current values through the tables it is configured with;
+the refresh keeps an open modal, the flash, typed input and the cart's tab. The topics are named once,
+in `Screens::Topics`. Moving onto it closed three gaps the old broadcasts had, each shown failing on the
+old code first: a staff stock edit at /products never reached an open cart; a product created at
+/products never reached an open portal; and a staff edit of a product replaced the portal's
+catalogue row with the /products row (Edit and Delete in place of the quantity field). The checkout
+and portal templates now pick a step's partial from a literal `STEP_VIEWS` table instead of a name
+built from the step.
+
 ## Run it
 
 ```bash
@@ -60,11 +78,11 @@ bin/rails ala:diagrams        # docs/diagrams/*.md from the wire arms
 
 | Layer | Directory | Holds |
 |---|---|---|
-| Application | `app/ala/screens/`, `app/controllers/`, `app/views/{products,carts,checkouts,portals,...}`, `config/routes.rb` | `Screens::Store` (the calibration); one screen per page that builds and configures its parts and wires them in `wire`; controllers that call one input and redirect or render; page templates that place components |
+| Application | `app/ala/screens/`, `app/controllers/`, `app/views/{products,carts,checkouts,portals,...}`, `config/routes.rb` | `Screens::Store` (the calibration), `Screens::Topics` (the live topics); one screen per page that builds and configures its parts and wires them in `wire`; controllers that call one input and redirect or render; page templates that place components |
 | Domain abstractions | `app/ala/domain_abstractions/`, `app/views/components/` | `CartLines`, `SavedItems`, `Wishlist` (values), `CartItemsStore`, `SavedItemsStore`, `WishlistStore` (their stores), `Undo`, `ProductIndex`, `PricingChoices`, `CartTotals`, `OrderTotals`, `CheckoutFlow`, `SubmitOrder`, `Records`, `AddLine`, `Charge`, `SettleOrder`; the domain UI partials |
 | Rules | `app/ala/rules/`, `app/views/elements/` | the pure rules and projections (among them `LineRow`, a held line shown as its product); the generic UI elements |
-| Programming paradigms | `app/ala/programming_paradigms/` | `Wiring` (`run`, and the trace hooks), `Transitions`, `Wizard` (a step flow kept in a record), `LiveUpdate` (a Turbo Stream broadcast sink), `Patches` (a Turbo Stream response), `PushLater` (an Active Job that rebuilds a screen and calls an input), `Drawing` (the wire arms as Mermaid, structural or as they ran) |
-| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Trace`, `Money`, `DomTargets`, `LedgerGateway`; the Active Record models as persistence; seven small Stimulus controllers |
+| Programming paradigms | `app/ala/programming_paradigms/` | `Wiring` (`run`, and the trace hooks), `Transitions`, `Wizard` (a step flow kept in a record), `ChangeFeed` (outside change: a `Publish` sink, a `Subscription` a page renders, and the channel between them), `Patches` (a Turbo Stream response), `PushLater` (an Active Job that rebuilds a screen and calls an input), `Drawing` (the wire arms as Mermaid, structural or as they ran) |
+| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Trace`, `Money`, `DomTargets`, `LedgerGateway`; the Active Record models as persistence; six small Stimulus controllers (`change-feed` is the page's end of `ChangeFeed`) |
 
 ## How a request runs
 

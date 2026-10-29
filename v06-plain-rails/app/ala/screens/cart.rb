@@ -25,7 +25,7 @@ module Screens
     GROUNDED = [].freeze
 
     attr_reader :config, :rows, :summary, :saved_rows, :saved_count, :wishlist_rows, :wishlist_count, :wishlist_ids,
-                :undo_pending, :flash, :patches
+                :undo_pending, :flash, :patches, :feed
 
     def parts = { lines: @lines, undo: @undo, saved: @saved, wishlist: @wishlist, pricing: @pricing, totals: @totals, items: @items,
                   saved_store: @saved_store, wishlist_store: @wishlist_store }
@@ -78,6 +78,8 @@ module Screens
       @pricing = PricingChoices.new(store: CartPricingChoice, cart_id:, shipping:, default_method: :standard,
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
+      # the lines show each product's stock and price as it is now, so the page follows both
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics::CATALOG, kinds: %i[stock product])
       @line_html = ->(row) { Partial.render("components/cart_line", row:, wishlist_ids: @wishlist_ids, t: @t[:cart], labels:) }
     end
 

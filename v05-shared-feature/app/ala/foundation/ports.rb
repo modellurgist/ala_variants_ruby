@@ -24,7 +24,7 @@ module Foundation
     # Wires one of my outputs to one of target's inputs, by port name or by the only paradigm match.
     # The target may also be a bare port object (one a paradigm or an execution model built).
     def wire_to(target, from: nil, to: nil)
-      return attach(from, self.class.outputs.fetch(from), target, target).then { self } unless target.respond_to?(:input_port)
+      return attach(from, outputs.fetch(from), target, target).then { self } unless target.respond_to?(:input_port)
       out, spec = find_output(from, target, to)
       input = to || target.class.inputs.key(spec[:paradigm])
       attach(out, spec, target.input_port(input), target, input)
@@ -36,7 +36,7 @@ module Foundation
     # Wires an output to a block: Spray's lambda at the wire (§6.17.4), for adapting or for a sink the
     # composition writes inline.
     def on(from, &block)
-      spec = self.class.outputs.fetch(from) { raise ArgumentError, "#{self.class} has no output #{from.inspect}" }
+      spec = outputs.fetch(from) { raise ArgumentError, "#{self.class} has no output #{from.inspect}" }
       attach(from, spec, spec[:paradigm].port(&block), block)
       self
     end
@@ -53,11 +53,14 @@ module Foundation
       paradigm.port(&method(:"#{name}_received"))
     end
 
+    # The class's declared outputs; a paradigm part whose outputs are its configuration answers its own.
+    def outputs = self.class.outputs
+
     # The instances a composition made and named, for a drawing or a coverage test; a leaf has none.
     def parts = {}
 
     # Outputs nothing is wired to yet; a composition test lists them.
-    def unwired_outputs = self.class.outputs.keys.select { instance_variable_get(:"@#{_1}").nil? }
+    def unwired_outputs = outputs.keys.select { instance_variable_get(:"@#{_1}").nil? }
 
     # Every wire made from my outputs, in wiring order: what a drawing of the built graph reads.
     Wire = Data.define(:output, :target, :input)
@@ -93,7 +96,7 @@ module Foundation
 
     def find_output(from, target, to)
       wanted = to ? [ target.class.inputs.fetch(to) ] : target.class.inputs.values
-      candidates = self.class.outputs.select do |name, spec|
+      candidates = outputs.select do |name, spec|
         (from.nil? || name == from) && wanted.include?(spec[:paradigm]) &&
           (spec[:many] || instance_variable_get(:"@#{name}").nil?)
       end

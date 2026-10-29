@@ -12,6 +12,7 @@ flowchart LR
   totals[totals]
   flow[flow]
   items[items]
+  feed[feed]
   order -- changed --> items
   order -- rows --> screen
   order -- contents --> totals
@@ -24,6 +25,10 @@ flowchart LR
   flow -- form --> screen
   flow -- blocked --> screen
   flow -- reference --> screen
+  feed -- product_added --> screen
+  feed -- product_changed --> screen
+  feed -- product_removed --> screen
+  feed -- stock --> screen
   order_lines -- removed --> order_undo
   order_undo -- restored --> order_lines
   order_undo -- restored --> order

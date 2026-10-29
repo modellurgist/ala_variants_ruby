@@ -10,8 +10,10 @@ flowchart LR
   charge[charge]
   settle[settle]
   items[items]
-  stock_update[stock_update]
-  status[status]
+  feed[feed]
+  publish_stock[publish_stock]
+  publish_paid[publish_paid]
+  publish_declined[publish_declined]
   lines -- contents --> totals
   pricing -- discount --> totals
   pricing -- shipping_method --> totals
@@ -23,8 +25,10 @@ flowchart LR
   flow -- done --> screen
   charge -- charged --> settle
   charge -- charged --> flow
-  charge -- charged --> status
+  charge -- charged --> publish_paid
   charge -- declined --> flow
-  charge -- declined --> status
-  settle -- stock_changed --> stock_update
+  charge -- declined --> publish_declined
+  settle -- stock_changed --> publish_stock
+  feed -- paid --> screen
+  feed -- declined --> screen
 ```

@@ -7,16 +7,15 @@ module Screens
     include DomainAbstractions
     include Rules
 
-    STREAM = "catalog"
     MODAL_FRAME = "modal"
     LIST = "products"
     TEXTS = { edit: "Edit", delete: "Delete", confirm_delete: "Delete this product?", add_to_cart: "Add to cart",
               created: "Product created successfully", updated: "Product updated successfully", added: "Added to cart" }.freeze
     GROUNDED = [].freeze
 
-    attr_reader :config, :rows, :row, :form, :saved, :deleted, :notices
+    attr_reader :config, :rows, :row, :form, :saved, :deleted, :notices, :feed
 
-    def parts = { records: @records, add_line: @add_line, list_update: @list_update, row_update: @row_update, row_removal: @row_removal }
+    def parts = { records: @records, add_line: @add_line, product_news: @product_news, product_gone: @product_gone }
 
     def load = run(:records, @records.load)
     def new = run(:records, @records.new)
@@ -35,12 +34,11 @@ module Screens
                                 links: ->(id) { { show: urls.product_path(id), edit: urls.edit_product_path(id), delete: urls.product_path(id), add_to_cart: urls.add_to_cart_product_path(id) } })
       @records = Records.new(model: Product, project: @project)
       @add_line = AddLine.new(lines: CartItem, cart_id:)
-      labels = Store::STOCK_LABELS
-      render_row = ->(p) { Partial.render("components/product_row", row: @project.(p), labels:, actions: TEXTS, frame: MODAL_FRAME) }
-      # every open catalogue follows a saved or deleted product
-      @list_update = ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :append, target: LIST, render: render_row)
-      @row_update = ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :replace, target: ->(p) { Foundation::DomTargets.product_row_id(p.id) }, render: render_row)
-      @row_removal = ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :remove, target: ->(p) { Foundation::DomTargets.product_row_id(p.id) })
+      # every open catalogue follows a saved or deleted product and a stock change; one product's page, its own
+      @product_news = ProgrammingParadigms::ChangeFeed::Publish.new(topic: Topics::CATALOG, kind: :product)
+      @product_gone = ProgrammingParadigms::ChangeFeed::Publish.new(topic: Topics::CATALOG, kind: :product_removed)
+      @list_feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics::CATALOG, kinds: %i[product product_removed stock])
+      @row_feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics::CATALOG, kinds: %i[product stock])
     end
 
     private
@@ -48,12 +46,12 @@ module Screens
     # {part, output} → where it goes
     def wire(part, output, payload)
       case [ part, output ]
-      in [ :records, :rows ] then @rows = payload
-      in [ :records, :record ] then @row = @project.(payload)
+      in [ :records, :rows ] then @rows = payload; @feed = @list_feed
+      in [ :records, :record ] then @row = @project.(payload); @feed = @row_feed.only(product_id: payload.id)
       in [ :records, :form ] then @form = payload
-      in [ :records, :created ] then @saved = payload; @notices << TEXTS[:created]; run(:list_update, @list_update.push(payload))
-      in [ :records, :updated ] then @saved = payload; @notices << TEXTS[:updated]; run(:row_update, @row_update.push(payload))
-      in [ :records, :deleted ] then @deleted = payload; run(:row_removal, @row_removal.push(payload))
+      in [ :records, :created ] then @saved = payload; @notices << TEXTS[:created]; run(:product_news, @product_news.push(product_id: payload.id))
+      in [ :records, :updated ] then @saved = payload; @notices << TEXTS[:updated]; run(:product_news, @product_news.push(product_id: payload.id))
+      in [ :records, :deleted ] then @deleted = payload; run(:product_gone, @product_gone.push(product_id: payload.id))
       in [ :add_line, :added ] then @notices << TEXTS[:added]
       end
     end

@@ -97,3 +97,37 @@ changes:
 | R8 | met, better | the wiring reads as a table a Rails developer has seen in a service object; the drawing is the table, and the running drawing is the suite |
 | R4 | met | a value holds its state; the screen holds what landed for the view, inside the table, as V03's blocks did |
 | R6 | met | `run` and `wire` are two words; `OUTPUTS` is the third |
+
+## Later (2026-10-21): outside change as a paradigm
+
+Before, each live path was built by hand: the catalogue configured three `LiveUpdate` sinks that
+broadcast rendered rows, the checkout broadcast rendered stock badges to every page by CSS class and
+a rendered status to its own page, and the waiting page carried a `catch-up` controller and a status
+endpoint for an outcome sent before it listened. Every sink knew a page's markup, and the row a
+product save broadcast was the /products row wherever it landed, the portal's catalogue included.
+
+`ProgrammingParadigms::ChangeFeed` makes it one paradigm, the checklist's "live subscription port":
+
+```ruby
+# publish side, in the screen that makes the change
+in [ :settle, :stock_changed ] then run(:stock_news, @stock_news.push(payload))   # ChangeFeed::Publish, kind :stock
+# subscribe side, configured by the screen that shows it and rendered by its page
+@feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics::CATALOG, kinds: %i[stock product])
+```
+
+- `ChangeFeed.fact` owns the format, a kind plus identity keys; `ChangeFeed.hears?` decides which facts a feed
+  takes, by kind and, where configured, by identity (a product's page hears only its product).
+- `ChangeFeed::Channel` streams a signed topic and transmits only what the feed hears; the `change-feed` Stimulus
+  controller refreshes the page when a fact arrives, waiting while Turbo is busy, and keeps what the
+  viewer has open (`data-change-feed-keep` with an id, typed input). A feed with `catch_up` also refreshes
+  on every subscription, which is what the checkout's waiting step needed the status endpoint for.
+- Delivery is the refresh: a page is rebuilt per request, so the wire from `feed.stock` to the lines
+  is the rebuilt screen reading current stock through its product lookup. That is why the feed
+  declares no `OUTPUTS` and is not a part in the wiring table; it is configuration the page renders.
+- The topics are named once in `Screens::Topics`, and both sides take them as configuration.
+
+What it costs: a refresh is a whole-page GET where a broadcast was one patch, and keeping the
+viewer's state across a morph needs the keep rules above (the cart's tabs keep their choice in
+`tabs_controller.js`). The JavaScript reads `Turbo.session.navigator.currentVisit` to tell its own
+refresh from a form's redirect; that is Turbo internals, not API.
+

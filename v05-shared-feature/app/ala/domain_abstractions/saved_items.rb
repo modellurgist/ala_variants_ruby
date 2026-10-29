@@ -2,7 +2,8 @@ module DomainAbstractions
   # Lines a shopper set aside for later, as a value: pulled through `items` on load, changed in
   # memory, every change sent out on `changed` for the store the composition wires; it asks its
   # `products` port what the products look like. Config: row (a LineRow: the product fields and
-  # URLs a saved item's row carries). Ports in: load, show (rows and count again, from memory), stash ({ product_id:, quantity: }), move_to_cart (an id).
+  # URLs a saved item's row carries). Ports in: load, show (rows and count again, from memory), stash ({ product_id:, quantity: }), move_to_cart (an id),
+  # product ({ product_id: }, changed elsewhere: asked again).
   # Ports out: items (a request), products (a request of product ids), changed ({ op:, ... }), rows
   # and count (after load, and again after a change as rows_changed / count), moved ({ product_id:,
   # quantity: } the shopper wants back in the cart).
@@ -42,6 +43,12 @@ module DomainAbstractions
       @held.delete(item)
       emit(:changed, op: :remove, id:)
       emit(:moved, product_id: item[:product_id], quantity: item[:quantity])
+      changed
+    end
+
+    input(:product, ProgrammingParadigms::DataFlow) do |fact|
+      next unless @held.any? { _1[:product_id] == fact[:product_id] }
+      @catalog.merge!(ask(:products, [ fact[:product_id] ]))
       changed
     end
 

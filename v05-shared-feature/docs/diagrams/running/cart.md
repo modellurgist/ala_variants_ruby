@@ -15,6 +15,7 @@ flowchart LR
   items[items: CartItemsStore]
   saved_store[saved_store: SavedItemsStore]
   wishlist_store[wishlist_store: WishlistStore]
+  feed[feed: Subscription]
   order -- items → lookup --> items
   order -- products → lookup --> products
   order -- changed → apply --> items
@@ -77,4 +78,8 @@ flowchart LR
   totals -- summary → push --> patch_12([Patch])
   items -- added → arrived --> order
   items -- found → arrived --> order
+  feed -- stock → product --> order
+  feed -- product → product --> order
+  feed -- product → product --> saved
+  feed -- product → product --> wishlist
 ```

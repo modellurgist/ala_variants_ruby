@@ -1,5 +1,5 @@
 <% content_for :title, "Show Product · GoodDeal" %>
-<%= turbo_stream_from Screens::Catalog::STREAM %>
+<%= tag.div hidden: true, data: @feed.attributes %>
 <div class="mb-6 flex items-center justify-between">
   <h1 class="text-3xl font-semibold tracking-tight">Show Product</h1>
   <div class="flex gap-3">

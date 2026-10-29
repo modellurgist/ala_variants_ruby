@@ -18,7 +18,7 @@ class DrawingTest < ActiveSupport::TestCase
   test "the checkout's chart draws the inline sink and the job's port" do
     cart = Cart.create!(status: "open")
     chart = ProgrammingParadigms::Drawing.mermaid(Screens::Checkout.new(cart_id: cart.id))
-    assert_match(/settle -- stock_changed → push --> \w+\(\[LiveUpdate\]\)/, chart)
+    assert_match(/settle -- stock_changed → push --> \w+\(\[Publish\]\)/, chart)
     assert_match(/flow -- ready_to_pay --> \w+\(\[DataFlow port\]\)/, chart)
     assert_includes chart, "charge -- charged → settle --> settle"
   end

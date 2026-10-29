@@ -4,15 +4,14 @@
 flowchart LR
   screen[[Screens::Catalog]]
   records[records]
-  list_update[list_update]
-  row_update[row_update]
-  row_removal[row_removal]
+  product_news[product_news]
+  product_gone[product_gone]
   add_line[add_line]
   records -- rows --> screen
   records -- record --> screen
   records -- form --> screen
-  records -- created --> list_update
-  records -- updated --> row_update
-  records -- deleted --> row_removal
+  records -- created --> product_news
+  records -- updated --> product_news
+  records -- deleted --> product_gone
   add_line -- added --> screen
 ```

@@ -7,6 +7,84 @@ long-lived cart and V03's pure core and patches are kept as they were and descri
 their own headings. This document records the latest changes first, then V05's, V04's and V03's,
 and the hand walk after the build.
 
+## Outside change as a paradigm (Later, 2026-10-21)
+
+Until now a change made elsewhere reached open pages through `LiveUpdate`: the screen that made the
+change rendered a product row or a stock badge and broadcast it to every page on the `catalog`
+stream, which each page targeted by DOM id or class. The publisher knew every view (R1, R10), and it
+missed what no broadcast targeted. The live paths it carried:
+
+| change | published by | reached |
+|---|---|---|
+| product created, updated, deleted at /products (R2.5) | `Catalog`: `records.created/updated/deleted` | product list (append, replace, remove a row), product page, and, by its row id, the portal's catalogue row, replaced with the *staff* row and its edit and delete buttons (a defect) |
+| stock taken by a paid order (R2.6, R3.14, R6.8) | `Checkout`: `settle.stock_changed` | every `.stock_<id>` badge: product list, product page, cart lines, portal lines and catalogue |
+| payment outcome | `Checkout`: `charge.charged/declined` | the cart's own checkout page, its status box, on `checkout_<cart_id>` |
+
+A staff stock or price edit reached product lists only: an open cart or portal kept its badge and
+prices until a reload. A portal submission takes no stock in this variant, so it publishes nothing.
+
+`ProgrammingParadigms::ChangeFeed` (`app/ala/programming_paradigms/change_feed.rb`) is the paradigm, in the layer
+Spray puts paradigm interfaces (§2.2), with the observer inside it (§4.4.2):
+
+```ruby
+# publish side: the composition making the change wires it to a sink with a topic and a kind
+changed = ChangeFeed::Publish.new(topic: Store::CATALOG_TOPIC, kind: :product, fact: ->(p) { { product_id: p.id } })
+@records.wire_to(changed, from: :updated)
+@settle.wire_to(ChangeFeed::Publish.new(topic: Store::CATALOG_TOPIC, kind: :stock, fact: ->(level) { level }), from: :stock_changed)
+
+# subscribe side: the page places a feed with what it listens to and wires the kinds to the parts that care
+@feed = ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[stock product])
+@feed.wire_to(@order, from: :stock, to: :product)
+@feed.wire_to(@order, from: :product, to: :product)
+@feed.wire_to(@saved, from: :product, to: :product)
+```
+
+- **What travels** is a fact: a kind and identity-keyed values, as a `<turbo-stream action="change_feed">`
+  carrying JSON and no markup. `ChangeFeed.message` writes it and `ChangeFeed.read` reads it back, so publisher and
+  subscriber are two ends of one format and share only the product id (or the cart id).
+- **Delivery.** A Rails page is not a process, so the paradigm's browser half (`change_feed_controller.js`,
+  placed by the `change_feed` helper with the page's topic stream) posts a fact of a kind the page
+  listens to back to the page's own `live` URL. The controller pushes it into the screen's `live`
+  input, the feed hands it to the wired parts, and the page answers with what changed: the cart its
+  patches (a line asked for its product again, the summary, the saved and wishlist panes), the checkout
+  its outcome (`feed.outcome` shows the flow's step), the product list and the portal their lists
+  drawn again from the tables (`feed.stock` → `records.load`, `order.load`, `catalog.load`), morphed in.
+  The product page shows its one product again. Kept compositions are already current: the change's
+  commit bumped the cart's stamp before the fact went out.
+- **The topic** is one name, `Store::CATALOG_TOPIC`, passed to both sides as configuration; the
+  checkout's is per cart, `Checkout.topic(cart_id)`, used only by its own screen.
+- **Subscription outputs are configuration.** `Foundation::Ports` reads a part's outputs through `outputs`, the
+  class's by default; `Subscription` answers one per configured kind, so `feed.stock` is a port the wiring
+  test, the drawing and the trace all see.
+
+What it changed: `LiveUpdate` and its three rendered broadcasts are gone, and so are the screens'
+render lambdas for them. `CartLines`, `SavedItems` and `Wishlist` gained a `product` input ({
+product_id: }, asked again; the lines redraw and reprice the lines that hold it), which the
+`OrderLines` feature forwards. Four `live` routes and actions (products has a second, `live_row`, for
+the product page). The staff-edit gap closed with the cart's `product` kind and its wire to the
+order; the portal's catalogue row is no longer replaced with the staff row. Fourteen tests: the feed,
+the format and the sink on their ports (`test/ala/change_feed_test.rb`), the three `product` inputs on fakes,
+and eight that publish and post facts back to each page (`test/controllers/change_feed_updates_test.rb`);
+two browser tests in `test/system/change_feed_test.rb` edit a product in a second session and see the open
+list and the open cart change.
+
+The linter's three R11 findings from 2026-10-21 (a step's template chosen by an interpolated name, in
+the checkout controller and the checkout and portal pages) are answered with literal tables,
+`Checkout::STEP_PARTIALS` and `Portal::STEP_PARTIALS`.
+
+### What it costs
+
+- Every live update is a round trip: the fact arrives, the page posts it back, the page's
+  composition answers. `LiveUpdate` rendered once and sent the HTML to every page. Here each open page
+  pays a request, and the per-request pages reload their lists from the tables. The topic is coarse
+  (every product change on one topic); each page decides by kind, not by product.
+- A fact posted back is trusted only to say "look again": the pages re-read through their tables, so a
+  forged fact costs a query and changes nothing.
+- The product page answers a deleted product with a 404, which the browser half ignores; `LiveUpdate`
+  removed the row.
+- A fact that arrives before a page's stream is subscribed is lost, as before; the checkout's
+  `catch_up` still covers its one case.
+
 ## The wiring as it ran, and the checkout kept (2026-10-11)
 
 **Forwarding.** A feature's twelve `on { emit }` lines became two:
@@ -147,7 +225,7 @@ def change
 end
 ```
 
-`LongLived` is an execution model in the paradigms layer, beside `PushLater` and `LiveUpdate`: it
+`LongLived` is an execution model in the paradigms layer, beside `PushLater` and `ChangeFeed`: it
 knows threads and staleness and nothing about carts. Three decisions it makes, and where Spray puts
 each:
 
@@ -307,7 +385,7 @@ reload to show those; a page that is patched can't.
 | **application** | `Screens::*`, controllers, page templates, routes | the composition: instances, configuration, wiring, words |
 | **domain** | `DomainAbstractions::*` (stateful, ported), `views/components/` (domain UI: a cart line, an order line, a catalogue row, a price summary) | abstractions that know a concept of the store's world |
 | **rules** | `Rules::*` (pure: pricing, shipping, promo, volume tier, stock status, line items, the product projection and a held line's row), `views/elements/` (generic UI: a product line, a stock badge, tabs, a modal, milestones, a record form) | significantly more general than the domain: they take any input and know no store |
-| **paradigms** | `DataFlow`, `Event`, `RequestResponse`, `Transitions`, `PersistedSteps` (a state machine kept in a record), `LiveUpdate` (a broadcast sink), `PushLater` (an asynchronous execution model) | how a connection runs |
+| **paradigms** | `DataFlow`, `Event`, `RequestResponse`, `Transitions`, `PersistedSteps` (a state machine kept in a record), `ChangeFeed` (outside change: a publish sink, a subscription part, their fact format; `LiveUpdate`, a broadcast sink, until 2026-10-21), `PushLater` (an asynchronous execution model) | how a connection runs |
 | **foundation** | `Ports`, `Money`, `DomTargets`, `LedgerGateway`, the Active Record models | the wiring operator, the money type, the names, the stores |
 
 V01 had one domain layer and found seven peer edges in it (totals → pricing, flow → stock check) and
@@ -345,7 +423,7 @@ target) is declared with `helper` so elements render them and screens broadcast 
 depending down. The checkout's status target and the modal's frame name are screen constants the
 pages pass to the components as locals.
 
-**Execution models in the paradigms layer (R1).** `LiveUpdate` and `PushLater` use `DataFlow`, so
+**Execution models in the paradigms layer (R1).** `LiveUpdate` (now `ChangeFeed`) and `PushLater` use `DataFlow`, so
 they sit beside it. Rendering a component outside a request is the application's business:
 `Screens::Component.render` wraps `ApplicationController.render`, and the screens' render lambdas
 call it.

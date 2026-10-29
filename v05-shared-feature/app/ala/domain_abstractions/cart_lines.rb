@@ -7,7 +7,7 @@ module DomainAbstractions
   # Ports in: load, show (rows and contents again, from memory), lines (a request answered with { cart_id:, lines: [...] }), bump ({ item_id:,
   # delta: }), set_quantity ({ item_id:, quantity: }), remove, save_for_later, toggle_gift_wrap and
   # line (an item id), receive (a product id, or { product_id:, quantity: }), arrived (a stored line's
-  # snapshot, after the store added it).
+  # snapshot, after the store added it), product ({ product_id: }, changed elsewhere: asked again).
   # Ports out: items (a request for the stored lines), products (a request of product ids), changed
   # ({ op:, ... } for the store), adding ({ product_id:, quantity: } for the store), rows (every line
   # to display, after load), row_added / row_changed / row_removed (one line, after a change),
@@ -98,6 +98,13 @@ module DomainAbstractions
     end
 
     input(:line, ProgrammingParadigms::DataFlow) { |item_id| emit(:line, snapshot(find(item_id))) }
+
+    input(:product, ProgrammingParadigms::DataFlow) do |fact|
+      next unless @catalog.key?(fact[:product_id])
+      @catalog.merge!(ask(:products, [ fact[:product_id] ]))
+      @held.select { _1[:product_id] == fact[:product_id] }.each { emit(:row_changed, row(_1)) }
+      contents
+    end
 
     def initialize(cart_id:, row: Rules::LineRow.new(fields: [])) = (@cart_id, @row, @held, @catalog = cart_id, row, [], {})
 

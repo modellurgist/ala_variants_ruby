@@ -2,11 +2,15 @@ Rails.application.routes.draw do
   root "home#show"
 
   resources :products do
-    collection { post :validate }
+    collection do
+      post :validate
+      post :live
+    end
     member { post :add_to_cart }
   end
 
   resource :cart, only: :show do
+    post :live
     resources :items, only: [ :update, :destroy ], controller: "cart_items" do
       member do
         patch :gift_wrap
@@ -34,12 +38,14 @@ Rails.application.routes.draw do
       post :edit_address
       post :pay
       get :status
+      post :live
     end
     get "checkout/:step", to: "checkouts#show", as: :checkout_step
     get "success", to: "cart_successes#show", as: :success
   end
 
   resource :portal, only: :show do
+    post :live
     post :review
     post :edit_lines
     post :validate

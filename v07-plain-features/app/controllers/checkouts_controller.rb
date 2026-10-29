@@ -1,4 +1,6 @@
 class CheckoutsController < ApplicationController
+  include ChangeFeedRefresh
+
   STEPS_BY_URL = { nil => :address, "payment" => :payment }.freeze
 
   def create

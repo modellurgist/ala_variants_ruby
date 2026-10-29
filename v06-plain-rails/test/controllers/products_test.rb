@@ -23,9 +23,10 @@ class ProductsTest < ActionDispatch::IntegrationTest
     get new_product_path
     assert_select "form[id^=form_product]"
 
-    assert_turbo_stream_broadcasts(Screens::Catalog::STREAM, count: 1) do
+    assert_broadcasts(Screens::Topics::CATALOG, 1) do
       post products_path, params: { product: { name: "New", description: "d", amount: 42, stock: 42, thumbnail: "t.png" } }
     end
+    assert_equal [ ProgrammingParadigms::ChangeFeed.fact(:product, product_id: Product.last.id) ], broadcasts(Screens::Topics::CATALOG).map { JSON.parse(_1) }
     assert_redirected_to products_path
     follow_redirect!
     assert_select "#flash", /Product created successfully/

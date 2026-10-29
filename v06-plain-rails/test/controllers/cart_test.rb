@@ -186,5 +186,6 @@ class CartTest < ActionDispatch::IntegrationTest
   test "stock badges show low and out of stock, and a stock change is broadcast to every open page" do
     open_cart
     assert_select ".stock_#{@b.id}", "Only 5 left!"
+    assert_select "[data-controller=change-feed][data-change-feed-kinds-value=?]", '["stock","product"]'
   end
 end

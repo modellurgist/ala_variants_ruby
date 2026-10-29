@@ -40,3 +40,20 @@ lines, and one accepted line: `CheckoutFlow#show`, still a delegation the linter
 proliferation.
 
 The `clone_inside` findings (in `CartLines` and `Drawing`) are reported and unscored by design.
+
+## 2026-10-21: the ChangeFeed paradigm and step tables
+
+The linter's new R11 check (a template chosen by a name built at run time) found two lines,
+`render "checkouts/#{@s.step}"` and `render "portals/#{@s.step}"` (99, 368/370). Each now reads a
+literal `STEP_VIEWS` table on its screen. Moving the live paths onto `ProgrammingParadigms::ChangeFeed`
+first drew two R11 findings of its own: the row lambdas looped (`sum`) over a lookup. That is a
+loop in the composition, and the fix lets the framework iterate instead (`Partial.each`, a
+collection render).
+
+| tier | score | rules met | functions clean |
+|---|---|---|---|
+| default | 100/100 (A) | 10 of 10 checked | 384/384 |
+| `--strict` | 100/100 | 10 of 10 | 384/384 |
+| `--super-strict` | 100/100 | 10 of 10 | 384/384 |
+
+Same accepted line (`CheckoutFlow#show`), no new ones; the advisories are the same less `r11_share`.

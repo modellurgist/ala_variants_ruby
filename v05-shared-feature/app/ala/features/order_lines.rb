@@ -8,7 +8,8 @@ module Features
   # `Undo` marks), undo_window (a duration).
   # Ports in: load, show, lines (a request), bump, set_quantity, remove, save_for_later,
   # toggle_gift_wrap, line (an item id), receive (a product id or { product_id:, quantity: }), arrived
-  # (a stored line's snapshot, added or restored), undo, expire_undo.
+  # (a stored line's snapshot, added or restored), undo, expire_undo, product ({ product_id: }, changed
+  # elsewhere).
   # Ports out: items and products (requests), changed and adding (for the lines store), fetch (an id
   # the store should hand back as a snapshot, after a restore), rows, row_added, row_changed,
   # row_removed, contents, saved, line, undo_pending, restored.
@@ -42,6 +43,7 @@ module Features
     input(:arrived, ProgrammingParadigms::DataFlow) { |item| @lines.input_port(:arrived).push(item) }
     input(:undo, ProgrammingParadigms::Event) { @undo.input_port(:restore).send_event }
     input(:expire_undo, ProgrammingParadigms::Event) { @undo.input_port(:expire).send_event }
+    input(:product, ProgrammingParadigms::DataFlow) { |fact| @lines.input_port(:product).push(fact) }
 
     def parts = { lines: @lines, undo: @undo }
 

@@ -11,7 +11,7 @@ class CheckoutSystemTest < ApplicationSystemTestCase
       super
     end
   end
-  Turbo::StreamsChannel.prepend(HeldSubscriptions)
+  ProgrammingParadigms::ChangeFeed::Channel.prepend(HeldSubscriptions)
 
   teardown { HeldSubscriptions.gate&.close; HeldSubscriptions.gate = nil }
 
@@ -27,7 +27,6 @@ class CheckoutSystemTest < ApplicationSystemTestCase
     fill_in "Postal code", with: "12345"
     click_on "Continue to payment"
     assert_text "Ada"
-    assert_selector "turbo-cable-stream-source[connected]", visible: :all
   end
 
   test "address, payment, the payment job, and the live redirect to the success page" do

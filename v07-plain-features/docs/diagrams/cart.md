@@ -14,6 +14,7 @@ flowchart LR
   items[items]
   saved_store[saved_store]
   wishlist_store[wishlist_store]
+  feed[feed]
   order -- changed --> items
   order -- adding --> items
   items -- added --> order
@@ -45,6 +46,7 @@ flowchart LR
   pricing -- promo_applied --> screen
   pricing -- promo_rejected --> screen
   totals -- summary --> screen
+  feed -- stock --> screen
   order_lines -- removed --> order_undo
   order_undo -- restored --> order_lines
   order_undo -- restored --> order

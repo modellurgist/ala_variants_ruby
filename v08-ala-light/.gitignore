@@ -1,0 +1,24 @@
+# Rails 8's defaults: runtime output, caches, builds and secrets stay out of the repo.
+/.bundle
+/.env*
+
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+
+/public/assets
+/app/assets/builds/*
+!/app/assets/builds/.keep
+
+/config/master.key
+/coverage

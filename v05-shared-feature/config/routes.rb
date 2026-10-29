@@ -2,11 +2,18 @@ Rails.application.routes.draw do
   root "home#show"
 
   resources :products do
-    collection { post :validate }
-    member { post :add_to_cart }
+    collection do
+      post :validate
+      post :live
+    end
+    member do
+      post :add_to_cart
+      post :live_row
+    end
   end
 
   resource :cart, only: :show do
+    post :live
     resources :items, only: [ :update, :destroy ], controller: "cart_items" do
       member do
         patch :gift_wrap
@@ -34,6 +41,7 @@ Rails.application.routes.draw do
       post :edit_address
       post :pay
       get :status
+      post :live
     end
     get "checkout/:step", to: "checkouts#show", as: :checkout_step
     get "success", to: "cart_successes#show", as: :success
@@ -44,6 +52,7 @@ Rails.application.routes.draw do
     post :edit_lines
     post :validate
     patch :submit
+    post :live
     resources :lines, only: [ :create, :update, :destroy ], controller: "portal_lines"
     resource :undo, only: :create, controller: "portal_undos" do
       post :expire

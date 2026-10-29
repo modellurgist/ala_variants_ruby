@@ -2,7 +2,8 @@ module DomainAbstractions
   # Products a shopper wants to remember, as a value: the ids pulled through `items` on load, changed
   # in memory, every change sent out on `changed` for the store the composition wires; it asks its
   # `products` port what they look like. Config: row (a LineRow: the product fields and URLs
-  # a wishlisted product's row carries). Ports in: load, show (rows, count and ids again, from memory), toggle, remove and take (a product id). Ports out: items (a request),
+  # a wishlisted product's row carries). Ports in: load, show (rows, count and ids again, from memory), toggle, remove and take (a product id),
+  # product ({ product_id: }, changed elsewhere: asked again). Ports out: items (a request),
   # products (a request of product ids), changed ({ op: :add | :remove, product_id: }), rows, count
   # and ids (after load; rows_changed, count and ids again after a change), added and dropped (a
   # product id, after a toggle), taken (a product id the shopper wants in the cart).
@@ -54,6 +55,12 @@ module DomainAbstractions
     input(:take, ProgrammingParadigms::DataFlow) do |product_id|
       drop(product_id)
       emit(:taken, product_id)
+      changed
+    end
+
+    input(:product, ProgrammingParadigms::DataFlow) do |fact|
+      next unless @wanted.include?(fact[:product_id])
+      @catalog.merge!(ask(:products, [ fact[:product_id] ]))
       changed
     end
 

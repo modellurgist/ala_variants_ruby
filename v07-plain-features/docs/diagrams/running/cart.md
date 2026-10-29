@@ -14,10 +14,13 @@ flowchart LR
   items[items]
   saved_store[saved_store]
   wishlist_store[wishlist_store]
+  feed[feed]
+  outside -- request --> feed
   outside -- request --> order
   outside -- request --> pricing
   outside -- request --> saved
   outside -- request --> wishlist
+  feed -- stock --> screen
   items -- added --> order
   order -- adding --> items
   order -- changed --> items

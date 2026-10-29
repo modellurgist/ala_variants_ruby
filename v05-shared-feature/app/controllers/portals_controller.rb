@@ -36,6 +36,13 @@ class PortalsController < ApplicationController
     end
   end
 
+  def live
+    screen.input_port(:live).push(live_message)
+    locals = { t: Screens::Portal::TEXTS, labels: Screens::Store::STOCK_LABELS }
+    render turbo_stream: [ turbo_stream.update(Foundation::DomTargets.order_lines_id, partial: "components/order_line", collection: screen.rows, as: :row, locals:, method: :morph),
+                           turbo_stream.update(Foundation::DomTargets.portal_products_id, partial: "components/catalog_order_row", collection: screen.catalog_rows, as: :row, locals:, method: :morph) ]
+  end
+
   private
 
   def po_params = params.expect(order_submission: [ :po_number, :notes ])

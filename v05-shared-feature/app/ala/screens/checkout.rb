@@ -17,13 +17,16 @@ module Screens
     ADDRESS_FIELDS = [ [ :name, :text, "Full name" ], [ :line1, :text, "Address" ], [ :city, :text, "City" ], [ :postal_code, :text, "Postal code" ] ].freeze
     STATUS_TARGET = "checkout_status"
     OUTCOMES = %i[complete error].freeze
+    STEP_PARTIALS = { address: "checkouts/address", payment: "checkouts/payment", processing: "checkouts/processing",
+                      error: "checkouts/error", complete: "checkouts/complete" }.freeze
     TEXTS = { back: "← Back to cart", heading: "Checkout", continue: "Continue to payment", edit_address: "Edit address", pay: "Pay",
               payment_failed: "Payment failed.", try_again: "Try again", processing: "Processing payment…", redirecting: "Redirecting…",
               total: Store::SUMMARY_TEXTS[:total] }.freeze
 
     attr_reader :config, :step, :form, :summary, :flash, :done
 
-    def parts = { lines: @lines, pricing: @pricing, totals: @totals, flow: @flow, charge: @charge, settle: @settle, products: @products, items: @items }
+    def parts = { lines: @lines, pricing: @pricing, totals: @totals, flow: @flow, charge: @charge, settle: @settle, products: @products, items: @items, feed: @feed }
+    def live = @feed.subscription
 
     # Lives across requests (see `LongLived`): `reload` reads the stores again, the flow's step included
     # (a payment job in another process moves it), `begin` opens a request with an empty flash, and each
@@ -41,16 +44,16 @@ module Screens
     input(:edit_address, ProgrammingParadigms::Event) { @flow.input_port(:edit_address).send_event }
     input(:pay, ProgrammingParadigms::Event) { @flow.input_port(:pay).send_event }
     input(:charge, ProgrammingParadigms::DataFlow) { |payment| @charge.input_port(:charge).push(payment) }
+    input(:live, ProgrammingParadigms::DataFlow) { |message| @feed.input_port(:receive).push(message) }
 
-    def self.stream(cart_id) = "checkout_#{cart_id}"
+    # one cart's payment outcome is its own topic: only that cart's checkout page listens
+    def self.topic(cart_id) = "checkout_#{cart_id}"
 
     def initialize(cart_id:)
       @config = { cart_id: }
       @flash = {}
       stock_rule = StockStatus.new(low_at: Store::LOW_STOCK_AT)
       shipping = CalculateShipping.new(rates: Store::RATES)
-      urls = Rails.application.routes.url_helpers
-      labels = Store::STOCK_LABELS
 
       @products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       @items = CartItemsStore.new(model: CartItem, cart_id:)
@@ -62,6 +65,7 @@ module Screens
                                stock_levels: ->(ids) { Product.stock_levels(ids) }, line_items: BuildLineItems.new(currency: Store::CURRENCY))
       @charge = Charge.new(gateway: Rails.configuration.x.payment_gateway.constantize.new, metadata: ->(id) { { "cart_id" => id } })
       @settle = SettleOrder.new(orders: Order, lines: CartItem, products: Product, cart_id:)
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: self.class.topic(cart_id), kinds: %i[outcome])
 
       # the checkout reads the lines and never changes them: their write ports stay open (the wiring test lists them)
       @lines.wire_to(@items, from: :items, to: :lookup)
@@ -82,14 +86,11 @@ module Screens
       @charge.wire_to(@flow, from: :charged, to: :succeeded)
       @charge.wire_to(@flow, from: :declined, to: :failed)
 
-      @settle.wire_to(ProgrammingParadigms::LiveUpdate.new(stream: Catalog::STREAM, action: :replace_all,
-        target: ->(c) { ".#{Foundation::DomTargets.stock_marker(c[:product_id])}" },
-        render: ->(c) { Partial.render("elements/stock_badge", product_id: c[:product_id], status: stock_rule.call(c[:stock]), stock: c[:stock], labels:) }),
-        from: :stock_changed)
-      status = ProgrammingParadigms::LiveUpdate.new(stream: self.class.stream(cart_id), action: :replace, target: STATUS_TARGET,
-        render: ->(step) { Partial.render("components/checkout_status", id: STATUS_TARGET, step:, t: TEXTS, pay_url: urls.pay_cart_checkout_path, success_url: urls.cart_success_path) })
-      @charge.on(:charged) { status.input_port(:push).push(:complete) }
-      @charge.on(:declined) { status.input_port(:push).push(:error) }
+      @settle.wire_to(ProgrammingParadigms::ChangeFeed::Publish.new(topic: Store::CATALOG_TOPIC, kind: :stock, fact: ->(level) { level }), from: :stock_changed)
+      @charge.wire_to(ProgrammingParadigms::ChangeFeed::Publish.new(topic: self.class.topic(cart_id), kind: :outcome, fact: ->(_) { { cart_id:, step: :complete } }), from: :charged)
+      @charge.wire_to(ProgrammingParadigms::ChangeFeed::Publish.new(topic: self.class.topic(cart_id), kind: :outcome, fact: ->(_) { { cart_id:, step: :error } }), from: :declined)
+      # the waiting page shows the flow's step, which the payment has moved by now
+      @feed.on(:outcome) { @flow.input_port(:show).push(nil) }
     end
   end
 end

@@ -13,6 +13,7 @@ flowchart LR
   flow[flow: SubmitOrder]
   products[products: ProductIndex]
   items[items: CartItemsStore]
+  feed[feed: Subscription]
   order -- items → lookup --> items
   order -- products → lookup --> products
   order -- changed → apply --> items
@@ -46,4 +47,6 @@ flowchart LR
   flow -- reference --> screen
   items -- added → arrived --> order
   items -- found → arrived --> order
+  feed -- stock --> screen
+  feed -- product --> screen
 ```

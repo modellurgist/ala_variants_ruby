@@ -47,8 +47,8 @@ class CheckoutTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "body", /Processing payment/
 
-    assert_turbo_stream_broadcasts(Screens::Catalog::STREAM, count: 2) do
-      assert_turbo_stream_broadcasts(Screens::Checkout.stream(cart_id), count: 1) { perform_enqueued_jobs }
+    assert_turbo_stream_broadcasts(Screens::Store::CATALOG_TOPIC, count: 2) do
+      assert_turbo_stream_broadcasts(Screens::Checkout.topic(cart_id), count: 1) { perform_enqueued_jobs }
     end
     assert_equal [ { amount: 3500, currency: "usd", metadata: { "cart_id" => cart_id } } ], FakeGateway.charges
     # the job delivered `charge` into the kept composition, not a rebuilt one

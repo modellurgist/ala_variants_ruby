@@ -1,5 +1,5 @@
 <% content_for :title, "Your Cart · GoodDeal" %>
-<%= turbo_stream_from Screens::Catalog::STREAM %>
+<%= tag.div hidden: true, data: @s.feed.attributes %>
 <h1 class="pb-6 text-3xl font-semibold tracking-tight">Your Cart</h1>
 <div id="<%= undo_id %>">
   <%= render "elements/notice_with_action", shown: @s.undo_pending, text: @texts[:undo][:text], action: @texts[:undo][:undo],

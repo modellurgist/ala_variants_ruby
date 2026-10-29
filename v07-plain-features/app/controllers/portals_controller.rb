@@ -1,4 +1,5 @@
 class PortalsController < ApplicationController
+  include ChangeFeedRefresh
   include PortalScreen
 
   STEPS_BY_URL = { nil => :lines, "review" => :review, "submitted" => :submitted }.freeze

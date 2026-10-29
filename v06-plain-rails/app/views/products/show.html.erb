@@ -1,5 +1,5 @@
 <% content_for :title, "Show Product · GoodDeal" %>
-<%= turbo_stream_from Screens::Catalog::STREAM %>
+<%= render @feed %>
 <div class="mb-6 flex items-center justify-between">
   <h1 class="text-3xl font-semibold tracking-tight">Show Product</h1>
   <div class="flex gap-3">
@@ -7,7 +7,7 @@
     <%= link_to "Edit", @row[:urls][:edit], data: { turbo_frame: Screens::Catalog::MODAL_FRAME }, class: "rounded-xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800" %>
   </div>
 </div>
-<%= turbo_frame_tag Screens::Catalog::MODAL_FRAME %>
+<%= turbo_frame_tag Screens::Catalog::MODAL_FRAME, data: { change_feed_keep: "" } %>
 <section class="rounded-2xl border border-stone-200 bg-white px-6 shadow-sm">
   <%= render "components/product_row", row: @row, labels: Screens::Store::STOCK_LABELS, frame: Screens::Catalog::MODAL_FRAME %>
 </section>

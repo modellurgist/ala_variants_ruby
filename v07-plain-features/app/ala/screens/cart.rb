@@ -26,10 +26,10 @@ module Screens
     GROUNDED = [].freeze
 
     attr_reader :config, :rows, :summary, :saved_rows, :saved_count, :wishlist_rows, :wishlist_count, :wishlist_ids,
-                :undo_pending, :flash, :patches
+                :undo_pending, :flash, :patches, :feed
 
     def parts = { order: @order, saved: @saved, wishlist: @wishlist, pricing: @pricing, totals: @totals, items: @items,
-                  saved_store: @saved_store, wishlist_store: @wishlist_store }
+                  saved_store: @saved_store, wishlist_store: @wishlist_store, feed: @feed }
 
     # every change loads first: the values start empty each request, and the patches need the whole page's state
     def load
@@ -50,6 +50,7 @@ module Screens
     def add_wishlisted(product_id) = (load; run(:wishlist, @wishlist.take(product_id)))
     def enter_promo(code) = (load; run(:pricing, @pricing.enter_promo(code)))
     def select_shipping(method) = (load; run(:pricing, @pricing.select_shipping(method)))
+    def live(message) = run(:feed, @feed.receive(message))
 
     def initialize(cart_id:)
       @config = { cart_id: }
@@ -62,8 +63,9 @@ module Screens
       @dom = Foundation::DomTargets
       @urls = urls
       labels = Store::STOCK_LABELS
+      stock_rule = StockStatus.new(low_at: Store::LOW_STOCK_AT)
 
-      products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule: StockStatus.new(low_at: Store::LOW_STOCK_AT)))
+      products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       lookup = ->(ids) { products.lookup(ids) }
       @items = CartItemsStore.new(model: CartItem, cart_id:)
       @saved_store = SavedItemsStore.new(model: SavedItem, cart_id:)
@@ -80,6 +82,8 @@ module Screens
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
       @line_html = ->(row) { Partial.render("components/cart_line", row:, wishlist_ids: @wishlist_ids, t: @t[:cart], labels:) }
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[stock], url: urls.live_cart_path)
+      @badge_html = ->(fact) { Partial.render("elements/stock_badge", product_id: fact[:product_id], status: stock_rule.(fact[:stock]), stock: fact[:stock], labels:) }
     end
 
     def tabs(summary = @summary)
@@ -133,6 +137,8 @@ module Screens
         @patches.update(@dom.promo_form_id, Partial.render("components/promo_form", code: payload[:promo_code], error: @flash[:promo_error], url: @urls.promo_cart_path, t: @t[:cart]))
         @patches.update(@dom.empty_note_id, Partial.render("elements/none", count: payload[:item_count], text: @t[:cart][:empty]))
         @patches.update(@dom.checkout_button_id, Partial.render("components/checkout_button", summary: payload, label: @t[:cart][:checkout], url: @urls.cart_checkout_path))
+      # a stock level changed elsewhere: every badge of that product on the page
+      in [ :feed, :stock ] then @patches.replace_all(@dom.stock_selector(payload[:product_id]), @badge_html.(payload))
       end
     end
 

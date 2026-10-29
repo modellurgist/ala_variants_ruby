@@ -15,10 +15,10 @@ into a kept checkout. Those are the things that cost V04 and V05 a familiarity p
 not depend on the Features layer; V05 keeps them and stays the fullest expression of ALA in Ruby.
 V07 is the leading edge at familiarity 4.
 
-**Status:** 86 integration and unit tests (V06's 57, 3 of the feature, 3 for later fixes, 23 for the
-abstractions the clone check extracted) and 7 Cuprite browser tests, 0 failures; after the full suite, **0 declared outputs never routed**, the
+**Status:** 100 integration and unit tests (V06's 57, 3 of the feature, 3 for later fixes, 23 for the
+abstractions the clone check extracted, 14 for the change feed of 2026-10-21) and 9 Cuprite browser tests, 0 failures; after the full suite, **0 declared outputs never routed**, the
 feature's inner outputs included; RuboCop clean; `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it
-**100/100 at every tier with no scored finding** (370 functions; one accepted line, below, and one
+**100/100 at every tier with no scored finding** (384 functions; one accepted line, below, and one
 inherent declaration, the drawing's edge labels). Until the linter's Prism fix of 2026-10-19 it skipped
 `programming_paradigms/drawing.rb` and `wiring.rb`; checking them found three R9 findings
 (`respond_to?(:parts)`, now `is_a?(Wiring)`) and two R3 (the drawing's notation, now
@@ -42,6 +42,23 @@ repeats another. One line is accepted with
 `ala_lint --list-accepted` prints it. `test/ala/shared_concepts_test.rb` tests each extracted
 abstraction in its own home.
 
+*Later (2026-10-21):* outside change is a paradigm, `ProgrammingParadigms::ChangeFeed` (the checklist's
+"A live subscription port"). A composition that changes something wires the output to a
+`ChangeFeed::Publish` sink configured with a topic and a kind; a page places a `ChangeFeed::Subscription` configured with
+its topic and the kinds it listens to, and wires each kind as an output (`feed.stock`). What travels
+is a fact keyed by identity (`{ product_id:, stock: }`, `{ cart_id: }`), never HTML. Delivery is
+built once: the browser's `change-feed` controller subscribes through `ChangeFeed::Channel` and posts each fact to
+the page's live URL (`ChangeFeedRefresh`, one concern on four controllers), where the screen takes it as
+`live(message)` and answers with its own patches. `LiveUpdate`, which rendered another page's HTML in
+the composition making the change, is gone, and so are the pages' `turbo_stream_from` tags. Two gaps
+closed on the way: a staff edit at /products now publishes the product's stock, so it reaches open
+carts and the portal (before, only a purchase did), and the portal renders its own catalogue row
+for a product change. Before, it received the product list's row with the same DOM id, edit and
+delete buttons included. The two step templates that were chosen by an interpolated name
+(`render "portals/#{@s.step}"`) now read a literal `STEP_VIEWS` table (R11). 100 integration and
+unit tests and 9 browser tests, 0 outputs unrouted, RuboCop clean, `ala_lint` 100 at every tier
+with 10 of 10 rules (384 functions), no new accepted line.
+
 ## Run it
 
 ```bash
@@ -60,7 +77,7 @@ As V06, plus:
 |---|---|---|
 | Features | `app/ala/features/` | `OrderLines`: `CartLines` and `Undo` wired inside, `out` for what leaves, placed by the cart page and the portal page |
 | Rules | `app/ala/rules/` | adds `HeldProducts` and `LineRequest`, and `Pricing.summary` |
-| Programming paradigms | `app/ala/programming_paradigms/` | adds `StepRecord` |
+| Programming paradigms | `app/ala/programming_paradigms/` | adds `StepRecord`, and `ChangeFeed` (publish sink, feed, channel) in place of `LiveUpdate` |
 
 ## How a feature runs
 

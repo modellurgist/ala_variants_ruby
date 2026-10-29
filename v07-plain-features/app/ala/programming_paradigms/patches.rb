@@ -7,6 +7,7 @@ module ProgrammingParadigms
 
     def append(target, html) = add(:append, target, html)
     def replace(target, html) = add(:replace, target, html)
+    def replace_all(selector, html) = add(:replace_all, selector, html)
     def update(target, html) = add(:update, target, html)
     def remove(target) = add(:remove, target, nil)
     def any? = @actions.any?

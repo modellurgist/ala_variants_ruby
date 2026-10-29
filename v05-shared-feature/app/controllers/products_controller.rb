@@ -2,11 +2,26 @@ class ProductsController < ApplicationController
   def index
     screen.input_port(:load).send_event
     @rows = screen.rows
+    @live = screen.live
   end
 
   def show
     screen.input_port(:show).push(params[:id])
     @row = screen.row
+    @live = screen.live
+  end
+
+  def live
+    screen.input_port(:live).push(live_message)
+    render turbo_stream: turbo_stream.update(Screens::Catalog::LIST, partial: "components/product_row", collection: screen.rows, as: :row, method: :morph,
+                                                                      locals: { labels: Screens::Store::STOCK_LABELS, actions: Screens::Catalog::TEXTS, frame: Screens::Catalog::MODAL_FRAME })
+  end
+
+  # the show page holds one product, which it shows again whatever the fact
+  def live_row
+    screen.input_port(:show).push(params[:id])
+    render turbo_stream: turbo_stream.update(Screens::Catalog::SHOWN, partial: "components/product_row", method: :morph,
+                                                                       locals: { row: screen.row, labels: Screens::Store::STOCK_LABELS, frame: Screens::Catalog::MODAL_FRAME })
   end
 
   def new

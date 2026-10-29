@@ -23,7 +23,7 @@ class ProductsTest < ActionDispatch::IntegrationTest
     get new_product_path
     assert_select "form[id^=form_product]"
 
-    assert_turbo_stream_broadcasts(Screens::Catalog::STREAM, count: 1) do
+    assert_broadcasts(Screens::Store::CATALOG_TOPIC, 1) do
       post products_path, params: { product: { name: "New", description: "d", amount: 42, stock: 42, thumbnail: "t.png" } }
     end
     assert_redirected_to products_path

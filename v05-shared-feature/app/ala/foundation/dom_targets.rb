@@ -1,5 +1,5 @@
 module Foundation
-  # The DOM ids and classes live updates and stream patches target. Elements render them and screens
+  # The DOM ids and classes stream patches and live answers target. Elements render them and screens
   # patch them, so both depend on this one module instead of agreeing on a string (R5). Declared as a
   # view helper by ApplicationController.
   module DomTargets
@@ -19,5 +19,7 @@ module Foundation
     def checkout_button_id = "cart_checkout"
     def undo_id = "cart_undo"
     def flash_id = "flash"
+    def order_lines_id = "order_lines"
+    def portal_products_id = "portal_products"
   end
 end

@@ -77,3 +77,32 @@ accepted line. V06's walk holds; what V07 adds:
 | R3 | met | links, window and the undo store are configuration; the portal's longer window is a `Store` constant with its reason |
 | R6 | met | `out` is the one word for "this leaves me"; the feature's header lists every input and output |
 | R8 | met, better | a page's wiring reads "place the order lines, give them a store, totals and patches"; the drawing opens the feature and the suite proves its inside ran |
+
+## Later (2026-10-21): outside change as a paradigm
+
+Before, every change made elsewhere had its own machinery: the catalogue's three `LiveUpdate`
+sinks rendered the product list's row and broadcast it, and the checkout rendered a stock badge for
+every page that shows one. The composition making the change knew every view (R1, R10), and the
+portal got the product list's row because the two shared a DOM id.
+
+`ProgrammingParadigms::ChangeFeed` (`change_feed.rb`) makes it one paradigm, built once:
+
+- `ChangeFeed::Publish` is a sink: config `topic`, `kind`, and a `fields` lambda that picks the fact out of
+  the payload; in `push`. The catalogue publishes `product_added`, `product_changed`,
+  `product_removed` and `stock`; the checkout `stock`, `paid` and `declined`.
+- `ChangeFeed::Subscription` is a part a page places: config `topic`, `kinds`, `url`; in `receive`; out one port per
+  kind. Its outputs are its configuration, so it answers `outputs` and `Drawing` reads that where a
+  part has no `OUTPUTS`.
+- `ChangeFeed.encode` and `ChangeFeed.decode` are the fact format, the only thing both ends share with the topic.
+  The catalogue topic is `Store::CATALOG_TOPIC`; a checkout's is `Checkout.topic(cart_id)`.
+- Delivery: `ChangeFeed::Channel` streams a signed topic; `change_feed_controller.js` posts each fact of a
+  listened kind to the page's `url`; `ChangeFeedRefresh#live` hands it to the screen's `live(message)` and
+  renders the screen's `Patches`. A page's live behaviour is its feed's arms:
+  `in [ :feed, :stock ] then @patches.replace_all(...)`. The cart, portal and catalogue arms patch
+  rows and badges; the checkout patches its status. `catch_up_controller.js` now watches the feed's
+  `connected` mark instead of Turbo's stream source.
+
+It costs one request per fact per open page, where Turbo pushed the rendered HTML directly, and
+four more ports, one per page's `live`. The feed's arms land on the page as patches rather than
+on a part: a page rebuilt per request reads current values through its tables, so there is no
+state part to tell.

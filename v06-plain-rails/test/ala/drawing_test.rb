@@ -15,9 +15,9 @@ class DrawingTest < ActiveSupport::TestCase
 
   test "the checkout's chart draws the sinks it runs" do
     chart = ProgrammingParadigms::Drawing.mermaid(Screens::Checkout)
-    assert_includes chart, "settle -- stock_changed --> stock_update"
+    assert_includes chart, "settle -- stock_changed --> stock_news"
     assert_includes chart, "charge -- charged --> settle"
-    assert_includes chart, "charge -- charged --> status"
+    assert_includes chart, "charge -- charged --> payment_news"
     assert_includes chart, "flow -- ready_to_pay --> screen"
   end
 end

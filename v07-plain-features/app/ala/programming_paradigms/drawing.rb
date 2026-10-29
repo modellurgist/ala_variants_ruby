@@ -4,7 +4,7 @@ module ProgrammingParadigms
   # A node per part the composition names; an arm that runs no part lands on the composition. A part
   # that is itself a composition (a feature, with `parts`) is drawn as a subgraph with its own arms
   # inside, and an arm that says `out` leaves it. `gaps` and `unrouted` read the same arms and hops
-  # against every part's OUTPUTS, the feature's included.
+  # against every part's outputs, the feature's included.
   module Drawing
     # The drawing's own notation, the same for any app (R3's domain-vocabulary exception)
     INHERENT_LABELS = { request: "request", other_outputs: "every other output" }.freeze
@@ -42,8 +42,9 @@ module ProgrammingParadigms
       end
     end
 
+    # a part declares its outputs in OUTPUTS, or, when they are its configuration (a ChangeFeed subscription's kinds), answers `outputs`
     def self.declared(composition)
-      composition.parts.flat_map { |name, part| part.class.const_defined?(:OUTPUTS) ? part.class::OUTPUTS.map { [ name, _1 ] } : [] }
+      composition.parts.flat_map { |name, part| (part.class.const_defined?(:OUTPUTS) ? part.class::OUTPUTS : part.try(:outputs).to_a).map { [ name, _1 ] } }
     end
 
     # the screen and every feature inside it, each with the prefix its parts are drawn under

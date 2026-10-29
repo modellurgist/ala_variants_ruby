@@ -1,0 +1,9 @@
+<%# A notice with one action, shown for a while: the action posts to url, and after after_ms the notice
+    posts to expire_url by itself. %>
+<% if shown %>
+  <div class="mb-6 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3" data-controller="countdown" data-countdown-after-value="<%= after_ms %>">
+    <span class="text-sm text-amber-900"><%= text %></span>
+    <%= button_to action, url, class: "rounded-lg bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 hover:bg-amber-200" %>
+    <%= button_to "", expire_url, form: { data: { countdown_target: "form" } }, class: "hidden" %>
+  </div>
+<% end %>

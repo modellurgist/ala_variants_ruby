@@ -15,12 +15,13 @@ screen must have carried something at least once and `docs/diagrams/running/` dr
 the wires that did solid and the rest dotted; and the **checkout kept across requests** too, with
 the payment job delivering `charge` into the kept composition through a registry it names.
 
-**Status:** 94 integration tests (V04's 66, plus 3 of the feature on fakes, 1 the trace asked for,
+**Status:** 108 integration tests (V04's 66, plus 3 of the feature on fakes, 1 the trace asked for,
 13 unit tests of the abstractions extracted 2026-10-19, one for `CartLines#find`'s refusal, 5 for
-the defect fixes below, 4 for product changes reaching kept carts, and a net 1 for the stamp race:
-two new, one of them replacing V04's test that asserted it) and 7 Cuprite browser tests, 0 failures;
-after the full suite, **0 wires never carried anything**; RuboCop clean; `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it
-**100/100** with ten accepted lines (283 functions). `LINT_NOTES.md` has the run. The drawings in
+the defect fixes below, 4 for product changes reaching kept carts, a net 1 for the stamp race:
+two new, one of them replacing V04's test that asserted it, and 14 for the live paradigm below) and
+9 Cuprite browser tests, 0 failures; after the full suite, **0 wires never carried anything**;
+RuboCop clean; `../../ala_lint_ruby/bin/ala_lint --root . --super-strict` scores it
+**100/100**, 10 of 10 rules, with ten accepted lines (303 functions). `LINT_NOTES.md` has the run. The drawings in
 `docs/diagrams/` draw the feature as a subgraph with its own wires inside; those in
 `docs/diagrams/running/` are the same graphs as the suite exercised them.
 
@@ -55,6 +56,17 @@ recorded the stamp read after the request as seen, so another writer's bump comm
 request was never reloaded. It now keeps the reading taken before; the cost is a `reload` on the
 request after one that wrote. `DESIGN.md`, "Other writers", has the rest.
 
+*Later (2026-10-21): outside change is a paradigm.* `ProgrammingParadigms::ChangeFeed` replaces
+`LiveUpdate`, which broadcast rendered rows and badges to every page on the stream. A change is now
+published as a fact keyed by identity (`{ product_id: }`, `{ product_id:, stock: }`, a cart's
+payment `outcome`) by a `ChangeFeed::Publish` sink the changing screen wires; each page places a
+`ChangeFeed::Subscription` configured with its topic and kinds, and its screen wires the feed's kinds to the parts
+that care (`feed.stock → order.product` on the cart). The browser half (`change_feed_controller.js`) posts a
+fact the page listens to back to the page's own `live` URL, and the page's composition answers:
+patches on the cart, the outcome on the checkout, the lists drawn again on the catalogue and the
+portal. One gap closed by a wire: a staff edit at /products never reached an open cart or portal.
+`DESIGN.md`, "Outside change as a paradigm", has the rest.
+
 ## Run it
 
 ```bash
@@ -72,8 +84,8 @@ bin/rails test
 | Features | `app/ala/features/` | `OrderLines`: a composition of `CartLines` and `Undo` with ports, placed by the cart page and the portal page |
 | Domain abstractions | `app/ala/domain_abstractions/`, `app/views/components/` | `CartLines`, `SavedItems`, `Wishlist` (values), `CartItemsStore`, `SavedItemsStore`, `WishlistStore` (their stores), `Undo`, `ProductIndex`, `PricingChoices`, `CartTotals`, `OrderTotals`, `CheckoutFlow`, `SubmitOrder`, `Records`, `AddLine`, `Charge`, `SettleOrder`; the domain UI partials that take projected rows and words: `cart_line`, `saved_line`, `wishlist_line`, `order_line`, `catalog_order_row`, `product_row`, `cart_summary`, `shipping_selector`, `promo_form`, `checkout_button`, `checkout_status` |
 | Rules | `app/ala/rules/`, `app/views/elements/` | the pure rules and projections (`Pricing`, `CalculateShipping`, `CalculateGiftWrapCost`, `ValidatePromo`, `VolumeTier`, `StockStatus`, `CheckStock`, `BuildLineItems`, `ProductRow`, `LineRow`); the generic UI elements (`product_line`, `stock_badge`, `record_form`, `modal`, `tabs`, `milestones`, `notice_with_action`, `flash`, `none`) |
-| Programming paradigms | `app/ala/programming_paradigms/` | `DataFlow`, `Event`, `RequestResponse` (each builds its port objects), `Transitions` (the state-machine table), `PersistedSteps` (a state machine whose state is a record's `step` column), `LiveUpdate` (a Turbo Stream broadcast sink), `Patches` and `Patch` (a Turbo Stream response built from outputs), `PushLater` (an Active Job that rebuilds a screen and pushes an input), `LongLived` (one kept composition per key, one thread at a time, reloaded when the store's stamp moved; registries by name), `Drawing` (the built graph as Mermaid, structural or as it ran) |
-| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Ports` (ports, wiring and `forward`), `Trace` (hops recorded while a test run is on), `Money`, `DomTargets` (the DOM names live updates target, declared as a view helper), `LedgerGateway`; the Active Record models as persistence, one per feature; seven small Stimulus controllers |
+| Programming paradigms | `app/ala/programming_paradigms/` | `DataFlow`, `Event`, `RequestResponse` (each builds its port objects), `Transitions` (the state-machine table), `PersistedSteps` (a state machine whose state is a record's `step` column), `ChangeFeed` (outside change: a `Publish` sink, a `Subscription` part a page places, the fact format they share), `Patches` and `Patch` (a Turbo Stream response built from outputs), `PushLater` (an Active Job that rebuilds a screen and pushes an input), `LongLived` (one kept composition per key, one thread at a time, reloaded when the store's stamp moved; registries by name), `Drawing` (the built graph as Mermaid, structural or as it ran) |
+| Foundation | `app/ala/foundation/`, `app/models/`, `app/javascript/controllers/` | `Ports` (ports, wiring and `forward`), `Trace` (hops recorded while a test run is on), `Money`, `DomTargets` (the DOM names live updates target, declared as a view helper), `LedgerGateway`; the Active Record models as persistence, one per feature; eight small Stimulus controllers (`change-feed` is the paradigm's browser half) |
 
 Each feature keeps its own table against the cart's identity (R10): `cart_items` (the lines both
 the storefront and the portal build on), `saved_items`, `wishlist_items`, `cart_pricing_choices`,

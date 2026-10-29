@@ -47,9 +47,10 @@ class CheckoutTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "body", /Processing payment/
 
-    assert_turbo_stream_broadcasts(Screens::Catalog::STREAM, count: 2) do
-      assert_turbo_stream_broadcasts(Screens::Checkout.stream(cart_id), count: 1) { perform_enqueued_jobs }
-    end
+    perform_enqueued_jobs
+    assert_equal [ ProgrammingParadigms::ChangeFeed.fact(:stock, product_id: @a.id, stock: 9), ProgrammingParadigms::ChangeFeed.fact(:stock, product_id: @b.id, stock: 4) ],
+                 broadcasts(Screens::Topics::CATALOG).map { JSON.parse(_1) }
+    assert_equal [ ProgrammingParadigms::ChangeFeed.fact(:payment, cart_id:) ], broadcasts(Screens::Topics.payment(cart_id)).map { JSON.parse(_1) }
     assert_equal [ { amount: 3500, currency: "usd", metadata: { "cart_id" => cart_id } } ], FakeGateway.charges
     assert_equal "completed", Cart.find(cart_id).status
     assert Order.exists?(cart_id:)
@@ -90,19 +91,20 @@ class CheckoutTest < ActionDispatch::IntegrationTest
     assert_equal 2, FakeGateway.charges.size
   end
 
-  test "a page waiting on the payment can ask for the outcome: nothing while processing, then the outcome" do
+  test "a page waiting on the payment listens for it, and its refresh shows the outcome" do
     FakeGateway.reset([ [ :error, :declined ] ])
     open_cart
     post cart_checkout_path
     patch address_cart_checkout_path, params: address
     post pay_cart_checkout_path
-    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
-    assert_response :no_content
+    get cart_checkout_step_path(:payment)
+    assert_select "[data-controller=change-feed][data-change-feed-catch-up-value=true][data-change-feed-kinds-value=?]", '["payment"]'
+    assert_select "body", /Processing payment/
 
     perform_enqueued_jobs
-    get status_cart_checkout_path, headers: { "Accept" => "text/vnd.turbo-stream.html" }
-    assert_match(/<turbo-stream action="replace" target="checkout_status">/, response.body)
-    assert_match(/Payment failed\./, response.body)
+    get cart_checkout_step_path(:payment)
+    assert_select "body", /Payment failed\./
+    assert_select "[data-controller=change-feed]", count: 0
   end
 
   test "browser back returns to the address step; a forward URL jump is ignored; a reload lands on the step" do

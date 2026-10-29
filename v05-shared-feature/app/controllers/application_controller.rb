@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   helper_method :cart_id, :portal_cart_id
   helper Foundation::DomTargets
+  helper ProgrammingParadigms::ChangeFeed::Helper
 
   private
 
@@ -13,4 +14,7 @@ class ApplicationController < ActionController::Base
   # The cart the session was last using, open or just completed: for a flow that outlives its cart.
   def current_cart_id = session.fetch(:cart_id) { cart_id }
   def current_portal_cart_id = session.fetch(:portal_cart_id) { portal_cart_id }
+
+  # A fact a page's feed posted back, for its composition's `live` input.
+  def live_message = ProgrammingParadigms::ChangeFeed.read(params[:kind], params[:fact])
 end

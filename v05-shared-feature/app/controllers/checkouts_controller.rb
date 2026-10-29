@@ -49,6 +49,13 @@ class CheckoutsController < ApplicationController
     end
   end
 
+  def live
+    with_screen do |s|
+      s.input_port(:live).push(live_message)
+      show_outcome(s)
+    end
+  end
+
   private
 
   # the cart's kept checkout, one request at a time; for a flow that outlives its cart, the cart last used
@@ -66,7 +73,7 @@ class CheckoutsController < ApplicationController
   def show_outcome(s)
     return head(:no_content) unless Screens::Checkout::OUTCOMES.include?(s.step)
     @t = Screens::Checkout::TEXTS
-    render turbo_stream: turbo_stream.replace(Screens::Checkout::STATUS_TARGET, partial: "checkouts/#{s.step}")
+    render turbo_stream: turbo_stream.replace(Screens::Checkout::STATUS_TARGET, partial: Screens::Checkout::STEP_PARTIALS.fetch(s.step))
   end
 
   def show_address_result(s)

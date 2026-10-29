@@ -11,6 +11,7 @@ module Screens
     URL_EDGES = [ [ :review, :lines ] ].freeze
     MILESTONES = [ [ :lines, "Order" ], [ :review, "Review" ], [ :submitted, "Done" ] ].freeze
     STEP_ORDER = %i[lines review submitted].freeze
+    STEP_VIEWS = { lines: "portals/lines", review: "portals/review", submitted: "portals/submitted" }.freeze
     PO_FIELDS = [ [ :po_number, :text, "Purchase order number" ], [ :notes, :text, "Notes (optional)" ] ].freeze
     TEXTS = {
       heading: "Bulk Order Portal", order: "Your order", catalog: "Products", review: "Review order",
@@ -24,7 +25,7 @@ module Screens
     GROUNDED = %i[lines.row_added lines.row_changed lines.row_removed lines.saved lines.line lines.adding items.added
                   catalog.record catalog.form catalog.created catalog.updated catalog.deleted].freeze
 
-    attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash
+    attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash, :feed
 
     def parts = { lines: @lines, undo: @undo, catalog: @catalog, add_line: @add_line, totals: @totals, flow: @flow, items: @items }
 
@@ -62,6 +63,8 @@ module Screens
       @totals = OrderTotals.new(shipping: CalculateShipping.new(rates: Store::RATES), volume: VolumeTier.new(tiers: Store::VOLUME_TIERS), shipping_method: :standard)
       @flow = SubmitOrder.new(steps: ProgrammingParadigms::Wizard.new(record: -> { OrderSubmission.for_cart(cart_id) }, flow: FLOW, start: :lines, url_edges: URL_EDGES),
                               cart_id:, orders: Order)
+      # the order's lines and the catalogue to add from follow every product and stock change
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics::CATALOG, kinds: %i[stock product product_removed])
     end
 
     private

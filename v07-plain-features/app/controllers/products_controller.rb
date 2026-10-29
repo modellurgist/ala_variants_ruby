@@ -1,12 +1,16 @@
 class ProductsController < ApplicationController
+  include ChangeFeedRefresh
+
   def index
     screen.load
     @rows = screen.rows
+    @feed = screen.feed
   end
 
   def show
     screen.show(params[:id])
     @row = screen.row
+    @feed = screen.feed
   end
 
   def new

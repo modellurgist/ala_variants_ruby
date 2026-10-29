@@ -33,7 +33,6 @@ Rails.application.routes.draw do
       patch :address
       post :edit_address
       post :pay
-      get :status
     end
     get "checkout/:step", to: "checkouts#show", as: :checkout_step
     get "success", to: "cart_successes#show", as: :success

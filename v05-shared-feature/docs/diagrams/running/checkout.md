@@ -11,6 +11,7 @@ flowchart LR
   settle[settle: SettleOrder]
   products[products: ProductIndex]
   items[items: CartItemsStore]
+  feed[feed: Subscription]
   lines -- items → lookup --> items
   lines -- products → lookup --> products
   lines -- contents → contents --> totals
@@ -26,7 +27,8 @@ flowchart LR
   charge -- charged → settle --> settle
   charge -- charged → succeeded --> flow
   charge -- declined → failed --> flow
-  charge -- charged --> screen
-  charge -- declined --> screen
-  settle -- stock_changed → push --> liveupdate_2([LiveUpdate])
+  charge -- charged → push --> publish_2([Publish])
+  charge -- declined → push --> publish_3([Publish])
+  settle -- stock_changed → push --> publish_4([Publish])
+  feed -- outcome --> screen
 ```

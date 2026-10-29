@@ -9,17 +9,17 @@ flowchart LR
   flow[flow]
   charge[charge]
   settle[settle]
-  status[status]
-  stock_update[stock_update]
+  payment_news[payment_news]
+  stock_news[stock_news]
   outside -- request --> charge
   outside -- request --> flow
   outside -- request --> lines
   outside -- request --> pricing
   charge -- charged --> flow
+  charge -- charged --> payment_news
   charge -- charged --> settle
-  charge -- charged --> status
   charge -- declined --> flow
-  charge -- declined --> status
+  charge -- declined --> payment_news
   flow -- blocked --> screen
   flow -- done --> screen
   flow -- form --> screen
@@ -28,6 +28,6 @@ flowchart LR
   lines -- contents --> totals
   pricing -- discount --> totals
   pricing -- shipping_method --> totals
-  settle -- stock_changed --> stock_update
+  settle -- stock_changed --> stock_news
   totals -- summary --> screen
 ```

@@ -1,6 +1,6 @@
 # V05 under ala_lint_ruby
 
-Run on 2026-10-10, and again on 2026-10-19 with the clone check, with `../../ala_lint_ruby/bin/ala_lint --root .` and a six-layer map: V02's five with `features` between application and domain.
+Run on 2026-10-10, again on 2026-10-19 with the clone check, and on 2026-10-21 after the live paradigm, with `../../ala_lint_ruby/bin/ala_lint --root .` and a six-layer map: V02's five with `features` between application and domain.
 
 | tier | score | rules met | functions clean |
 |---|---|---|---|
@@ -27,6 +27,22 @@ Ten lines are accepted (`--list-accepted` prints them with the finding each cove
   that bumps the cart's version. The check flags a model callback reaching another model as a lower
   record deciding what happens next. Here nothing happens next: the stamp is the store's own, read
   by whoever wants to know whether the cart changed.
+
+Findings fixed on 2026-10-21. The linter's new reading of R11 scored the variant 99 before the live
+paradigm went in, with three findings of one kind: a step's template chosen by a name built at run
+time (`partial: "checkouts/#{s.step}"` in `CheckoutsController#show_outcome`, `render
+"checkouts/#{@s.step}"` and `render "portals/#{@s.step}"` in the two pages). Each now picks from a
+literal table, `Screens::Checkout::STEP_PARTIALS` and `Screens::Portal::STEP_PARTIALS`. Two more
+came up while the paradigm was built, both fixed:
+
+- `ProgrammingParadigms::ChangeFeed`'s header did not list the ports of `Publish` and `Subscription` (the
+  ports check read the module's header, not the class comments under it); a header line listed
+  them until the check learned to read each nested class's own header, and is gone now.
+- `ProductsController#live_row` passed `DomTargets.product_row_id(params[:id])` into the replace
+  (R11, handled data). The product page's section has a constant id, `Catalog::SHOWN`, and the answer
+  updates it.
+
+No line was accepted for the paradigm; the ten accepted lines are the ones below.
 
 Findings fixed when the linter gained its clone check (2026-10-19), all three scored from `--strict`:
 

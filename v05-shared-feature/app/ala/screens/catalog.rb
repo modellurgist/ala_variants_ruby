@@ -7,15 +7,16 @@ module Screens
     include DomainAbstractions
     include Rules
 
-    STREAM = "catalog"
     MODAL_FRAME = "modal"
     LIST = "products"
+    SHOWN = "product"
     TEXTS = { edit: "Edit", delete: "Delete", confirm_delete: "Delete this product?", add_to_cart: "Add to cart",
               created: "Product created successfully", updated: "Product updated successfully", added: "Added to cart" }.freeze
 
     attr_reader :config, :rows, :row, :form, :saved, :deleted, :notices
 
-    def parts = { records: @records, add_line: @add_line }
+    def parts = { records: @records, add_line: @add_line, feed: @feed }
+    def live = @feed.subscription
 
     input(:load, ProgrammingParadigms::Event) { @records.input_port(:load).send_event }
     input(:new, ProgrammingParadigms::Event) { @records.input_port(:new).send_event }
@@ -25,6 +26,7 @@ module Screens
     input(:save, ProgrammingParadigms::DataFlow) { |request| @records.input_port(:save).push(request) }
     input(:delete, ProgrammingParadigms::DataFlow) { |id| @records.input_port(:delete).push(id) }
     input(:add_to_cart, ProgrammingParadigms::DataFlow) { |product_id| @add_line.input_port(:add).push(product_id) }
+    input(:live, ProgrammingParadigms::DataFlow) { |message| @feed.input_port(:receive).push(message) }
 
     def initialize(cart_id:)
       @config = { cart_id: }
@@ -34,8 +36,8 @@ module Screens
                                links: ->(id) { { show: urls.product_path(id), edit: urls.edit_product_path(id), delete: urls.product_path(id), add_to_cart: urls.add_to_cart_product_path(id) } })
       @records = Records.new(model: Product, project:)
       @add_line = AddLine.new(lines: CartItem, cart_id:)
-      labels = Store::STOCK_LABELS
-      render_row = ->(p) { Partial.render("components/product_row", row: project.(p), labels:, actions: TEXTS, frame: MODAL_FRAME) }
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[product stock])
+      changed = ProgrammingParadigms::ChangeFeed::Publish.new(topic: Store::CATALOG_TOPIC, kind: :product, fact: ->(p) { { product_id: p.id } })
 
       @records.on(:rows) { @rows = _1 }
       @records.on(:record) { @row = project.(_1) }
@@ -47,9 +49,12 @@ module Screens
       @records.on(:deleted) { @deleted = _1 }
       @add_line.on(:added) { @notices << TEXTS[:added] }
 
-      @records.wire_to(ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :append, target: LIST, render: render_row), from: :created)
-      @records.wire_to(ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :replace, target: ->(p) { Foundation::DomTargets.product_row_id(p.id) }, render: render_row), from: :updated)
-      @records.wire_to(ProgrammingParadigms::LiveUpdate.new(stream: STREAM, action: :remove, target: ->(p) { Foundation::DomTargets.product_row_id(p.id) }), from: :deleted)
+      @records.wire_to(changed, from: :created)
+      @records.wire_to(changed, from: :updated)
+      @records.wire_to(changed, from: :deleted)
+      # a change to any product, made here or elsewhere, draws the list again from the table
+      @feed.on(:product) { @records.input_port(:load).send_event }
+      @feed.on(:stock) { @records.input_port(:load).send_event }
     end
   end
 end

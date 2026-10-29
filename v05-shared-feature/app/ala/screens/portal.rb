@@ -11,6 +11,7 @@ module Screens
     URL_EDGES = [ [ :review, :lines ] ].freeze
     MILESTONES = [ [ :lines, "Order" ], [ :review, "Review" ], [ :submitted, "Done" ] ].freeze
     STEP_ORDER = %i[lines review submitted].freeze
+    STEP_PARTIALS = { lines: "portals/lines", review: "portals/review", submitted: "portals/submitted" }.freeze
     PO_FIELDS = [ [ :po_number, :text, "Purchase order number" ], [ :notes, :text, "Notes (optional)" ] ].freeze
     TEXTS = {
       heading: "Bulk Order Portal", order: "Your order", catalog: "Products", review: "Review order",
@@ -22,7 +23,8 @@ module Screens
 
     attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash
 
-    def parts = { order: @order, catalog: @catalog, add_line: @add_line, totals: @totals, flow: @flow, products: @products, items: @items }
+    def parts = { order: @order, catalog: @catalog, add_line: @add_line, totals: @totals, flow: @flow, products: @products, items: @items, feed: @feed }
+    def live = @feed.subscription
 
     input(:show, ProgrammingParadigms::DataFlow) do |requested|
       @order.input_port(:load).send_event
@@ -46,6 +48,7 @@ module Screens
       @order.input_port(:load).send_event
       @flow.input_port(:submit).push(params)
     end
+    input(:live, ProgrammingParadigms::DataFlow) { |message| @feed.input_port(:receive).push(message) }
 
     def initialize(cart_id:)
       @config = { cart_id: }
@@ -64,6 +67,7 @@ module Screens
       @totals = OrderTotals.new(shipping: CalculateShipping.new(rates: Store::RATES), volume: VolumeTier.new(tiers: Store::VOLUME_TIERS), shipping_method: :standard)
       @flow = SubmitOrder.new(steps: ProgrammingParadigms::PersistedSteps.new(find: -> { OrderSubmission.for_cart(cart_id) }, table: FLOW, start: :lines, jumps: URL_EDGES),
                               cart_id:, orders: Order)
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[stock product])
 
       @order.wire_to(@items, from: :items, to: :lookup)
       @order.wire_to(@products, from: :products, to: :lookup)
@@ -86,6 +90,12 @@ module Screens
       @flow.on(:blocked) { @flash[:alert] = say[:empty] }
       @flow.on(:reference) { @reference = _1 }
       @flow.on(:reference) { @flash[:notice] = say[:submitted] }
+
+      # built per request: a product changed elsewhere has the two lists that show products load again
+      @feed.on(:stock) { @order.input_port(:load).send_event }
+      @feed.on(:stock) { @catalog.input_port(:load).send_event }
+      @feed.on(:product) { @order.input_port(:load).send_event }
+      @feed.on(:product) { @catalog.input_port(:load).send_event }
     end
   end
 end

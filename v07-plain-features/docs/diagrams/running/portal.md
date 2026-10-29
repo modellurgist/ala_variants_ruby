@@ -12,12 +12,18 @@ flowchart LR
   totals[totals]
   flow[flow]
   items[items]
+  feed[feed]
   outside -- request --> add_line
   outside -- request --> catalog
+  outside -- request --> feed
   outside -- request --> flow
   outside -- request --> order
   add_line -- added --> screen
   catalog -- rows --> screen
+  feed -- product_added --> screen
+  feed -- product_changed --> screen
+  feed -- product_removed --> screen
+  feed -- stock --> screen
   flow -- blocked --> screen
   flow -- form --> screen
   flow -- reference --> screen

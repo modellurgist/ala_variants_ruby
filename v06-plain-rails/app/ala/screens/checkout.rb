@@ -13,21 +13,21 @@ module Screens
     URL_EDGES = [ [ :payment, :address ] ].freeze
     MILESTONES = [ [ :address, "Address" ], [ :payment, "Payment" ] ].freeze
     STEP_ORDER = %i[address payment processing error complete].freeze
+    # a completed checkout redirects to the success page, so it has no view here
+    STEP_VIEWS = { address: "checkouts/address", payment: "checkouts/payment", processing: "checkouts/processing", error: "checkouts/error" }.freeze
     BLOCKED = { empty: "Your cart is empty", out_of_stock: "Some items are out of stock" }.freeze
     ADDRESS_FIELDS = [ [ :name, :text, "Full name" ], [ :line1, :text, "Address" ], [ :city, :text, "City" ], [ :postal_code, :text, "Postal code" ] ].freeze
-    STATUS_TARGET = "checkout_status"
-    OUTCOMES = %i[complete error].freeze
     TEXTS = { back: "← Back to cart", heading: "Checkout", continue: "Continue to payment", edit_address: "Edit address", pay: "Pay",
-              payment_failed: "Payment failed.", try_again: "Try again", processing: "Processing payment…", redirecting: "Redirecting…",
+              payment_failed: "Payment failed.", try_again: "Try again", processing: "Processing payment…",
               total: Store::SUMMARY_TEXTS[:total] }.freeze
     # the checkout reads the lines and never changes them
     GROUNDED = %i[lines.changed lines.adding lines.rows lines.row_added lines.row_changed lines.row_removed lines.removed lines.saved lines.line
                   items.added pricing.promo_applied pricing.promo_rejected].freeze
 
-    attr_reader :config, :step, :form, :summary, :flash, :done
+    attr_reader :config, :step, :form, :summary, :flash, :done, :feed
 
     def parts = { lines: @lines, pricing: @pricing, totals: @totals, flow: @flow, charge: @charge, settle: @settle, items: @items,
-                  stock_update: @stock_update, status: @status }
+                  stock_news: @stock_news, payment_news: @payment_news }
 
     # the lines are a value: every input that asks them loads them first
     def start = (load_lines; run(:flow, @flow.start(@lines.lines)))
@@ -38,15 +38,11 @@ module Screens
     def pay = (load_lines; run(:flow, @flow.pay(@lines.lines)))
     def charge(payment) = run(:charge, @charge.charge(payment))
 
-    def self.stream(cart_id) = "checkout_#{cart_id}"
-
     def initialize(cart_id:)
       @config = { cart_id: }
       @flash = {}
       stock_rule = StockStatus.new(low_at: Store::LOW_STOCK_AT)
       shipping = CalculateShipping.new(rates: Store::RATES)
-      urls = Rails.application.routes.url_helpers
-      labels = Store::STOCK_LABELS
 
       products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       @items = CartItemsStore.new(model: CartItem, cart_id:)
@@ -58,12 +54,11 @@ module Screens
                                stock_levels: ->(ids) { Product.stock_levels(ids) }, line_items: BuildLineItems.new(currency: Store::CURRENCY))
       @charge = Charge.new(gateway: Rails.configuration.x.payment_gateway.constantize.new, metadata: ->(id) { { "cart_id" => id } })
       @settle = SettleOrder.new(orders: Order, lines: CartItem, products: Product, cart_id:)
-      # every open catalogue follows the stock; this checkout's page follows the payment
-      @stock_update = ProgrammingParadigms::LiveUpdate.new(stream: Catalog::STREAM, action: :replace_all,
-        target: ->(c) { ".#{Foundation::DomTargets.stock_marker(c[:product_id])}" },
-        render: ->(c) { Partial.render("elements/stock_badge", product_id: c[:product_id], status: stock_rule.call(c[:stock]), stock: c[:stock], labels:) })
-      @status = ProgrammingParadigms::LiveUpdate.new(stream: self.class.stream(cart_id), action: :replace, target: STATUS_TARGET,
-        render: ->(step) { Partial.render("components/checkout_status", id: STATUS_TARGET, step:, t: TEXTS, pay_url: urls.pay_cart_checkout_path, success_url: urls.cart_success_path) })
+      # every open page follows the stock; this checkout's waiting page follows its payment, asking again
+      # whenever it subscribes, since the payment can finish before the page listens
+      @stock_news = ProgrammingParadigms::ChangeFeed::Publish.new(topic: Topics::CATALOG, kind: :stock)
+      @payment_news = ProgrammingParadigms::ChangeFeed::Publish.new(topic: Topics.payment(cart_id), kind: :payment)
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Topics.payment(cart_id), kinds: %i[payment], catch_up: true)
     end
 
     private
@@ -82,9 +77,9 @@ module Screens
       in [ :flow, :blocked ] then @flash[:alert] = BLOCKED[payload]
       in [ :flow, :ready_to_pay ] then ProgrammingParadigms::PushLater.push(self, :charge, payload)
       in [ :flow, :done ] then @done = payload
-      in [ :charge, :charged ] then run(:settle, @settle.settle(payload)); run(:flow, @flow.succeeded(payload)); run(:status, @status.push(:complete))
-      in [ :charge, :declined ] then run(:flow, @flow.failed(payload)); run(:status, @status.push(:error))
-      in [ :settle, :stock_changed ] then run(:stock_update, @stock_update.push(payload))
+      in [ :charge, :charged ] then run(:settle, @settle.settle(payload)); run(:flow, @flow.succeeded(payload)); run(:payment_news, @payment_news.push(cart_id: @config[:cart_id]))
+      in [ :charge, :declined ] then run(:flow, @flow.failed(payload)); run(:payment_news, @payment_news.push(cart_id: @config[:cart_id]))
+      in [ :settle, :stock_changed ] then run(:stock_news, @stock_news.push(payload))
       end
     end
   end

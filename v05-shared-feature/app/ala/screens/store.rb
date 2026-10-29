@@ -17,7 +17,10 @@ module Screens
     UNDO_WINDOW = 5.seconds
     PORTAL_UNDO_WINDOW = 10.seconds # a bulk order's removal is bigger, so it waits longer
 
-    STOCK_LABELS = { in_stock: "%{n} in stock", low_stock: "Only %{n} left!", out_of_stock: "Out of stock" }.freeze
+    # the live topic product changes are published on and every page showing products listens to
+    CATALOG_TOPIC = "catalog"
+
+    STOCK_LABELS ={ in_stock: "%{n} in stock", low_stock: "Only %{n} left!", out_of_stock: "Out of stock" }.freeze
 
     SUMMARY_TEXTS = { items: "Items", subtotal: "Subtotal", shipping: "Shipping", free: "Free", total: "Total" }.freeze
 

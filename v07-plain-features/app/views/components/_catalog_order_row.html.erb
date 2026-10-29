@@ -1,7 +1,8 @@
 <%# A catalogue row a buyer orders from: a product line with its stock and a quantity to add; adding is
     unavailable when the product is out of stock. Takes a projected row (with its add URL), the words
     and the stock labels. %>
-<%= render "elements/product_line", row: row, id: product_row_id(row[:id]) do %>
+<div id="<%= product_row_id(row[:id]) %>">
+<%= render "elements/product_line", row: row do %>
   <%= form_with url: row[:urls][:add], class: "flex items-center gap-2" do |f| %>
     <%= f.hidden_field :product_id, value: row[:id] %>
     <%= f.number_field :quantity, value: t[:default_quantity], min: 1, class: "w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-right text-sm" %>
@@ -9,3 +10,4 @@
   <% end %>
 <% end %>
 <div class="-mt-4 mb-4 pl-20 text-xs"><%= render "elements/stock_badge", product_id: row[:id], status: row[:stock_status], stock: row[:stock], labels: labels %></div>
+</div>

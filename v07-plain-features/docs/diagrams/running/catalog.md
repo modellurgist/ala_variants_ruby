@@ -5,16 +5,24 @@ flowchart LR
   screen[[Screens::Catalog]]
   records[records]
   add_line[add_line]
-  list_update[list_update]
-  row_update[row_update]
-  row_removal[row_removal]
+  feed[feed]
+  publish_added[publish_added]
+  publish_changed[publish_changed]
+  publish_removed[publish_removed]
+  publish_stock[publish_stock]
   outside -- request --> add_line
+  outside -- request --> feed
   outside -- request --> records
   add_line -- added --> screen
-  records -- created --> list_update
-  records -- deleted --> row_removal
+  feed -- product_added --> screen
+  feed -- product_changed --> screen
+  feed -- product_removed --> screen
+  feed -- stock --> screen
+  records -- created --> publish_added
+  records -- deleted --> publish_removed
   records -- form --> screen
   records -- record --> screen
   records -- rows --> screen
-  records -- updated --> row_update
+  records -- updated --> publish_changed
+  records -- updated --> publish_stock
 ```

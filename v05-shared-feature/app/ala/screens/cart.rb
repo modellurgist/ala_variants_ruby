@@ -28,7 +28,8 @@ module Screens
                 :undo_pending, :flash, :patches
 
     def parts = { order: @order, saved: @saved, wishlist: @wishlist, pricing: @pricing, totals: @totals, products: @products,
-                  items: @items, saved_store: @saved_store, wishlist_store: @wishlist_store }
+                  items: @items, saved_store: @saved_store, wishlist_store: @wishlist_store, feed: @feed }
+    def live = @feed.subscription
 
     # Lives across requests: `reload` reads the stores again, `show` says what it holds, `begin` opens
     # a request with an empty flash and no patches, and each change works on what it holds.
@@ -56,6 +57,7 @@ module Screens
     input(:add_wishlisted, ProgrammingParadigms::DataFlow) { |product_id| @wishlist.input_port(:take).push(product_id) }
     input(:enter_promo, ProgrammingParadigms::DataFlow) { |code| @pricing.input_port(:enter_promo).push(code) }
     input(:select_shipping, ProgrammingParadigms::DataFlow) { |method| @pricing.input_port(:select_shipping).push(method) }
+    input(:live, ProgrammingParadigms::DataFlow) { |message| @feed.input_port(:receive).push(message) }
 
     def initialize(cart_id:)
       @config = { cart_id: }
@@ -83,6 +85,7 @@ module Screens
       @pricing = PricingChoices.new(store: CartPricingChoice, cart_id:, shipping:, default_method: :standard,
                                     promo: ValidatePromo.new(codes: Store::PROMO_CODES))
       @totals = CartTotals.new(shipping:, gift_wrap: CalculateGiftWrapCost.new(unit: Store::GIFT_WRAP_CENTS))
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[stock product])
 
       # the order's lines: pulled from the store, changed in memory, written back through `changed`
       @order.wire_to(@items, from: :items, to: :lookup)
@@ -137,6 +140,12 @@ module Screens
       @pricing.wire_to(@totals, from: :shipping_method, to: :shipping_method)
       @pricing.on(:promo_applied) { notice say[:promo_applied] }
       @pricing.on(:promo_rejected) { @flash[:alert] = say[:promo_rejected]; @flash[:promo_error] = say[:promo_rejected] }
+
+      # a product changed elsewhere: the lists that hold it ask for it again and patch their rows
+      @feed.wire_to(@order, from: :stock, to: :product)
+      @feed.wire_to(@order, from: :product, to: :product)
+      @feed.wire_to(@saved, from: :product, to: :product)
+      @feed.wire_to(@wishlist, from: :product, to: :product)
 
       # the summary and the tab counts follow every change
       @totals.on(:summary) { @summary = _1 }

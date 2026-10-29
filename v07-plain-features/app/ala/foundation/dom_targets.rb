@@ -7,6 +7,7 @@ module Foundation
 
     def product_row_id(product_id) = "product_#{product_id}"
     def stock_marker(product_id) = "stock_#{product_id}"
+    def stock_selector(product_id) = ".#{stock_marker(product_id)}"
     def cart_line_id(item_id) = "cart_item_#{item_id}"
     def items_pane_id = "cart_items"
     def empty_note_id = "cart_empty"

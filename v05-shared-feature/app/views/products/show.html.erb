@@ -1,5 +1,5 @@
 <% content_for :title, "Show Product · GoodDeal" %>
-<%= turbo_stream_from Screens::Catalog::STREAM %>
+<%= change_feed @live, url: live_row_product_path(@row[:id]) %>
 <div class="mb-6 flex items-center justify-between">
   <h1 class="text-3xl font-semibold tracking-tight">Show Product</h1>
   <div class="flex gap-3">
@@ -8,6 +8,6 @@
   </div>
 </div>
 <%= turbo_frame_tag Screens::Catalog::MODAL_FRAME %>
-<section class="rounded-2xl border border-stone-200 bg-white px-6 shadow-sm">
+<section id="<%= Screens::Catalog::SHOWN %>" class="rounded-2xl border border-stone-200 bg-white px-6 shadow-sm">
   <%= render "components/product_row", row: @row, labels: Screens::Store::STOCK_LABELS, frame: Screens::Catalog::MODAL_FRAME %>
 </section>

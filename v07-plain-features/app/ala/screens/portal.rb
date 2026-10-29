@@ -11,6 +11,8 @@ module Screens
     URL_EDGES = [ [ :review, :lines ] ].freeze
     MILESTONES = [ [ :lines, "Order" ], [ :review, "Review" ], [ :submitted, "Done" ] ].freeze
     STEP_ORDER = %i[lines review submitted].freeze
+    STEP_VIEWS = { lines: "portals/lines", review: "portals/review", submitted: "portals/submitted" }.freeze
+    CATALOG_LIST = "portal_products"
     PO_FIELDS = [ [ :po_number, :text, "Purchase order number" ], [ :notes, :text, "Notes (optional)" ] ].freeze
     TEXTS = {
       heading: "Bulk Order Portal", order: "Your order", catalog: "Products", review: "Review order",
@@ -24,9 +26,9 @@ module Screens
     GROUNDED = %i[order.row_added order.row_changed order.row_removed order.saved order.line order.adding items.added
                   catalog.record catalog.form catalog.created catalog.updated catalog.deleted].freeze
 
-    attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash
+    attr_reader :config, :step, :rows, :catalog_rows, :summary, :form, :reference, :undo_pending, :flash, :feed, :patches
 
-    def parts = { order: @order, catalog: @catalog, add_line: @add_line, totals: @totals, flow: @flow, items: @items }
+    def parts = { order: @order, catalog: @catalog, add_line: @add_line, totals: @totals, flow: @flow, items: @items, feed: @feed }
 
     def show(requested)
       load_lines
@@ -44,6 +46,7 @@ module Screens
     # The review step prices the lines beside the form, so validating and submitting load them first.
     def validate(params) = (load_lines; run(:flow, @flow.validate(params)))
     def submit(params) = (load_lines; run(:flow, @flow.submit(params)))
+    def live(message) = run(:feed, @feed.receive(message))
 
     def initialize(cart_id:)
       @config = { cart_id: }
@@ -51,17 +54,25 @@ module Screens
       stock_rule = StockStatus.new(low_at: Store::LOW_STOCK_AT)
       urls = Rails.application.routes.url_helpers
       @say = TEXTS[:notices]
+      @patches = ProgrammingParadigms::Patches.new
+      @dom = Foundation::DomTargets
+      labels = Store::STOCK_LABELS
 
       products = ProductIndex.new(model: Product, project: ProductRow.new(stock_rule:))
       @items = CartItemsStore.new(model: CartItem, cart_id:)
       @order = Features::OrderLines.new(cart_id:, undo_lines: CartItem, undo_window: Store::PORTAL_UNDO_WINDOW,
                                         held: HeldProducts.new(products: ->(ids) { products.lookup(ids) },
                                                                links: ->(id) { { quantity: urls.portal_line_path(id), remove: urls.portal_line_path(id) } }))
-      @catalog = Records.new(model: Product, project: ProductRow.new(stock_rule:, links: ->(_id) { { add: urls.portal_lines_path } }))
+      catalog_row = ProductRow.new(stock_rule:, links: ->(_id) { { add: urls.portal_lines_path } })
+      @catalog = Records.new(model: Product, project: catalog_row)
       @add_line = AddLine.new(lines: CartItem, cart_id:)
       @totals = OrderTotals.new(shipping: CalculateShipping.new(rates: Store::RATES), volume: VolumeTier.new(tiers: Store::VOLUME_TIERS), shipping_method: :standard)
       @flow = SubmitOrder.new(steps: ProgrammingParadigms::StepRecord.new(record: -> { OrderSubmission.for_cart(cart_id) }, flow: FLOW, start: :lines, url_edges: URL_EDGES),
                               cart_id:, orders: Order)
+      catalog = ProductIndex.new(model: Product, project: catalog_row)
+      @row_html = ->(id) { Partial.each("components/catalog_order_row", catalog.lookup([ id ]).values, t: TEXTS, labels:) }
+      @badge_html = ->(fact) { Partial.render("elements/stock_badge", product_id: fact[:product_id], status: stock_rule.(fact[:stock]), stock: fact[:stock], labels:) }
+      @feed = ProgrammingParadigms::ChangeFeed::Subscription.new(topic: Store::CATALOG_TOPIC, kinds: %i[product_added product_changed product_removed stock], url: urls.live_portal_path)
     end
 
     private
@@ -83,6 +94,13 @@ module Screens
       in [ :flow, :form ] then @form = payload
       in [ :flow, :blocked ] then @flash[:alert] = @say[:empty]
       in [ :flow, :reference ] then @reference = payload; @flash[:notice] = @say[:submitted]
+      # a change made elsewhere: the catalogue's rows, and every stock badge, order lines' included
+      in [ :feed, :product_added ] then @patches.append(CATALOG_LIST, @row_html.(payload[:product_id]))
+      in [ :feed, :product_changed ] then @patches.replace(@dom.product_row_id(payload[:product_id]), @row_html.(payload[:product_id]))
+      in [ :feed, :product_removed ] then @patches.remove(@dom.product_row_id(payload[:product_id]))
+      in [ :feed, :stock ]
+        @patches.replace(@dom.product_row_id(payload[:product_id]), @row_html.(payload[:product_id]))
+        @patches.replace_all(@dom.stock_selector(payload[:product_id]), @badge_html.(payload))
       end
     end
   end

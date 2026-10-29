@@ -15,6 +15,7 @@ flowchart LR
   items[items: CartItemsStore]
   saved_store[saved_store: SavedItemsStore]
   wishlist_store[wishlist_store: WishlistStore]
+  feed[feed: Subscription]
   order -- items → lookup --> items
   order -- products → lookup --> products
   order -- changed → apply --> items
@@ -25,11 +26,11 @@ flowchart LR
   order -- saved → stash --> saved
   order -- saved --> screen
   order -- line --> screen
-  order -- row_added → push --> patch_8144([Patch])
-  order -- row_changed → push --> patch_8152([Patch])
-  order -- row_removed → push --> patch_8160([Patch])
+  order -- row_added → push --> patch_1([Patch])
+  order -- row_changed → push --> patch_2([Patch])
+  order -- row_removed → push --> patch_3([Patch])
   order -- undo_pending --> screen
-  order -- undo_pending → push --> patch_8168([Patch])
+  order -- undo_pending → push --> patch_4([Patch])
   order -- restored --> screen
   order_lines -- removed → capture --> order_undo
   order_lines -- items --> order
@@ -50,7 +51,7 @@ flowchart LR
   saved -- changed → apply --> saved_store
   saved -- rows --> screen
   saved -- count --> screen
-  saved -- rows_changed → push --> patch_8192([Patch])
+  saved -- rows_changed → push --> patch_5([Patch])
   saved -- moved → receive --> order
   saved -- moved --> screen
   wishlist -- items → lookup --> wishlist_store
@@ -59,7 +60,7 @@ flowchart LR
   wishlist -- rows --> screen
   wishlist -- count --> screen
   wishlist -- ids --> screen
-  wishlist -- rows_changed → push --> patch_8200([Patch])
+  wishlist -- rows_changed → push --> patch_6([Patch])
   wishlist -- added --> screen
   wishlist -- dropped --> screen
   wishlist -- taken → receive --> order
@@ -69,12 +70,16 @@ flowchart LR
   pricing -- promo_applied --> screen
   pricing -- promo_rejected --> screen
   totals -- summary --> screen
-  totals -- summary → push --> patch_8208([Patch])
-  totals -- summary → push --> patch_8216([Patch])
-  totals -- summary → push --> patch_8224([Patch])
-  totals -- summary → push --> patch_8232([Patch])
-  totals -- summary → push --> patch_8240([Patch])
-  totals -- summary → push --> patch_8248([Patch])
+  totals -- summary → push --> patch_7([Patch])
+  totals -- summary → push --> patch_8([Patch])
+  totals -- summary → push --> patch_9([Patch])
+  totals -- summary → push --> patch_10([Patch])
+  totals -- summary → push --> patch_11([Patch])
+  totals -- summary → push --> patch_12([Patch])
   items -- added → arrived --> order
   items -- found → arrived --> order
+  feed -- stock → product --> order
+  feed -- product → product --> order
+  feed -- product → product --> saved
+  feed -- product → product --> wishlist
 ```

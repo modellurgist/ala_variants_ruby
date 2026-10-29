@@ -24,3 +24,9 @@ the `totals.summary` arm: ten handled-data findings, all right. The patches went
 
 One thing to know: while the parser was half-changed the linter skipped the screens with a warning
 and scored the variant 100. A skipped file is a warning on stderr, not a finding; read the warnings.
+
+Later (2026-10-21): the linter learned that a template picked by a name built at run time is a branch,
+and found two (`render "checkouts/#{@s.step}"`, `render "portals/#{@s.step}"`), 99 at every tier. Both
+now render from a literal `STEP_VIEWS` table on their screen, and it is 100 again. A `case` in the
+template whose arms only render, the other form the finding's message suggests, is still flagged
+there: the template check counts every branch and has no routing exemption.
